@@ -9,6 +9,8 @@
 UCLASS()
 class CONSPIRACYTHEORYGAME_API ACTGGameModeBase : public AGameModeBase
 {
-	GENERATED_BODY()
-	
+    GENERATED_BODY()
+
+public:
+    ACTGGameModeBase();
 };
