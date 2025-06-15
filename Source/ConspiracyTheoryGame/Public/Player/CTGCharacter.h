@@ -4,25 +4,47 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "InputActionValue.h"
 #include "CTGCharacter.generated.h"
 
+class USpringArmComponent;
 class UCameraComponent;
+class UInputMappingContext;
+class UInputAction;
 
 UCLASS()
 class CONSPIRACYTHEORYGAME_API ACTGCharacter : public ACharacter
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	ACTGCharacter();
+    ACTGCharacter();
 
     virtual void Tick(float DeltaTime) override;
 
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+    USpringArmComponent* SpringArm;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     UCameraComponent* CameraComponent;
 
-	virtual void BeginPlay() override;
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
+    UInputMappingContext* MappingContext;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
+    UInputAction* MovementAction;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
+    UInputAction* LookAction;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
+    UInputAction* JumpAction;
+
+    virtual void BeginPlay() override;
+
+    void Move(const FInputActionValue& Value);
+    void Look(const FInputActionValue& Value);
 };
