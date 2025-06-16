@@ -43,8 +43,24 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Input")
     UInputAction* JumpAction;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
+    UInputAction* CrouchAction;
+
+    //UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Crouch")
+    //FVector CrouchEyeOffset;
+    //UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Crouch")
+    //float CrouchSpeed;
+
     virtual void BeginPlay() override;
 
     void Move(const FInputActionValue& Value);
     void Look(const FInputActionValue& Value);
+
+    void StartCrouch(const FInputActionValue& Value);
+    void StopCrouch(const FInputActionValue& Value);
+
+//private:
+//    void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
+//    void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
+//    void CalcCamera(float DeltaTime, struct FMinimalViewInfo& OutResult) override;
 };

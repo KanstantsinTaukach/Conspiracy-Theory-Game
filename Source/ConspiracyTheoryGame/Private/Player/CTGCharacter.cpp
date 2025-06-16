@@ -2,6 +2,7 @@
 
 #include "Player/CTGCharacter.h"
 #include "Camera/CameraComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
@@ -15,9 +16,15 @@ ACTGCharacter::ACTGCharacter()
     SpringArm->SetupAttachment(GetRootComponent());
     SpringArm->bUsePawnControlRotation = true;
 
-    CameraComponent = CreateDefaultSubobject<UCameraComponent>("Cameracomponent");
+    CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
     CameraComponent->SetupAttachment(SpringArm);
     CameraComponent->bUsePawnControlRotation = false;
+
+    GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
+    GetCharacterMovement()->MaxWalkSpeedCrouched = 200.f;
+
+    //CrouchEyeOffset = FVector(0.0f);
+    //CrouchSpeed = 12.0f;
 }
 
 void ACTGCharacter::BeginPlay()
@@ -36,17 +43,22 @@ void ACTGCharacter::BeginPlay()
 void ACTGCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+
+    //float CrouchInterpTime = FMath::Min(1.0f, CrouchSpeed * DeltaTime);
+    //CrouchEyeOffset = (1.0f - CrouchInterpTime) * CrouchEyeOffset;
 }
 
 void ACTGCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-    if(const auto EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
+    if(const auto EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
     {
         EnhancedInputComponent->BindAction(MovementAction, ETriggerEvent::Triggered, this, &ACTGCharacter::Move);
         EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ACTGCharacter::Look);
         EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
+        EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &ACTGCharacter::StartCrouch);
+        EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &ACTGCharacter::StopCrouch);
     }
 }
 
@@ -70,3 +82,42 @@ void ACTGCharacter::Look(const FInputActionValue& Value)
     AddControllerPitchInput(LookAxisVector.Y);
     AddControllerYawInput(LookAxisVector.X);
 }
+
+void ACTGCharacter::StartCrouch(const FInputActionValue& Value) 
+{
+    Crouch();
+}
+
+void ACTGCharacter::StopCrouch(const FInputActionValue& Value) 
+{
+    UnCrouch();
+}
+
+//void ACTGCharacter::OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) 
+//{
+//    if (HalfHeightAdjust == 0.0f) return;
+//
+//    float StartBaseEyeHeight = BaseEyeHeight;
+//    Super::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
+//    CrouchEyeOffset.Z += StartBaseEyeHeight - BaseEyeHeight + HalfHeightAdjust;
+//    CameraComponent->SetRelativeLocation(FVector(0.0f, 0.0f, BaseEyeHeight), false);
+//}
+//
+//void ACTGCharacter::OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) 
+//{
+//    if (HalfHeightAdjust == 0.0f) return;
+//
+//    float StartBaseEyeHeight = BaseEyeHeight;
+//    Super::OnEndCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
+//    CrouchEyeOffset.Z += StartBaseEyeHeight - BaseEyeHeight - HalfHeightAdjust;
+//    CameraComponent->SetRelativeLocation(FVector(0.0f, 0.0f, BaseEyeHeight), false);
+//}
+//
+//void ACTGCharacter::CalcCamera(float DeltaTime, FMinimalViewInfo& OutResult) 
+//{
+//    if(CameraComponent)
+//    {
+//        CameraComponent->GetCameraView(DeltaTime, OutResult);
+//        OutResult.Location += CrouchEyeOffset;
+//    }
+//}
