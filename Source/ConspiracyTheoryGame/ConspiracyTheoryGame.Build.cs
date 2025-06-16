@@ -13,7 +13,12 @@ public class ConspiracyTheoryGame : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
-		PublicIncludePaths.AddRange(new string[] { "ConspiracyTheoryGame/Public/Player" });
+		PublicIncludePaths.AddRange(new string[] 
+		{
+			"ConspiracyTheoryGame/Public/Player",
+			"ConspiracyTheoryGame/Public/Components",
+            "ConspiracyTheoryGame/Public/Interfaces"
+        });
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

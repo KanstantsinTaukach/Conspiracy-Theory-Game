@@ -11,6 +11,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
+class UCTGInteractionComponent;
 
 UCLASS()
 class CONSPIRACYTHEORYGAME_API ACTGCharacter : public ACharacter
@@ -31,6 +32,9 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     UCameraComponent* CameraComponent;
 
+    UPROPERTY(VisibleAnywhere, Category = "Components")
+    UCTGInteractionComponent* InteractionComponent;
+
     UPROPERTY(EditDefaultsOnly, Category = "Input")
     UInputMappingContext* MappingContext;
 
@@ -46,10 +50,8 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Input")
     UInputAction* CrouchAction;
 
-    //UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Crouch")
-    //FVector CrouchEyeOffset;
-    //UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Crouch")
-    //float CrouchSpeed;
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
+    UInputAction* InteractAction;
 
     virtual void BeginPlay() override;
 
@@ -59,8 +61,5 @@ protected:
     void StartCrouch(const FInputActionValue& Value);
     void StopCrouch(const FInputActionValue& Value);
 
-//private:
-//    void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
-//    void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
-//    void CalcCamera(float DeltaTime, struct FMinimalViewInfo& OutResult) override;
+    void PrimaryInteract();
 };
