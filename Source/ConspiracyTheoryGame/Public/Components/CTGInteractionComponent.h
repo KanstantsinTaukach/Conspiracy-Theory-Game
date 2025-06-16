@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "CTGInteractionComponent.generated.h"
 
+class UCTGWorldUserWidget;
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class CONSPIRACYTHEORYGAME_API UCTGInteractionComponent : public UActorComponent
 {
@@ -27,4 +29,15 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "Trace")
     TEnumAsByte<ECollisionChannel> CollisionChannel;
+
+    UPROPERTY()
+    AActor* FocusedActor;
+
+    UPROPERTY()
+    UCTGWorldUserWidget* DefaultWidgetInstance;
+
+    UPROPERTY(EditDefaultsOnly, Category = "UI")
+    TSubclassOf<UCTGWorldUserWidget> DefaultWidgetClass;
+
+    void FindBestInteractable();
 };

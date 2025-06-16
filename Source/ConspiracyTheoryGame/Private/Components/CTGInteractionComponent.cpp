@@ -1,8 +1,8 @@
 // Team Development of a Conspiracy Theory Game for GameBOX.
 
 #include "Components/CTGInteractionComponent.h"
-#include "DrawDebugHelpers.h"
 #include "Interfaces/CTGGameplayInterface.h"
+#include "UI/CTGWorldUserWidget.h"
 
 DEFINE_LOG_CATEGORY_STATIC(CTGInreractionComponentLog, All, All);
 
@@ -18,9 +18,11 @@ UCTGInteractionComponent::UCTGInteractionComponent()
 void UCTGInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+    FindBestInteractable();
 }
 
-void UCTGInteractionComponent::PrimaryInteract() 
+void UCTGInteractionComponent::FindBestInteractable() 
 {
     FCollisionObjectQueryParams ObjectQueryParams;
     ObjectQueryParams.AddObjectTypesToQuery(CollisionChannel);
@@ -43,6 +45,8 @@ void UCTGInteractionComponent::PrimaryInteract()
 
     FColor LineColor = bBlockingHit ? FColor::Green : FColor::Red;
 
+    FocusedActor = nullptr;
+
     for (const auto Hit : Hits)
     {
         AActor* HitActor = Hit.GetActor();
@@ -50,17 +54,42 @@ void UCTGInteractionComponent::PrimaryInteract()
         {
             if (HitActor->Implements<UCTGGameplayInterface>())
             {
-                APawn* MyPawn = Cast<APawn>(GetOwner());
-                ICTGGameplayInterface::Execute_Interact(HitActor, MyPawn);
-
-                DrawDebugSphere(GetWorld(), Hit.ImpactPoint, TraceRadius, 32, LineColor, false, 3.0f);
-
+                FocusedActor = HitActor;
                 break;
             }
         }
     }
 
-    DrawDebugLine(GetWorld(), EyeLocation, End, LineColor, false, 2.0f, 0, 2.0f);
+    if(FocusedActor)
+    {
+        if(DefaultWidgetInstance == nullptr && ensure(DefaultWidgetClass))
+        {
+            DefaultWidgetInstance = CreateWidget<UCTGWorldUserWidget>(GetWorld(), DefaultWidgetClass);
+        }
 
-    UE_LOG(CTGInreractionComponentLog, Log, TEXT("Interact success"));
+        if(DefaultWidgetInstance)
+        {
+            DefaultWidgetInstance->AttachedActor = FocusedActor;
+
+            if(!DefaultWidgetInstance->IsInViewport())
+            {
+                DefaultWidgetInstance->AddToViewport();
+            }
+        }
+    }
+    else
+    {
+        if(DefaultWidgetInstance)
+        {
+            DefaultWidgetInstance->RemoveFromParent();
+        }
+    }
+}
+
+void UCTGInteractionComponent::PrimaryInteract()
+{
+    if (FocusedActor == nullptr) return;
+
+    APawn* MyPawn = Cast<APawn>(GetOwner());
+    ICTGGameplayInterface::Execute_Interact(FocusedActor, MyPawn);
 }
