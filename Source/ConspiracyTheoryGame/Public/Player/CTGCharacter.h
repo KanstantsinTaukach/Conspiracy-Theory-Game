@@ -62,4 +62,6 @@ protected:
     void StopCrouch(const FInputActionValue& Value);
 
     void PrimaryInteract();
+
+    virtual FVector GetPawnViewLocation() const override;
 };

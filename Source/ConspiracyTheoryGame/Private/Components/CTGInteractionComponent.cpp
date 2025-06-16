@@ -84,8 +84,8 @@ void UCTGInteractionComponent::FindBestInteractable()
         }
     }
 
-    FColor LineColor = bBlockingHit ? FColor::Green : FColor::Red;
-    DrawDebugLine(GetWorld(), EyeLocation, End, LineColor, false, 2.0f, 0, 2.0f);
+    //FColor LineColor = bBlockingHit ? FColor::Green : FColor::Red;
+    //DrawDebugLine(GetWorld(), EyeLocation, End, LineColor, false, 2.0f, 0, 2.0f);
 }
 
 void UCTGInteractionComponent::PrimaryInteract()
