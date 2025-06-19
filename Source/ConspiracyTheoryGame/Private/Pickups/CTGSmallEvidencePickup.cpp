@@ -5,7 +5,7 @@
 
 ACTGSmallEvidencePickup::ACTGSmallEvidencePickup() 
 {
-    PointsAmount = 50;
+    PointsAmountToAdd = 50;
 }
 
 void ACTGSmallEvidencePickup::Interact_Implementation(APawn* InstigatorPawn) 
@@ -14,7 +14,7 @@ void ACTGSmallEvidencePickup::Interact_Implementation(APawn* InstigatorPawn)
 
     if (const auto PS = InstigatorPawn->GetPlayerState<ACTGPlayerState>())
     {
-        PS->AddPoints(PointsAmount);
+        PS->AddPoints(PointsAmountToAdd);
         HidePickup();
     }
 }

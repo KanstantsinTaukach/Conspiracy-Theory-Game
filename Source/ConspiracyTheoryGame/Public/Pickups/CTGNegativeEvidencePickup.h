@@ -4,19 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "Pickups/CTGBasePickup.h"
-#include "CTGSmallEvidencePickup.generated.h"
+#include "CTGNegativeEvidencePickup.generated.h"
 
 UCLASS()
-class CONSPIRACYTHEORYGAME_API ACTGSmallEvidencePickup : public ACTGBasePickup
+class CONSPIRACYTHEORYGAME_API ACTGNegativeEvidencePickup : public ACTGBasePickup
 {
     GENERATED_BODY()
 
 public:
-    ACTGSmallEvidencePickup();
+    ACTGNegativeEvidencePickup();
 
     void Interact_Implementation(APawn* InstigatorPawn) override;
 
 protected:
     UPROPERTY(EditAnywhere, Category = "Points")
-    int32 PointsAmountToAdd;
+    int32 PointsAmountToRemove;
 };

@@ -21,7 +21,7 @@ public:
     void Interact_Implementation(APawn* InstigatorPawn);
 
 protected:
-    UPROPERTY(visibleAnywhere, Category = "Components")
+    UPROPERTY(VisibleAnywhere, Category = "Components")
     USphereComponent* CollisionComponent;
 
     UPROPERTY(VisibleAnywhere, Category = "Components")

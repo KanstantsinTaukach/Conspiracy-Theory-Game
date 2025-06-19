@@ -6,6 +6,7 @@ void ACTGPlayerState::AddPoints(int32 Delta)
 {
     if (!ensure(Delta > 0)) return;
 
+    PreviousPoints = Points;
     Points += Delta;
 
     OnPointsChanged.Broadcast(this, Points, Delta);
@@ -15,6 +16,7 @@ bool ACTGPlayerState::RemovePoints(int32 Delta)
 {
     if (!ensure(Delta > 0)) return false;
 
+    PreviousPoints = Points;
     Points -= Delta;
     if (Points < 0)
     {

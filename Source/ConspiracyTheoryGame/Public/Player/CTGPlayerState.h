@@ -25,8 +25,14 @@ public:
     int32 GetPoints() const { return Points; };
 
     UFUNCTION(BlueprintCallable, Category = "Points")
+    int32 GetPreviousPoints() const { return PreviousPoints; };
+
+    UFUNCTION(BlueprintCallable, Category = "Points")
     void AddPoints(int32 Delta);
 
     UFUNCTION(BlueprintCallable, Category = "Points")
     bool RemovePoints(int32 Delta);
+
+private:
+    int32 PreviousPoints;
 };
