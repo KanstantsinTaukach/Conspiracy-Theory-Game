@@ -16,6 +16,7 @@ ACTGCharacter::ACTGCharacter()
     SpringArm = CreateDefaultSubobject<USpringArmComponent>("SpringArm");
     SpringArm->SetupAttachment(GetRootComponent());
     SpringArm->bUsePawnControlRotation = true;
+    SpringArm->SocketOffset = FVector(0.0f, 90.0f, 0.0f);
 
     CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
     CameraComponent->SetupAttachment(SpringArm);

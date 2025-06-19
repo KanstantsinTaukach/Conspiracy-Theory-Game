@@ -15,7 +15,7 @@ class CONSPIRACYTHEORYGAME_API ACTGGameModeBase : public AGameModeBase
 public:
     ACTGGameModeBase();
 
-    FOnMatchStateChangeSignature OnMatchStateChange;
+    FOnMatchStateChangeSignature OnMatchStateChanged;
 
     virtual void StartPlay() override;
 

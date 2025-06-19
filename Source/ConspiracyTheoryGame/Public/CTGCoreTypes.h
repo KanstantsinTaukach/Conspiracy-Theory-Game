@@ -9,7 +9,7 @@ enum class CTGMatchState : uint8
 {
 	WaitingToStart = 0,
 	InProgress,
-	FightWithBoss,
+	FightingWithBoss,
 	Pause,
 	GameOver
 };

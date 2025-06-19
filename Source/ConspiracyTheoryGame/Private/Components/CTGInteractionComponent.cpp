@@ -3,9 +3,8 @@
 #include "Components/CTGInteractionComponent.h"
 #include "Interfaces/CTGGameplayInterface.h"
 #include "UI/CTGWorldUserWidget.h"
-#include "DrawDebugHelpers.h"
 
-DEFINE_LOG_CATEGORY_STATIC(CTGInreractionComponentLog, All, All);
+DEFINE_LOG_CATEGORY_STATIC(LogCTGInreractionComponent, All, All);
 
 UCTGInteractionComponent::UCTGInteractionComponent()
 {
@@ -83,9 +82,6 @@ void UCTGInteractionComponent::FindBestInteractable()
             DefaultWidgetInstance->RemoveFromParent();
         }
     }
-
-    //FColor LineColor = bBlockingHit ? FColor::Green : FColor::Red;
-    //DrawDebugLine(GetWorld(), EyeLocation, End, LineColor, false, 2.0f, 0, 2.0f);
 }
 
 void UCTGInteractionComponent::PrimaryInteract()

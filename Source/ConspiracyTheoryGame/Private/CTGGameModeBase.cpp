@@ -25,5 +25,5 @@ void ACTGGameModeBase::SetMatchState(CTGMatchState State)
     if (MatchState == State) return;
 
     MatchState = State;
-    OnMatchStateChange.Broadcast(MatchState);
+    OnMatchStateChanged.Broadcast(MatchState);
 }
