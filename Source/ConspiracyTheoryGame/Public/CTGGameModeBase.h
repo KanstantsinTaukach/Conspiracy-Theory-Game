@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "CTGCoreTypes.h"
 #include "CTGGameModeBase.generated.h"
 
 UCLASS()
@@ -13,4 +14,13 @@ class CONSPIRACYTHEORYGAME_API ACTGGameModeBase : public AGameModeBase
 
 public:
     ACTGGameModeBase();
+
+    FOnMatchStateChangeSignature OnMatchStateChange;
+
+    virtual void StartPlay() override;
+
+    private:
+    CTGMatchState MatchState = CTGMatchState::WaitingToStart;
+
+    void SetMatchState(CTGMatchState State);
 };
