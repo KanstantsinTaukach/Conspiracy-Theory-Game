@@ -8,6 +8,7 @@
 #include "CTGBasePickup.generated.h"
 
 class USphereComponent;
+class UStaticMeshComponent;
 
 UCLASS()
 class CONSPIRACYTHEORYGAME_API ACTGBasePickup : public AActor, public ICTGGameplayInterface
@@ -22,6 +23,9 @@ public:
 protected:
     UPROPERTY(visibleAnywhere, Category = "Components")
     USphereComponent* CollisionComponent;
+
+    UPROPERTY(VisibleAnywhere, Category = "Components")
+    UStaticMeshComponent* MeshComponent;
 
     virtual void BeginPlay() override;
 

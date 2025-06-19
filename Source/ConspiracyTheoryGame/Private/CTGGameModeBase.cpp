@@ -4,6 +4,7 @@
 #include "CTGGameModeBase.h"
 #include "Player/CTGCharacter.h"
 #include "Player/CTGPlayerController.h"
+#include "Player/CTGPlayerState.h"
 #include "UI/CTGGameHUD.h"
 
 ACTGGameModeBase::ACTGGameModeBase() 
@@ -11,6 +12,7 @@ ACTGGameModeBase::ACTGGameModeBase()
     DefaultPawnClass = ACTGCharacter::StaticClass();
     PlayerControllerClass = ACTGPlayerController::StaticClass();
     HUDClass = ACTGGameHUD::StaticClass();
+    PlayerStateClass = ACTGPlayerState::StaticClass();
 }
 
 void ACTGGameModeBase::StartPlay() 

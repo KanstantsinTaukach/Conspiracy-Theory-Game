@@ -2,6 +2,7 @@
 
 #include "Pickups/CTGBasePickup.h"
 #include "Components/SphereComponent.h"
+#include "Components/StaticMeshComponent.h"
 
 ACTGBasePickup::ACTGBasePickup()
 {
@@ -10,6 +11,10 @@ ACTGBasePickup::ACTGBasePickup()
     CollisionComponent = CreateDefaultSubobject<USphereComponent>("CollisionComponent");
     CollisionComponent->SetCollisionProfileName("Pickup");
     RootComponent = CollisionComponent;
+
+    MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("MeshComponent");
+    MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    MeshComponent->SetupAttachment(RootComponent);
 }
 
 void ACTGBasePickup::BeginPlay()
@@ -19,17 +24,17 @@ void ACTGBasePickup::BeginPlay()
     check(CollisionComponent);
 }
 
-void ACTGBasePickup::ShowPickup() 
+void ACTGBasePickup::ShowPickup()
 {
     SetPickupState(true);
 }
 
-void ACTGBasePickup::HidePickup() 
+void ACTGBasePickup::HidePickup()
 {
     SetPickupState(false);
 }
 
-void ACTGBasePickup::SetPickupState(bool bIsActive) 
+void ACTGBasePickup::SetPickupState(bool bIsActive)
 {
     SetActorEnableCollision(bIsActive);
 

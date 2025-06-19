@@ -1,18 +1,20 @@
 // Team Development of a Conspiracy Theory Game for GameBOX.
 
 #include "Pickups/CTGSmallEvidencePickup.h"
-#include "Components/StaticMeshComponent.h"
+#include "Player/CTGPlayerState.h"
 
 ACTGSmallEvidencePickup::ACTGSmallEvidencePickup() 
 {
-    MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("MeshComponent");
-    MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    MeshComponent->SetupAttachment(RootComponent);
+    PointsAmount = 50;
 }
 
 void ACTGSmallEvidencePickup::Interact_Implementation(APawn* InstigatorPawn) 
 {
     if (!InstigatorPawn) return;
 
-    HidePickup();
+    if (const auto PS = InstigatorPawn->GetPlayerState<ACTGPlayerState>())
+    {
+        PS->AddPoints(PointsAmount);
+        HidePickup();
+    }
 }

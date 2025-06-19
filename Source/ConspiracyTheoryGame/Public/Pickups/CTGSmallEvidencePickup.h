@@ -6,8 +6,6 @@
 #include "Pickups/CTGBasePickup.h"
 #include "CTGSmallEvidencePickup.generated.h"
 
-class UStaticMeshComponent;
-
 UCLASS()
 class CONSPIRACYTHEORYGAME_API ACTGSmallEvidencePickup : public ACTGBasePickup
 {
@@ -19,6 +17,6 @@ public:
     void Interact_Implementation(APawn* InstigatorPawn) override;
 
 protected:
-    UPROPERTY(VisibleAnywhere, Category = "Components")
-    UStaticMeshComponent* MeshComponent;
+    UPROPERTY(EditAnywhere, Category = "Points")
+    int32 PointsAmount;
 };
