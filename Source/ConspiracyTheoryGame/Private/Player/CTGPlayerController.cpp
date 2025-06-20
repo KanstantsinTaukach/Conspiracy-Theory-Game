@@ -33,9 +33,9 @@ void ACTGPlayerController::OnPauseGame()
     SetPause(!IsPaused());
 }
 
-void ACTGPlayerController::OnMatchStateChanged(CTGMatchState State)
+void ACTGPlayerController::OnMatchStateChanged(ECTGMatchState State)
 {
-    if (State == CTGMatchState::InProgress)
+    if (State == ECTGMatchState::InProgress)
     {
         SetInputMode(FInputModeGameOnly());
         bShowMouseCursor = false;

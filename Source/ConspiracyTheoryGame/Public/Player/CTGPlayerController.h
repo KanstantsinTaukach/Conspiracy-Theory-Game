@@ -25,5 +25,5 @@ private:
 
     void OnPauseGame();
 
-    void OnMatchStateChanged(CTGMatchState State);
+    void OnMatchStateChanged(ECTGMatchState State);
 };

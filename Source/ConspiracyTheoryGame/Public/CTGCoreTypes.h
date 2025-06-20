@@ -5,7 +5,7 @@
 #include "CTGCoreTypes.generated.h"
 
 UENUM(BlueprintType)
-enum class CTGMatchState : uint8
+enum class ECTGMatchState : uint8
 {
 	WaitingToStart = 0,
 	InProgress,
@@ -14,4 +14,4 @@ enum class CTGMatchState : uint8
 	GameOver
 };
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnMatchStateChangeSignature, CTGMatchState);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnMatchStateChangeSignature, ECTGMatchState);

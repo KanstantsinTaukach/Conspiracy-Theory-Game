@@ -19,14 +19,17 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UUserWidget> PauseWidgetClass;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UUserWidget> GameOverWidgetClass;
+
     virtual void BeginPlay() override;
 
 private:
     UPROPERTY()
-    TMap<CTGMatchState, UUserWidget*> GameWidgets;
+    TMap<ECTGMatchState, UUserWidget*> GameWidgets;
 
     UPROPERTY()
     UUserWidget* CurrentWidget = nullptr;
 
-    void OnMatchStateChanged(CTGMatchState State);
+    void OnMatchStateChanged(ECTGMatchState State);
 };

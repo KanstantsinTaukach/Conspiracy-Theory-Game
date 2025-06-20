@@ -23,7 +23,7 @@ public:
     virtual bool ClearPause() override;
 
     private:
-    CTGMatchState MatchState = CTGMatchState::WaitingToStart;
+    ECTGMatchState MatchState = ECTGMatchState::WaitingToStart;
 
-    void SetMatchState(CTGMatchState State);
+    void SetMatchState(ECTGMatchState State);
 };
