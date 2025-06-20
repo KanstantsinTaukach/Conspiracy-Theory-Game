@@ -4,16 +4,14 @@
 #include "Components/Button.h"
 #include "Gameframework/GameModeBase.h"
 
-bool UCTGPauseWidget::Initialize()
+void UCTGPauseWidget::NativeOnInitialized()
 {
-    const auto InitStatus = Super::Initialize();
+    Super::NativeOnInitialized();
 
     if (ClearPauseButton)
     {
         ClearPauseButton->OnClicked.AddDynamic(this, &UCTGPauseWidget::OnClearPause);
     }
-
-    return InitStatus;
 }
 
 void UCTGPauseWidget::OnClearPause()

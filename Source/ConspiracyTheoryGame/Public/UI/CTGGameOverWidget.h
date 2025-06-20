@@ -4,11 +4,22 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "CTGCoreTypes.h"
 #include "CTGGameOverWidget.generated.h"
+
+class UButton;
 
 UCLASS()
 class CONSPIRACYTHEORYGAME_API UCTGGameOverWidget : public UUserWidget
 {
     GENERATED_BODY()
+
+protected:
+    UPROPERTY(meta = (BindWidget))
+    UButton* RestartLevelButton;
+
+    virtual void NativeOnInitialized() override;
+
+private:
+    UFUNCTION()
+    void OnRestartLevel();
 };
