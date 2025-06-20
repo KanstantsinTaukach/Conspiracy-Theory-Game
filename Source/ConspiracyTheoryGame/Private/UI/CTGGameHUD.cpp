@@ -10,10 +10,16 @@ void ACTGGameHUD::BeginPlay()
 {
     Super::BeginPlay();
 
-    auto PlayerHUDWidget = CreateWidget<UUserWidget>(GetWorld(), PlayerHUDWidgetClass);
-    if (PlayerHUDWidget)
+    GameWidgets.Add(CTGMatchState::InProgress, CreateWidget<UUserWidget>(GetWorld(), PlayerHUDWidgetClass));
+    GameWidgets.Add(CTGMatchState::Pause, CreateWidget<UUserWidget>(GetWorld(), PauseWidgetClass));
+
+    for (auto GameWidgetPair : GameWidgets)
     {
-        PlayerHUDWidget->AddToViewport();
+        const auto GameWidget = GameWidgetPair.Value;
+        if (!GameWidget) continue;
+
+        GameWidget->AddToViewport();
+        GameWidget->SetVisibility(ESlateVisibility::Hidden);
     }
 
     if (GetWorld())
@@ -26,7 +32,20 @@ void ACTGGameHUD::BeginPlay()
     }
 }
 
-void ACTGGameHUD::OnMatchStateChanged(CTGMatchState State) 
+void ACTGGameHUD::OnMatchStateChanged(CTGMatchState State)
 {
-    UE_LOG(LogCTGGameHUD, Display, TEXT("Match state changed: %s"), *UEnum::GetValueAsString(State));
+    if (CurrentWidget)
+    {
+        CurrentWidget->SetVisibility(ESlateVisibility::Hidden);
+    }
+
+    if (GameWidgets.Contains(State))
+    {
+        CurrentWidget = GameWidgets[State];
+    }
+
+    if (CurrentWidget)
+    {
+        CurrentWidget->SetVisibility(ESlateVisibility::Visible);
+    }
 }

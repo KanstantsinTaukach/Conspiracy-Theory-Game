@@ -19,6 +19,9 @@ public:
 
     virtual void StartPlay() override;
 
+    virtual bool SetPause(APlayerController* PC, FCanUnpause CanUnpauseDelegate = FCanUnpause()) override;
+    virtual bool ClearPause() override;
+
     private:
     CTGMatchState MatchState = CTGMatchState::WaitingToStart;
 
