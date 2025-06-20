@@ -18,3 +18,8 @@ void ACTGSmallEvidencePickup::Interact_Implementation(APawn* InstigatorPawn)
         HidePickup();
     }
 }
+
+int32 ACTGSmallEvidencePickup::GetPointsValue_Implementation() const
+{
+    return PointsAmountToAdd;
+}

@@ -28,6 +28,7 @@ void UCTGInteractionComponent::FindBestInteractable()
     ObjectQueryParams.AddObjectTypesToQuery(CollisionChannel);
 
     const AActor* MyOwner = GetOwner();
+    if (!MyOwner) return;
 
     FVector EyeLocation;
     FRotator EyeRotation;
@@ -41,7 +42,7 @@ void UCTGInteractionComponent::FindBestInteractable()
     FCollisionShape Shape;
     Shape.SetSphere(TraceRadius);
 
-    bool bBlockingHit = GetWorld()->SweepMultiByObjectType(Hits, EyeLocation, End, FQuat::Identity, ObjectQueryParams, Shape);    
+    bool bBlockingHit = GetWorld()->SweepMultiByObjectType(Hits, EyeLocation, End, FQuat::Identity, ObjectQueryParams, Shape);
 
     FocusedActor = nullptr;
 

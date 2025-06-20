@@ -19,6 +19,9 @@ public:
     ACTGBasePickup();
 
     void Interact_Implementation(APawn* InstigatorPawn);
+    FText GetInteractName_Implementation() const;
+    FText GetInteractDescription_Implementation() const;
+    int32 GetPointsValue_Implementation() const;
 
 protected:
     UPROPERTY(VisibleAnywhere, Category = "Components")
@@ -26,6 +29,12 @@ protected:
 
     UPROPERTY(VisibleAnywhere, Category = "Components")
     UStaticMeshComponent* MeshComponent;
+
+    UPROPERTY(EditAnywhere, Category = "Description")
+    FText DisplayName;
+
+    UPROPERTY(EditAnywhere, Category = "Description")
+    FText Description;
 
     virtual void BeginPlay() override;
 

@@ -20,3 +20,8 @@ void ACTGNegativeEvidencePickup::Interact_Implementation(APawn* InstigatorPawn)
         }
     }
 }
+
+int32 ACTGNegativeEvidencePickup::GetPointsValue_Implementation() const
+{
+    return PointsAmountToRemove;
+}

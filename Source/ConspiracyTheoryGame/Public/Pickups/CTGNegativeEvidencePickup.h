@@ -15,8 +15,9 @@ public:
     ACTGNegativeEvidencePickup();
 
     void Interact_Implementation(APawn* InstigatorPawn) override;
+    int32 GetPointsValue_Implementation() const override;
 
 protected:
-    UPROPERTY(EditAnywhere, Category = "Points")
+    UPROPERTY(EditAnywhere, Category = "Description")
     int32 PointsAmountToRemove;
 };

@@ -41,4 +41,22 @@ void ACTGBasePickup::SetPickupState(bool bIsActive)
     RootComponent->SetVisibility(bIsActive, true);
 }
 
-void ACTGBasePickup::Interact_Implementation(APawn* InstigatorPawn) {}
+void ACTGBasePickup::Interact_Implementation(APawn* InstigatorPawn) 
+{
+
+}
+
+FText ACTGBasePickup::GetInteractName_Implementation() const
+{
+    return DisplayName;
+}
+
+FText ACTGBasePickup::GetInteractDescription_Implementation() const
+{
+    return Description;
+}
+
+int32 ACTGBasePickup::GetPointsValue_Implementation() const
+{
+    return 0;
+}

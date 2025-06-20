@@ -7,6 +7,8 @@
 #include "CTGWorldUserWidget.generated.h"
 
 class USizeBox;
+class UVerticalBox;
+class UCTGInteractionWidget;
 
 UCLASS()
 class CONSPIRACYTHEORYGAME_API UCTGWorldUserWidget : public UUserWidget
@@ -21,8 +23,20 @@ protected:
     UPROPERTY(meta = (Bindwidget))
     USizeBox* ParentSizeBox;
 
+    UPROPERTY(meta = (Bindwidget))
+    UVerticalBox* InteractionInfoBox;
+
     UPROPERTY(EditAnywhere, Category = "UI")
     FVector WorldOffset;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UUserWidget> InteractionInfoWidgetClass;
+
+    UPROPERTY()
+    UCTGInteractionWidget* InteractionInfoWidget;
+
     virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
+private:
+    void UpdateInteractionInfo();
 };

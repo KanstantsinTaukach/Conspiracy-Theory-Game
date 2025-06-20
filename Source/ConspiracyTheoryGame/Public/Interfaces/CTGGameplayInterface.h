@@ -18,6 +18,15 @@ class CONSPIRACYTHEORYGAME_API ICTGGameplayInterface
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, blueprintNativeEvent)
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
     void Interact(APawn* InstigatorPawn);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+    FText GetInteractName() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+    FText GetInteractDescription() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+    int32 GetPointsValue() const;
 };
