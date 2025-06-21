@@ -4,9 +4,9 @@
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
 #include "CTGGameInstance.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogCTGMainMenuWidget, All, All)
-
 
 void UCTGMainMenuWidget::NativeOnInitialized() 
 {
@@ -15,6 +15,11 @@ void UCTGMainMenuWidget::NativeOnInitialized()
     if (StartGameButton)
     {
         StartGameButton->OnClicked.AddDynamic(this, &UCTGMainMenuWidget::OnStartGame);
+    }
+
+    if (QuitGameButton)
+    {
+        QuitGameButton->OnClicked.AddDynamic(this, &UCTGMainMenuWidget::OnQuitGame);
     }
 }
 
@@ -32,4 +37,9 @@ void UCTGMainMenuWidget::OnStartGame()
     }
 
     UGameplayStatics::OpenLevel(this, CTGGameInstance->GetStartupLevelName());
+}
+
+void UCTGMainMenuWidget::OnQuitGame() 
+{
+    UKismetSystemLibrary::QuitGame(this, GetOwningPlayer(), EQuitPreference::Quit, true);
 }
