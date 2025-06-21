@@ -10,7 +10,7 @@ UCTGInteractionComponent::UCTGInteractionComponent()
 {
     PrimaryComponentTick.bCanEverTick = true;
 
-    TraceDistance = 1000.0f;
+    TraceDistance = 500.0f;
     TraceRadius = 30.0f;
     CollisionChannel = ECC_WorldDynamic;
 }

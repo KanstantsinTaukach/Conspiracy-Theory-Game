@@ -19,7 +19,9 @@ public class ConspiracyTheoryGame : ModuleRules
 			"ConspiracyTheoryGame/Public/Components",
 			"ConspiracyTheoryGame/Public/Interfaces",
 			"ConspiracyTheoryGame/Public/Pickups",
-			"ConspiracyTheoryGame/Public/UI"
+			"ConspiracyTheoryGame/Public/UI",
+			"ConspiracyTheoryGame/Public/MainMenu",
+			"ConspiracyTheoryGame/Public/MainMenu/UI"
 		});
 
 		// Uncomment if you are using Slate UI
