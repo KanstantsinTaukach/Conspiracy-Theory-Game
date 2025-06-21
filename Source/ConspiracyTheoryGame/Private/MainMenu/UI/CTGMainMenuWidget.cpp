@@ -22,14 +22,14 @@ void UCTGMainMenuWidget::OnStartGame()
 {
     if (!GetWorld()) return;
 
-    const auto CTGGameInstanse = GetWorld()->GetGameInstance<UCTGGameInstance>();
-    if (!CTGGameInstanse) return;
+    const auto CTGGameInstance = GetWorld()->GetGameInstance<UCTGGameInstance>();
+    if (!CTGGameInstance) return;
 
-    if (CTGGameInstanse->GetStartupLevelName().IsNone())
+    if (CTGGameInstance->GetStartupLevelName().IsNone())
     {
         UE_LOG(LogCTGMainMenuWidget, Error, TEXT("Level name is NONE"));
         return;
     }
 
-    UGameplayStatics::OpenLevel(this, CTGGameInstanse->GetStartupLevelName());
+    UGameplayStatics::OpenLevel(this, CTGGameInstance->GetStartupLevelName());
 }
