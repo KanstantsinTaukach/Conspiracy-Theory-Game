@@ -3,6 +3,10 @@
 #include "MainMenu/UI/CTGMainMenuWidget.h"
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
+#include "CTGGameInstance.h"
+
+DEFINE_LOG_CATEGORY_STATIC(LogCTGMainMenuWidget, All, All)
+
 
 void UCTGMainMenuWidget::NativeOnInitialized() 
 {
@@ -16,6 +20,16 @@ void UCTGMainMenuWidget::NativeOnInitialized()
 
 void UCTGMainMenuWidget::OnStartGame() 
 {
-    const FName StartupLevelName = "TestLevelTony";
-    UGameplayStatics::OpenLevel(this, StartupLevelName);
+    if (!GetWorld()) return;
+
+    const auto CTGGameInstanse = GetWorld()->GetGameInstance<UCTGGameInstance>();
+    if (!CTGGameInstanse) return;
+
+    if (CTGGameInstanse->GetStartupLevelName().IsNone())
+    {
+        UE_LOG(LogCTGMainMenuWidget, Error, TEXT("Level name is NONE"));
+        return;
+    }
+
+    UGameplayStatics::OpenLevel(this, CTGGameInstanse->GetStartupLevelName());
 }
