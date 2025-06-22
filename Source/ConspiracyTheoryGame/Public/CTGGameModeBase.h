@@ -22,7 +22,7 @@ public:
     virtual bool SetPause(APlayerController* PC, FCanUnpause CanUnpauseDelegate = FCanUnpause()) override;
     virtual bool ClearPause() override;
 
-    private:
+private:
     ECTGMatchState MatchState = ECTGMatchState::WaitingToStart;
 
     void SetMatchState(ECTGMatchState State);

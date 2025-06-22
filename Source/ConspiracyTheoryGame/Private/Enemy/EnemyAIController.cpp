@@ -1,9 +1,9 @@
 // Team Development of a Conspiracy Theory Game for GameBOX.
 
 
-#include "EnemyAIController.h"
+#include "Enemy/EnemyAIController.h"
 #include "Kismet/GameplayStatics.h"
-#include "EnemyCharacter.h"
+#include "Enemy/EnemyCharacter.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "GameFramework/Character.h"
 #include "TimerManager.h"
