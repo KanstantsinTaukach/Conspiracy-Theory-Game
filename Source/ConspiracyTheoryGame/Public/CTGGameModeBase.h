@@ -26,7 +26,4 @@ private:
     ECTGMatchState MatchState = ECTGMatchState::WaitingToStart;
 
     void SetMatchState(ECTGMatchState State);
-
-private:
-    int32 TestInt;
 };
