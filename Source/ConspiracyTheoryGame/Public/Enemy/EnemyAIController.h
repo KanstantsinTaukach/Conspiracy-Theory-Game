@@ -7,9 +7,6 @@
 #include "Sound/SoundBase.h"
 #include "EnemyAIController.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class CONSPIRACYTHEORYGAME_API AEnemyAIController : public AAIController
 {

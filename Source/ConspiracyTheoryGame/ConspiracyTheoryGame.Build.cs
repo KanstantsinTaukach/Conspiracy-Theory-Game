@@ -34,7 +34,9 @@ public class ConspiracyTheoryGame : ModuleRules
             "ConspiracyTheoryGame/Public/UI",
             "ConspiracyTheoryGame/Public/MainMenu",
             "ConspiracyTheoryGame/Public/MainMenu/UI",
-            "ConspiracyTheoryGame/Public/Enemy"
+            "ConspiracyTheoryGame/Public/Enemy",
+            "ConspiracyTheoryGame/Public/Boss",
+            "ConspiracyTheoryGame/Public/Boss/RhythmMechanics"
         });
 
         // Uncomment if you are using Slate UI

@@ -15,3 +15,12 @@ enum class ECTGMatchState : uint8
 };
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnMatchStateChangeSignature, ECTGMatchState);
+
+UENUM(BlueprintType)
+enum class ECTGKeyType : uint8
+{
+    ArrowUp = 0 UMETA(DispayName = "Up"),
+    ArrowDown UMETA(DispayName = "Down"),
+    ArrowLeft UMETA(DispayName = "Left"),
+    AroowRight UMETA(DispayName = "Right")
+};
