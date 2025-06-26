@@ -1,6 +1,8 @@
 #include "RoomSpawner.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
+#include "PickUpSpawner.h"
+#include "Pickups/CTGBasePickup.h"
 #include "Engine/StaticMeshActor.h"
 #include "NavMesh/RecastNavMesh.h"
 #include "NavigationSystem.h"
@@ -18,6 +20,7 @@ void ARoomSpawner::BeginPlay()
 {
     Super::BeginPlay();
     GenerateDungeon();
+
 }
 
 bool ARoomSpawner::IsLocationFree(FVector Location, float Radius)
@@ -92,7 +95,7 @@ void ARoomSpawner::GenerateDungeon()
         }
     }
     CloseUnconnectedExits();
-
+    SpawnPickups();
     GetWorldTimerManager().SetTimerForNextTick(this, &ARoomSpawner::RebuildNavigation);
 }
 
@@ -156,6 +159,43 @@ void ARoomSpawner::CloseUnconnectedExits()
 
                 }
             }
+        }
+    }
+}
+
+void ARoomSpawner::SpawnPickups()
+{
+    TArray<AActor*> FoundSpawners;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), APickUpSpawner::StaticClass(), FoundSpawners);
+
+    int32 CurrentIndex = 0;
+    int32 SpawnedGuaranteed = 0;
+
+    for (int32 i = 0; i < FoundSpawners.Num(); ++i)
+    {
+        APickUpSpawner* Spawner = Cast<APickUpSpawner>(FoundSpawners[i]);
+        if (!Spawner || !Spawner->PickupClass) continue;
+
+        bool bShouldSpawn = false;
+
+        if (SpawnedGuaranteed < GuaranteedPickupCount)
+        {
+            bShouldSpawn = true;
+            ++SpawnedGuaranteed;
+        }
+        else if (FMath::FRandRange(0.f, 100.f) <= RandomPickupChance)
+        {
+            bShouldSpawn = true;
+        }
+
+        if (bShouldSpawn && PickupSequence.IsValidIndex(CurrentIndex))
+        {
+            FActorSpawnParameters Params;
+            Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+            GetWorld()->SpawnActor<ACTGBasePickup>(
+                PickupSequence[CurrentIndex], Spawner->GetActorLocation(), Spawner->GetActorRotation(), Params);
+            ++CurrentIndex;
         }
     }
 }

@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "CTGBasePickup.h"
+#include "PickupSpawner.h"
 #include "RoomBase.h"
 #include "RoomSpawner.generated.h"
 
@@ -29,6 +31,18 @@ public:
     float RoomSpacing = 1000.0f;
     UPROPERTY(EditAnywhere)
     int32 TotalRooms = 10;
+
+    UFUNCTION(BlueprintCallable, Category = "Pickup")
+    void SpawnPickups();
+
+    UPROPERTY(EditAnywhere, Category = "Pickup")
+    TArray<TSubclassOf<ACTGBasePickup>> PickupSequence;
+
+    UPROPERTY(EditAnywhere, Category = "Pickup")
+    int32 GuaranteedPickupCount = 10;
+
+    UPROPERTY(EditAnywhere, Category = "Pickup")
+    float RandomPickupChance = 10.f;
 
     UPROPERTY(EditAnywhere, Category = "Dungeon")
     UStaticMesh* ExitBlockerMesh;
