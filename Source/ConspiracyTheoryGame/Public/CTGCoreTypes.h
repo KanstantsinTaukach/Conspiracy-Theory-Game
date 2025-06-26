@@ -24,3 +24,28 @@ enum class ECTGKeyType : uint8
     ArrowLeft UMETA(DispayName = "Left"),
     AroowRight UMETA(DispayName = "Right")
 };
+
+USTRUCT(BlueprintType)
+struct FDim
+{
+    GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "GridSettings")
+    int32 Width;
+    int32 Height;
+};
+
+UENUM(BlueprintType)
+enum class ECTGCellType : uint8
+{
+    Empty = 0,
+    FallingKey
+};
+
+USTRUCT(BlueprintType)
+struct FSettings
+{
+    GENERATED_USTRUCT_BODY()
+
+    FDim GridSize;
+};
