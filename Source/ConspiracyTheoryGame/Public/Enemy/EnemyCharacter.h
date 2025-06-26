@@ -37,6 +37,9 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
     UAudioComponent* PatrolLoopAudio;
 
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy|State")
+    bool bIsStunned = false;
+
     /** Sound used for patrol loop */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
     USoundBase* PatrolLoopSound;

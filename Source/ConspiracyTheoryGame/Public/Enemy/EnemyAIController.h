@@ -30,13 +30,14 @@ private:
 
     void MoveToNextPatrolPoint();
 
-    UPROPERTY()
-    APawn* ChaseTarget;
+
 
     void LoseTarget();
 
 
 public:
+    UPROPERTY()
+    APawn* ChaseTarget;
     UPROPERTY(BlueprintReadOnly, Category = "AI")
     bool bIsChasing = false;
 
