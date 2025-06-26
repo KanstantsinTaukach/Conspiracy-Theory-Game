@@ -121,6 +121,34 @@ void AEnemyCharacter::StartPatrolSound()
         PatrolLoopAudio->Play();
     }
 }
+void AEnemyCharacter::Stun()
+{
+
+    AEnemyAIController* AIController = Cast<AEnemyAIController>(GetController());
+    if (AIController)
+    {
+        AIController->StopMovement();
+        AIController->ClearFocus(EAIFocusPriority::Gameplay);
+
+        AIController->GetWorldTimerManager().ClearTimer(AIController->LoseTargetTimerHandle);
+        AIController->GetWorldTimerManager().ClearTimer(AIController->ReturnToPatrolTimerHandle);
+    }
+
+    if (StunMontage)
+    {
+        UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+        if (AnimInstance)
+        {
+            AnimInstance->Montage_Play(StunMontage);
+        }
+    }
+
+    if (AIController)
+    {
+        AIController->GetWorldTimerManager().SetTimer(
+            AIController->ReturnToPatrolTimerHandle, AIController, &AEnemyAIController::ResumePatrol, StunDuration, false);
+    }
+}
 void AEnemyCharacter::StopChaseSound()
 {
     if (ChaseAudio && ChaseAudio->IsPlaying())

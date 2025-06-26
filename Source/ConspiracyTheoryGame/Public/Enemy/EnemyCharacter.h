@@ -48,6 +48,15 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
     UAudioComponent* ChaseAudio;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy|State")
+    float StunDuration = 3.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy|Animation")
+    UAnimMontage* StunMontage;
+
+    UFUNCTION(BlueprintCallable)
+    void Stun();
+
     void StopChaseSound();
 
     void StopPatrolSound();
