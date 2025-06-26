@@ -30,6 +30,9 @@ public:
     UFUNCTION()
     void OnHearNoise(APawn* InstigatorPawn, const FVector& Location, float Volume);
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy|Animation")
+    UAnimMontage* LostTargetMontage;
+
     /** Looping patrol audio component */
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
     UAudioComponent* PatrolLoopAudio;
