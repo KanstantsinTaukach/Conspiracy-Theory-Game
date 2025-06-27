@@ -17,7 +17,7 @@ void ACTGGrid::SetModel(const FSettings& InSettings, int32 InCellSize)
 {
     GridDim = InSettings.GridSize;
     CellSize = InCellSize;
-    WorldWidht = GridDim.Width * CellSize;
+    WorldWidth = GridDim.Width * CellSize;
     WorldHeight = GridDim.Height * CellSize;
 }
 
@@ -33,12 +33,14 @@ void ACTGGrid::DrawGrid()
     for (int32 i = 0; i < GridDim.Height + 1; ++i)
     {
         const FVector StartLocation = GetActorLocation() + GetActorForwardVector() * CellSize * i;
-        DrawDebugLine(GetWorld(), StartLocation, StartLocation + GetActorRightVector() * WorldWidht, FColor::Red, false, -1.0, 0, 1);
+        const FVector EndLocation = StartLocation + GetActorRightVector() * WorldWidth;
+        DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Red, false, -1.0, 0, 2);
     }
 
-    for (int32 i = 0; i < GridDim.Width + 1; ++i)
+    for (int32 j = 0; j < GridDim.Width + 1; ++j)
     {
-        const FVector StartLocation = GetActorLocation() + GetActorRightVector() * CellSize * i;
-        DrawDebugLine(GetWorld(), StartLocation, StartLocation + GetActorForwardVector() * WorldHeight, FColor::Red, false, -1.0, 0, 1);
+        const FVector StartLocation = GetActorLocation() + GetActorRightVector() * CellSize * j;
+        const FVector EndLocation = StartLocation + GetActorForwardVector() * WorldHeight;
+        DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Red, false, -1.0, 0, 2);
     }
 }

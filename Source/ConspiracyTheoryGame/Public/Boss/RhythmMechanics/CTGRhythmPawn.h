@@ -25,4 +25,14 @@ protected:
 
     UPROPERTY(VisibleAnywhere)
     UCameraComponent* Camera;
+
+private:
+    FDim Dim;
+    int32 CellSize;
+    FTransform GridOrigin;
+
+    float HalfFOVTan(float FOVDegrees);
+    float VerticalFOV(float HorizontalFOVDegrees, float ViewportAspectHW);
+
+    void OnViewportResized(FViewport* Viewport, uint32 Val);
 };

@@ -32,6 +32,7 @@ struct FDim
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "GridSettings")
     int32 Width;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "GridSettings")
     int32 Height;
 };
 

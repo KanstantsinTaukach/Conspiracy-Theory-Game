@@ -23,10 +23,10 @@ void ACTGRhythmGameModeBase::StartPlay()
     GridVisual->FinishSpawning(GridOrigin);
 
     // Set pawn location fitting grid in viewport
-    const auto PC = GetWorld()->GetFirstPlayerController();
+    auto* PC = GetWorld()->GetFirstPlayerController();
     check(PC);
 
-    const auto MyPawn = Cast<ACTGRhythmPawn>(PC->GetPawn());
+    auto* MyPawn = Cast<ACTGRhythmPawn>(PC->GetPawn());
     check(MyPawn);
     MyPawn->UpdateLocation(MySettings.GridSize, CellSize, GridOrigin);
 

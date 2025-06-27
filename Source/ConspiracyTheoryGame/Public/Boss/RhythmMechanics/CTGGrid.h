@@ -25,7 +25,7 @@ protected:
 private:
     FDim GridDim;
     int32 CellSize;
-    int32 WorldWidht;
+    int32 WorldWidth;
     int32 WorldHeight;
 
     void DrawGrid();
