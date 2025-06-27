@@ -4,6 +4,7 @@
 #include "Boss/RhythmMechanics/CTGFallingKey.h"
 #include "CTGCoreTypes.h"
 #include "RhythmMechanics/CTGGrid.h"
+#include "RhythmMechanics/CTGRhythmPawn.h"
 
 ACTGRhythmGameModeBase::ACTGRhythmGameModeBase() {}
 
@@ -11,6 +12,7 @@ void ACTGRhythmGameModeBase::StartPlay()
 {
     Super::StartPlay();
 
+    // Init CTGGrid
     const FTransform GridOrigin = FTransform::Identity;
     check(GetWorld());
     GridVisual = GetWorld()->SpawnActorDeferred<ACTGGrid>(GridVisualClass, GridOrigin);
@@ -19,6 +21,14 @@ void ACTGRhythmGameModeBase::StartPlay()
     const FSettings MySettings{GridSize.X, GridSize.Y};
     GridVisual->SetModel(MySettings, CellSize);
     GridVisual->FinishSpawning(GridOrigin);
+
+    // Set pawn location fitting grid in viewport
+    const auto PC = GetWorld()->GetFirstPlayerController();
+    check(PC);
+
+    const auto MyPawn = Cast<ACTGRhythmPawn>(PC->GetPawn());
+    check(MyPawn);
+    MyPawn->UpdateLocation(MySettings.GridSize, CellSize, GridOrigin);
 
     // GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true);
 }
