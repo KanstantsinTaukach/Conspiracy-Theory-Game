@@ -13,10 +13,20 @@ class CONSPIRACYTHEORYGAME_API ACTGGrid : public AActor
     GENERATED_BODY()
 
 public:
-    ACTGGrid(const FDim& Dim);
+    ACTGGrid();
 
     virtual void Tick(float DeltaTime) override;
 
+    void SetModel(const FSettings& InSettings, int32 InCellSize);
+
 protected:
     virtual void BeginPlay() override;
+
+private:
+    FDim GridDim;
+    int32 CellSize;
+    int32 WorldWidht;
+    int32 WorldHeight;
+
+    void DrawGrid();
 };

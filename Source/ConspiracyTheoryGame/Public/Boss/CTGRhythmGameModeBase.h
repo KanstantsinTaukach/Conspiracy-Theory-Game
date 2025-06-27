@@ -7,12 +7,23 @@
 #include "CTGCoreTypes.h"
 #include "CTGRhythmGameModeBase.generated.h"
 
+class ACTGGrid;
+
 UCLASS()
 class CONSPIRACYTHEORYGAME_API ACTGRhythmGameModeBase : public AGameModeBase
 {
     GENERATED_BODY()
 
 public:
+    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "10", clampMax = "100"))
+    FIntPoint GridSize{10, 10};
+
+    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "10", clampMax = "100"))
+    int32 CellSize{10};
+
+    UPROPERTY(EditDefaultsOnly)
+    TSubclassOf<ACTGGrid> GridVisualClass;
+
     ACTGRhythmGameModeBase();
 
     virtual void StartPlay() override;
@@ -23,6 +34,9 @@ public:
 private:
     UPROPERTY(EditAnywhere, Category = "KeySpawning")
     float SpawnInterval = 1.0f;
+
+    UPROPERTY()
+    ACTGGrid* GridVisual;
 
     FTimerHandle SpawnTimerHandle;
 

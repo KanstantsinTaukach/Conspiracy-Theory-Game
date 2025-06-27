@@ -39,6 +39,7 @@ UENUM(BlueprintType)
 enum class ECTGCellType : uint8
 {
     Empty = 0,
+    Wall,
     FallingKey
 };
 
