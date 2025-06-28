@@ -3,6 +3,8 @@
 #include "Boss/RhythmMechanics/CTGRhythmPawn.h"
 #include "Camera/CameraComponent.h"
 
+constexpr double GridMargin = 0.0;
+
 ACTGRhythmPawn::ACTGRhythmPawn()
 {
     PrimaryActorTick.bCanEverTick = false;
@@ -27,7 +29,8 @@ void ACTGRhythmPawn::UpdateLocation(const FDim& InDim, uint32 InCellSize, const 
     check(GEngine->GameViewport->Viewport);
 
     auto* Viewport = GEngine->GameViewport->Viewport;
-    Viewport->ViewportResizedEvent.AddUObject(this, &ACTGRhythmPawn::OnViewportResized);
+    Viewport->ViewportResizedEvent.Remove(ResizeHandle);
+    ResizeHandle = Viewport->ViewportResizedEvent.AddUObject(this, &ACTGRhythmPawn::OnViewportResized);
 
 #if WITH_EDITOR
     OnViewportResized(Viewport, 0);
@@ -57,13 +60,15 @@ void ACTGRhythmPawn::OnViewportResized(FViewport* Viewport, uint32 Val)
     double LocationZ = 0.0;
     if (ViewportAspect <= GridAspect)
     {
-        LocationZ = WorldWidth / HalfFOVTan(Camera->FieldOfView);
+        const double MarginWidth = (Dim.Width + GridMargin) * CellSize;
+        LocationZ = MarginWidth / HalfFOVTan(Camera->FieldOfView);
     }
     else
     {
         check(ViewportAspect);
         const double VFOV = VerticalFOV(Camera->FieldOfView, 1.0 / ViewportAspect);
-        LocationZ = WorldHeight / HalfFOVTan(VFOV);
+        const double MarginHeight = (Dim.Height + GridMargin) * CellSize;
+        LocationZ = MarginHeight / HalfFOVTan(VFOV);
     }
 
     const FVector NewPawnLocation = GridOrigin.GetLocation() + 0.5 * FVector(WorldHeight, WorldWidth, LocationZ);

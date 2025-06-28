@@ -30,6 +30,7 @@ private:
     FDim Dim;
     uint32 CellSize;
     FTransform GridOrigin;
+    FDelegateHandle ResizeHandle;
 
     double HalfFOVTan(double FOVDegrees);
     double VerticalFOV(double HorizontalFOVDegrees, double ViewportAspectHW);
