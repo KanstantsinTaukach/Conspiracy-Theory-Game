@@ -7,6 +7,8 @@
 #include "CTGCoreTypes.h"
 #include "CTGGrid.generated.h"
 
+class UStaticMeshComponent;
+
 UCLASS()
 class CONSPIRACYTHEORYGAME_API ACTGGrid : public AActor
 {
@@ -17,16 +19,22 @@ public:
 
     virtual void Tick(float DeltaTime) override;
 
-    void SetModel(const FSettings& InSettings, int32 InCellSize);
+    void SetModel(const FSettings& InSettings, uint32 InCellSize);
 
 protected:
+    UPROPERTY(VisibleAnywhere)
+    USceneComponent* Origin;
+
+    UPROPERTY(VisibleAnywhere)
+    UStaticMeshComponent* GridMesh;
+
     virtual void BeginPlay() override;
 
 private:
     FDim GridDim;
-    int32 CellSize;
-    int32 WorldWidth;
-    int32 WorldHeight;
+    uint32 CellSize;
+    uint32 WorldWidth;
+    uint32 WorldHeight;
 
     void DrawGrid();
 };

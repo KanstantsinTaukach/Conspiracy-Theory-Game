@@ -30,10 +30,8 @@ struct FDim
 {
     GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "GridSettings")
-    int32 Width;
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "GridSettings")
-    int32 Height;
+    uint32 Width;
+    uint32 Height;
 };
 
 UENUM(BlueprintType)

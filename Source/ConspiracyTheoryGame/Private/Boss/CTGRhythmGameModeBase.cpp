@@ -18,7 +18,7 @@ void ACTGRhythmGameModeBase::StartPlay()
     GridVisual = GetWorld()->SpawnActorDeferred<ACTGGrid>(GridVisualClass, GridOrigin);
 
     check(GridVisual);
-    const FSettings MySettings{GridSize.X, GridSize.Y};
+    const FSettings MySettings{GridDims.X, GridDims.Y};
     GridVisual->SetModel(MySettings, CellSize);
     GridVisual->FinishSpawning(GridOrigin);
 

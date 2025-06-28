@@ -16,10 +16,10 @@ class CONSPIRACYTHEORYGAME_API ACTGRhythmGameModeBase : public AGameModeBase
 
 public:
     UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "10", clampMax = "100"))
-    FIntPoint GridSize{10, 10};
+    FUintPoint GridDims{10, 10};
 
     UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "10", clampMax = "100"))
-    int32 CellSize{10};
+    uint32 CellSize{10};
 
     UPROPERTY(EditDefaultsOnly)
     TSubclassOf<ACTGGrid> GridVisualClass;

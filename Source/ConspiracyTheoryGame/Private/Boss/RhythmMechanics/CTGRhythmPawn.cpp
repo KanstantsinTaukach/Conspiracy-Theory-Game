@@ -16,7 +16,7 @@ ACTGRhythmPawn::ACTGRhythmPawn()
     Camera->SetupAttachment(Origin);
 }
 
-void ACTGRhythmPawn::UpdateLocation(const FDim& InDim, int32 InCellSize, const FTransform& InGridOrigin)
+void ACTGRhythmPawn::UpdateLocation(const FDim& InDim, uint32 InCellSize, const FTransform& InGridOrigin)
 {
     Dim = InDim;
     CellSize = InCellSize;
@@ -34,27 +34,27 @@ void ACTGRhythmPawn::UpdateLocation(const FDim& InDim, int32 InCellSize, const F
 #endif
 }
 
-float ACTGRhythmPawn::HalfFOVTan(float FOVDegrees)
+double ACTGRhythmPawn::HalfFOVTan(double FOVDegrees)
 {
-    return FMath::Tan(FMath::DegreesToRadians(FOVDegrees * 0.5f));
+    return FMath::Tan(FMath::DegreesToRadians(FOVDegrees * 0.5));
 }
 
-float ACTGRhythmPawn::VerticalFOV(float HorizontalFOVDegrees, float ViewportAspectHW)
+double ACTGRhythmPawn::VerticalFOV(double HorizontalFOVDegrees, double ViewportAspectHW)
 {
-    return FMath::RadiansToDegrees(2.0f * FMath::Atan(FMath::Tan(FMath::DegreesToRadians(HorizontalFOVDegrees) * 0.5f) * ViewportAspectHW));
+    return FMath::RadiansToDegrees(2.0 * FMath::Atan(FMath::Tan(FMath::DegreesToRadians(HorizontalFOVDegrees) * 0.5) * ViewportAspectHW));
 }
 
 void ACTGRhythmPawn::OnViewportResized(FViewport* Viewport, uint32 Val)
 {
     if (!Viewport || Viewport->GetSizeXY().Y == 0 || Dim.Height == 0) return;
 
-    const float WorldWidth = Dim.Width * CellSize;
-    const float WorldHeight = Dim.Height * CellSize;
+    const double WorldWidth = Dim.Width * CellSize;
+    const double WorldHeight = Dim.Height * CellSize;
 
-    const float ViewportAspect = static_cast<float>(Viewport->GetSizeXY().X) / Viewport->GetSizeXY().Y;
-    const float GridAspect = static_cast<float>(Dim.Width) / Dim.Height;
+    const double ViewportAspect = static_cast<double>(Viewport->GetSizeXY().X) / Viewport->GetSizeXY().Y;
+    const double GridAspect = static_cast<double>(Dim.Width) / Dim.Height;
 
-    float LocationZ = 0.0f;
+    double LocationZ = 0.0;
     if (ViewportAspect <= GridAspect)
     {
         LocationZ = WorldWidth / HalfFOVTan(Camera->FieldOfView);
@@ -62,10 +62,10 @@ void ACTGRhythmPawn::OnViewportResized(FViewport* Viewport, uint32 Val)
     else
     {
         check(ViewportAspect);
-        const float VFOV = VerticalFOV(Camera->FieldOfView, 1.0 / ViewportAspect);
+        const double VFOV = VerticalFOV(Camera->FieldOfView, 1.0 / ViewportAspect);
         LocationZ = WorldHeight / HalfFOVTan(VFOV);
     }
 
-    const FVector NewPawnLocation = GridOrigin.GetLocation() + 0.5f * FVector(WorldHeight, WorldWidth, LocationZ);
+    const FVector NewPawnLocation = GridOrigin.GetLocation() + 0.5 * FVector(WorldHeight, WorldWidth, LocationZ);
     SetActorLocation(NewPawnLocation);
 }

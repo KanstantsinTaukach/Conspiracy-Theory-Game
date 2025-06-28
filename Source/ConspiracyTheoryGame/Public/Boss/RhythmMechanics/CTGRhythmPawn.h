@@ -17,7 +17,7 @@ class CONSPIRACYTHEORYGAME_API ACTGRhythmPawn : public APawn
 public:
     ACTGRhythmPawn();
 
-    void UpdateLocation(const FDim& InDim, int32 InCellSize, const FTransform& InGridOrigin);
+    void UpdateLocation(const FDim& InDim, uint32 InCellSize, const FTransform& InGridOrigin);
 
 protected:
     UPROPERTY(VisibleAnywhere)
@@ -28,11 +28,11 @@ protected:
 
 private:
     FDim Dim;
-    int32 CellSize;
+    uint32 CellSize;
     FTransform GridOrigin;
 
-    float HalfFOVTan(float FOVDegrees);
-    float VerticalFOV(float HorizontalFOVDegrees, float ViewportAspectHW);
+    double HalfFOVTan(double FOVDegrees);
+    double VerticalFOV(double HorizontalFOVDegrees, double ViewportAspectHW);
 
     void OnViewportResized(FViewport* Viewport, uint32 Val);
 };
