@@ -21,6 +21,8 @@ public:
 
     void SetModel(const FSettings& InSettings, uint32 InCellSize);
 
+    void UpdateColors(const FGridColors& Colors);
+
 protected:
     UPROPERTY(VisibleAnywhere)
     USceneComponent* Origin;
@@ -31,6 +33,9 @@ protected:
     virtual void BeginPlay() override;
 
 private:
+    UPROPERTY()
+    UMaterialInstanceDynamic* GridMaterial;
+
     FDim GridDim;
     uint32 CellSize;
     uint32 WorldWidth;

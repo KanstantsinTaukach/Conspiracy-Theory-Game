@@ -5,6 +5,9 @@
 #include "CTGCoreTypes.h"
 #include "RhythmMechanics/CTGGrid.h"
 #include "RhythmMechanics/CTGRhythmPawn.h"
+#include "Engine/ExponentialHeightFog.h"
+#include "Components/ExponentialHeightFogComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 ACTGRhythmGameModeBase::ACTGRhythmGameModeBase() {}
 
@@ -30,7 +33,45 @@ void ACTGRhythmGameModeBase::StartPlay()
     check(MyPawn);
     MyPawn->UpdateLocation(MySettings.GridSize, CellSize, GridOrigin);
 
+    //
+    FindFog();
+
+    // Update colors
+    check(ColorsTable);
+    const auto RowsCount = ColorsTable->GetRowNames().Num();
+    check(RowsCount >= 1);
+    ColorTableIndex = FMath::RandRange(0, RowsCount - 1);
+    UpdateColors();
+
     // GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true);
+}
+
+void ACTGRhythmGameModeBase::FindFog() 
+{
+    TArray<AActor*> Fogs;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AExponentialHeightFog::StaticClass(), Fogs);
+    if (Fogs.Num() > 0)
+    {
+        Fog = Cast<AExponentialHeightFog>(Fogs[0]);
+    }
+}
+
+void ACTGRhythmGameModeBase::UpdateColors()
+{
+    const auto RowName = ColorsTable->GetRowNames()[ColorTableIndex];
+    const auto* ColorSet = ColorsTable->FindRow<FGridColors>(RowName, {});
+    if (ColorSet)
+    {
+        // Update grid
+        GridVisual->UpdateColors(*ColorSet);
+
+        // Update scene ambient color via fog
+        if (Fog && Fog->GetComponent())
+        {
+            Fog->GetComponent()->SkyAtmosphereAmbientContributionColorScale = ColorSet->SkyAtmosphereColor;
+            Fog->MarkComponentsRenderStateDirty();
+        }
+    }
 }
 
 void ACTGRhythmGameModeBase::SpawnRandomFallingKey()

@@ -6,7 +6,7 @@
 
 ACTGGrid::ACTGGrid()
 {
-    PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.bCanEverTick = false;
 
     Origin = CreateDefaultSubobject<USceneComponent>("Origin");
     check(Origin);
@@ -29,6 +29,7 @@ void ACTGGrid::SetModel(const FSettings& InSettings, uint32 InCellSize)
     WorldWidth = GridDim.Width * CellSize;
     WorldHeight = GridDim.Height * CellSize;
 
+    // Scale mesh
     check(GridMesh->GetStaticMesh());
     const FBox Box = GridMesh->GetStaticMesh()->GetBoundingBox();
     const FVector Size = Box.GetSize();
@@ -37,13 +38,30 @@ void ACTGGrid::SetModel(const FSettings& InSettings, uint32 InCellSize)
     check(Size.Y);
     GridMesh->SetRelativeScale3D(FVector(WorldHeight / Size.X, WorldWidth / Size.Y, 1.0));
     GridMesh->SetRelativeLocation(0.5 * FVector(WorldHeight, WorldWidth, -Size.Z));
+
+    // Setup material
+    GridMaterial = GridMesh->CreateAndSetMaterialInstanceDynamic(0);
+    if (GridMaterial)
+    {
+        GridMaterial->SetVectorParameterValue("Division", FVector(GridDim.Height, GridDim.Width, 0.0));
+    }
+}
+
+void ACTGGrid::UpdateColors(const FGridColors& Colors) 
+{
+    if (GridMaterial)
+    {
+        GridMaterial->SetVectorParameterValue("BackgroundColor", Colors.GridBackgroundColor);
+        GridMaterial->SetVectorParameterValue("LineColor", Colors.GridLineColor);
+        GridMaterial->SetVectorParameterValue("WallColor", Colors.GridWallColor);
+    }
 }
 
 void ACTGGrid::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    DrawGrid();
+    //DrawGrid();
 }
 
 void ACTGGrid::DrawGrid()

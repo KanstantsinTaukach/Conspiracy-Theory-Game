@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Engine/DataTable.h"
 #include "CTGCoreTypes.generated.h"
 
 UENUM(BlueprintType)
@@ -48,4 +49,22 @@ struct FSettings
     GENERATED_USTRUCT_BODY()
 
     FDim GridSize;
+};
+
+USTRUCT(BlueprintType)
+struct FGridColors : public FTableRowBase
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+    FLinearColor GridBackgroundColor;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+    FLinearColor GridWallColor;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+    FLinearColor GridLineColor;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+    FLinearColor SkyAtmosphereColor;
 };
