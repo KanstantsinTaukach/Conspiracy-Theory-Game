@@ -2,6 +2,7 @@
 
 #include "Boss/RhythmMechanics/CTGFallingKey.h"
 #include "Components/StaticMeshComponent.h"
+#include "CTGRhythmGameModeBase.h"
 
 ACTGFallingKey::ACTGFallingKey()
 {
@@ -21,7 +22,7 @@ void ACTGFallingKey::BeginPlay()
 
     if (FallingKeyClass)
     {
-        const FTransform Transform = FTransform(ActorPositionToVector(Settings.StartPosition, CellSize, Settings.GridDims));
+        const FTransform Transform = FTransform(ActorPositionToVector(Settings.ActorPosition, CellSize, Settings.GridDims));
         KeyMeshActor = GetWorld()->SpawnActor<AActor>(FallingKeyClass, Transform);
     }
 }
@@ -42,11 +43,11 @@ void ACTGFallingKey::Tick(float DeltaTime)
 void ACTGFallingKey::UpdateActorPosition()
 {
     if (!KeyMeshActor) return;
-    Settings.StartPosition.Y = Settings.StartPosition.Y + 1;
+    Settings.ActorPosition.Y = Settings.ActorPosition.Y + 1;
 
-    KeyMeshActor->SetActorLocation(ActorPositionToVector(Settings.StartPosition, CellSize, Settings.GridDims));
+    KeyMeshActor->SetActorLocation(ActorPositionToVector(Settings.ActorPosition, CellSize, Settings.GridDims));
 
-    if (Settings.StartPosition.Y == Settings.GridDims.Height - 1)
+    if (Settings.ActorPosition.Y == Settings.GridDims.Height - 1)
     {
         OnMissed();
     }
@@ -69,6 +70,7 @@ void ACTGFallingKey::CheckHit()
         KeyMeshActor->Destroy();
     }
 
+    OnFallingKeyDestroyed.Broadcast(this);
     Destroy();
 }
 
@@ -79,5 +81,11 @@ void ACTGFallingKey::OnMissed()
         KeyMeshActor->Destroy();
     }
 
+    if (auto* GameMode = Cast<ACTGRhythmGameModeBase>(GetWorld()->GetAuthGameMode()))
+    {
+        GameMode->RemovePlayerHealth(50);
+    }
+
+    OnFallingKeyDestroyed.Broadcast(this);
     Destroy();
 }

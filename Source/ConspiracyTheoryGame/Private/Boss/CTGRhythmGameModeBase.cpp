@@ -9,6 +9,8 @@
 #include "Components/ExponentialHeightFogComponent.h"
 #include "Kismet/GameplayStatics.h"
 
+DEFINE_LOG_CATEGORY_STATIC(LogCTGRhythmGameModeBase, All, All);
+
 ACTGRhythmGameModeBase::ACTGRhythmGameModeBase() {}
 
 void ACTGRhythmGameModeBase::StartPlay()
@@ -17,7 +19,7 @@ void ACTGRhythmGameModeBase::StartPlay()
 
     // FSettings RhythmSettings;
     RhythmSettings.GridDims = FDim{GridDims.X, GridDims.Y};
-    RhythmSettings.StartPosition = FPosition{0, 0};
+    RhythmSettings.ActorPosition = FPosition{0, 0};
     RhythmSettings.GameSpeed = GameSpeed;
 
     // Init CTGGrid
@@ -87,7 +89,12 @@ void ACTGRhythmGameModeBase::SpawnFallingKey(ECTGKeyType Key)
     if (UWorld* World = GetWorld())
     {
         uint32 RandPositionX = FMath::RandRange(1, GridDims.X - 2);
-        RhythmSettings.StartPosition = FPosition{RandPositionX, 1};
+        RhythmSettings.ActorPosition = FPosition{RandPositionX, 1};
+
+        if (RhythmSettings.ActorPosition.X == LastActorPositionX)
+        {
+            RhythmSettings.ActorPosition.X++;
+        }
 
         const FTransform GridOrigin = FTransform::Identity;
 
@@ -97,5 +104,30 @@ void ACTGRhythmGameModeBase::SpawnFallingKey(ECTGKeyType Key)
         FallingKeyVisual->SetModel(RhythmSettings, CellSize);
         FallingKeyVisual->SetKeyType(Key);
         FallingKeyVisual->FinishSpawning(GridOrigin);
+
+        LastActorPositionX = RhythmSettings.ActorPosition.X;
+        ActiveFallingKeys.Add(FallingKeyVisual);
+
+        FallingKeyVisual->OnDestroyed.AddDynamic(this, &ACTGRhythmGameModeBase::RemoveFallingKey);
     }
+}
+
+void ACTGRhythmGameModeBase::RemoveFallingKey(AActor* DestroyedActor) 
+{
+    if (auto* FallingKey = Cast<ACTGFallingKey>(DestroyedActor))
+    {
+        ActiveFallingKeys.Remove(FallingKey);
+    }
+}
+
+void ACTGRhythmGameModeBase::RemovePlayerHealth(int32 Delta) 
+{
+    PlayerHealth = FMath::Max(0, PlayerHealth - Delta);
+    UE_LOG(LogCTGRhythmGameModeBase, Display, TEXT("PLAYER HEALTH IS: %d"), PlayerHealth);
+}
+
+void ACTGRhythmGameModeBase::RemoveBossHealth(int32 Delta) 
+{
+    BossHealth = FMath::Max(0, BossHealth - Delta);
+    UE_LOG(LogCTGRhythmGameModeBase, Display, TEXT("BOSS HEALTH IS: %d"), BossHealth);
 }

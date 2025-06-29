@@ -59,7 +59,7 @@ struct FSettings
 
     FDim GridDims{25, 40};
 
-    FPosition StartPosition{0, 0};
+    FPosition ActorPosition{0, 0};
 
     float GameSpeed{1.0f};
 };

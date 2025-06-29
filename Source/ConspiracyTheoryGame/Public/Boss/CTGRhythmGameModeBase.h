@@ -21,6 +21,16 @@ public:
 
     virtual void StartPlay() override;
 
+    UFUNCTION(BlueprintCallable)
+    int32 GetPlayerHealth() const { return PlayerHealth; };
+    UFUNCTION(BlueprintCallable)
+    void RemovePlayerHealth(int32 Delta);
+
+    UFUNCTION(BlueprintCallable)
+    int32 GetBossHealth() const { return BossHealth; };
+    UFUNCTION(BlueprintCallable)
+    void RemoveBossHealth(int32 Delta);
+
 protected:
     UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "10", clampMax = "100"), Category = "RhythmGameSettings")
     FUintPoint GridDims{15, 30};
@@ -29,7 +39,7 @@ protected:
     uint32 CellSize{10};
 
     UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.01", clampMax = "5"), Category = "RhythmGameSettings")
-    float GameSpeed{0.1f};
+    float GameSpeed{0.15f};
 
     UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.5", clampMax = "5"), Category = "RhythmGameSettings")
     float SpawnInterval = 2.5f;
@@ -42,6 +52,14 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "Design")
     UDataTable* ColorsTable;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+    int32 PlayerHealth = 2500;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+    int32 BossHealth = 2500;
+
+    UPROPERTY()
+    TArray<ACTGFallingKey*> ActiveFallingKeys;
 
     UFUNCTION(BlueprintCallable)
     void SpawnFallingKey(ECTGKeyType Key);
@@ -60,6 +78,8 @@ private:
 
     uint32 ColorTableIndex{0};
 
+    uint32 LastActorPositionX{0};
+
     FTimerHandle SpawnTimerHandle;
 
     void FindFog();
@@ -67,4 +87,7 @@ private:
     void UpdateColors();
 
     void SpawnRandomFallingKey();
+
+    UFUNCTION()
+    void RemoveFallingKey(AActor* DestroyedActor);
 };

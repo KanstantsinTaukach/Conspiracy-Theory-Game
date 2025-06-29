@@ -9,6 +9,8 @@
 
 class UStaticMeshComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFallingKeyDestroyedSignature, AActor*, DestroyedActor);
+
 UCLASS()
 class CONSPIRACYTHEORYGAME_API ACTGFallingKey : public AActor
 {
@@ -20,9 +22,14 @@ public:
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override;
 
+    UPROPERTY(BlueprintAssignable)
+    FOnFallingKeyDestroyedSignature OnFallingKeyDestroyed;
+
     void SetModel(const FSettings& InSettings, uint32 InCellSize);
 
     void SetKeyType(ECTGKeyType Key);
+
+    FPosition GetCurrentPosition() const { return Settings.ActorPosition; };
 
     UFUNCTION()
     void CheckHit();
@@ -40,7 +47,7 @@ protected:
 private:
     FSettings Settings;
     uint32 CellSize;
-    float Delta = 0.1f;
+    float Delta = 0.05f;
     float TimeSinceLastMove = 0.0f;
 
     UPROPERTY()
