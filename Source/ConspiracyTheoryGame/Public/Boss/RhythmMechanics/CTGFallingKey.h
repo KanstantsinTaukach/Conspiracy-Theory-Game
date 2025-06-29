@@ -27,15 +27,16 @@ public:
 
     void SetModel(const FSettings& InSettings, uint32 InCellSize);
 
-    void SetKeyType(ECTGKeyType Key);
+    void SetKeyType(ECTGKeyType Key) { KeyType = Key; };
+    ECTGKeyType GetKeyType() const { return KeyType; };
 
     FPosition GetCurrentPosition() const { return Settings.ActorPosition; };
 
     UFUNCTION()
-    void CheckHit();
+    void OnMissed();
 
     UFUNCTION()
-    void OnMissed();
+    void DestroyFallingKey();
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
@@ -44,14 +45,14 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "KeySettings")
     ECTGKeyType KeyType;
 
+    UPROPERTY()
+    AActor* KeyMeshActor;
+
 private:
     FSettings Settings;
     uint32 CellSize;
     float Delta = 0.05f;
     float TimeSinceLastMove = 0.0f;
-
-    UPROPERTY()
-    AActor* KeyMeshActor;
 
     FVector ActorPositionToVector(FPosition& InPosition, uint32 InCellSize, FDim& InDim);
 

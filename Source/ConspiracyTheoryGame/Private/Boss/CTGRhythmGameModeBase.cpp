@@ -8,10 +8,15 @@
 #include "Engine/ExponentialHeightFog.h"
 #include "Components/ExponentialHeightFogComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Boss/CTGRhythmPlayerController.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogCTGRhythmGameModeBase, All, All);
 
-ACTGRhythmGameModeBase::ACTGRhythmGameModeBase() {}
+ACTGRhythmGameModeBase::ACTGRhythmGameModeBase() 
+{
+    DefaultPawnClass = ACTGRhythmPawn::StaticClass();
+    PlayerControllerClass = ACTGRhythmPlayerController::StaticClass();
+}
 
 void ACTGRhythmGameModeBase::StartPlay()
 {
@@ -109,6 +114,38 @@ void ACTGRhythmGameModeBase::SpawnFallingKey(ECTGKeyType Key)
         ActiveFallingKeys.Add(FallingKeyVisual);
 
         FallingKeyVisual->OnDestroyed.AddDynamic(this, &ACTGRhythmGameModeBase::RemoveFallingKey);
+    }
+}
+
+void ACTGRhythmGameModeBase::CheckPlayerInput(ECTGKeyType InputKey)
+{
+    if (ActiveFallingKeys.Num() == 0) return;
+
+    ACTGFallingKey* LowestKey = nullptr;
+    uint32 MinPositionY = 0;
+
+    for (auto* Key : ActiveFallingKeys)
+    {
+        if (Key->GetCurrentPosition().Y > MinPositionY)
+        {
+            MinPositionY = Key->GetCurrentPosition().Y;
+            LowestKey = Key;
+        }
+    }
+
+    if (LowestKey)
+    {
+        if (LowestKey->GetKeyType() == InputKey)
+        {
+            RemoveBossHealth(100);
+        }
+        else
+        {
+            RemovePlayerHealth(100);
+        }
+
+        RemoveFallingKey(LowestKey);
+        LowestKey->DestroyFallingKey();
     }
 }
 

@@ -2,10 +2,12 @@
 
 #include "Boss/CTGRhythmPlayerController.h"
 #include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "CTGRhythmGameModeBase.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogTGRhythmPlayerController, All, All);
 
-void ACTGRhythmPlayerController::SetupInputComponent() 
+void ACTGRhythmPlayerController::SetupInputComponent()
 {
     Super::SetupInputComponent();
 
@@ -18,22 +20,44 @@ void ACTGRhythmPlayerController::SetupInputComponent()
     }
 }
 
-void ACTGRhythmPlayerController::OnUpPressed() 
+void ACTGRhythmPlayerController::BeginPlay()
 {
-    UE_LOG(LogTGRhythmPlayerController, Display, TEXT("UP"));
+    Super::BeginPlay();
+
+    if (const auto InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+    {
+        InputSystem->AddMappingContext(MappingContext, 0);
+    }
 }
 
-void ACTGRhythmPlayerController::OnDownPressed() 
+void ACTGRhythmPlayerController::OnUpPressed()
 {
-    UE_LOG(LogTGRhythmPlayerController, Display, TEXT("DOWN"));
+    if (auto* GameMode = Cast<ACTGRhythmGameModeBase>(GetWorld()->GetAuthGameMode()))
+    {
+        GameMode->CheckPlayerInput(ECTGKeyType::ArrowUp);
+    }
 }
 
-void ACTGRhythmPlayerController::OnLeftPressed() 
+void ACTGRhythmPlayerController::OnDownPressed()
 {
-    UE_LOG(LogTGRhythmPlayerController, Display, TEXT("LEFT"));
+    if (auto* GameMode = Cast<ACTGRhythmGameModeBase>(GetWorld()->GetAuthGameMode()))
+    {
+        GameMode->CheckPlayerInput(ECTGKeyType::ArrowDown);
+    }
 }
 
-void ACTGRhythmPlayerController::OnRightPressed() 
+void ACTGRhythmPlayerController::OnLeftPressed()
 {
-    UE_LOG(LogTGRhythmPlayerController, Display, TEXT("RIGHT"));
+    if (auto* GameMode = Cast<ACTGRhythmGameModeBase>(GetWorld()->GetAuthGameMode()))
+    {
+        GameMode->CheckPlayerInput(ECTGKeyType::ArrowLeft);
+    }
+}
+
+void ACTGRhythmPlayerController::OnRightPressed()
+{
+    if (auto* GameMode = Cast<ACTGRhythmGameModeBase>(GetWorld()->GetAuthGameMode()))
+    {
+        GameMode->CheckPlayerInput(ECTGKeyType::ArrowRight);
+    }
 }

@@ -23,7 +23,7 @@ enum class ECTGKeyType : uint8
     ArrowUp = 0 UMETA(DispayName = "Up"),
     ArrowDown UMETA(DispayName = "Down"),
     ArrowLeft UMETA(DispayName = "Left"),
-    AroowRight UMETA(DispayName = "Right")
+    ArrowRight UMETA(DispayName = "Right")
 };
 
 USTRUCT(BlueprintType)

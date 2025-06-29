@@ -30,6 +30,9 @@ public:
     int32 GetBossHealth() const { return BossHealth; };
     UFUNCTION(BlueprintCallable)
     void RemoveBossHealth(int32 Delta);
+    
+    UFUNCTION()
+    void CheckPlayerInput(ECTGKeyType InputKey);
 
 protected:
     UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "10", clampMax = "100"), Category = "RhythmGameSettings")

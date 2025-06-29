@@ -7,6 +7,7 @@
 #include "CTGRhythmPlayerController.generated.h"
 
 class UInputAction;
+class UInputMappingContext;
 
 UCLASS()
 class CONSPIRACYTHEORYGAME_API ACTGRhythmPlayerController : public APlayerController
@@ -15,6 +16,8 @@ class CONSPIRACYTHEORYGAME_API ACTGRhythmPlayerController : public APlayerContro
 
 protected:
     virtual void SetupInputComponent() override;
+
+    virtual void BeginPlay() override;
 
     UPROPERTY(EditDefaultsOnly, Category = "Input")
     UInputAction* PressUp;
@@ -27,6 +30,9 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "Input")
     UInputAction* PressRight;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
+    UInputMappingContext* MappingContext;
 
     UFUNCTION()
     void OnUpPressed();

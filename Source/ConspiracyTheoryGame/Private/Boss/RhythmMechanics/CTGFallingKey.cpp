@@ -58,34 +58,23 @@ FVector ACTGFallingKey::ActorPositionToVector(FPosition& InPosition, uint32 InCe
     return FVector((Settings.GridDims.Height - 1 - InPosition.Y) * InCellSize, InPosition.X * InCellSize, 0.0) + FVector(CellSize * 0.5);
 }
 
-void ACTGFallingKey::SetKeyType(ECTGKeyType Key)
-{
-    KeyType = Key;
-}
-
-void ACTGFallingKey::CheckHit() 
-{
-    if (KeyMeshActor)
-    {
-        KeyMeshActor->Destroy();
-    }
-
-    OnFallingKeyDestroyed.Broadcast(this);
-    Destroy();
-}
-
 void ACTGFallingKey::OnMissed() 
 {
+    if (auto* GameMode = Cast<ACTGRhythmGameModeBase>(GetWorld()->GetAuthGameMode()))
+    {
+        GameMode->RemovePlayerHealth(200);
+    }
+
+    OnFallingKeyDestroyed.Broadcast(this);
+    DestroyFallingKey();
+}
+
+void ACTGFallingKey::DestroyFallingKey() 
+{
     if (KeyMeshActor)
     {
         KeyMeshActor->Destroy();
     }
 
-    if (auto* GameMode = Cast<ACTGRhythmGameModeBase>(GetWorld()->GetAuthGameMode()))
-    {
-        GameMode->RemovePlayerHealth(50);
-    }
-
-    OnFallingKeyDestroyed.Broadcast(this);
     Destroy();
 }
