@@ -17,7 +17,7 @@ void ACTGRhythmGameModeBase::StartPlay()
 
     // FSettings RhythmSettings;
     RhythmSettings.GridDims = FDim{GridDims.X, GridDims.Y};
-    uint32 RandPositionX = FMath::RandRange(0, GridDims.X - 1);
+    uint32 RandPositionX = FMath::RandRange(1, GridDims.X - 2);
     RhythmSettings.StartPosition = FPosition{RandPositionX, 1};
     RhythmSettings.GameSpeed = GameSpeed;
 

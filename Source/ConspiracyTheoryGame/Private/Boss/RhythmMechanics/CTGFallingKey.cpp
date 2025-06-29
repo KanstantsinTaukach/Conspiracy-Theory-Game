@@ -34,7 +34,7 @@ void ACTGFallingKey::Tick(float DeltaTime)
 
 FVector ACTGFallingKey::ActorPositionToVector(FPosition& InPosition, uint32 InCellSize, FDim& InDim) 
 {
-    return FVector(InPosition.Y * InCellSize, InPosition.X * InCellSize, 0.0) + FVector(CellSize * 0.5);
+    return FVector((Settings.GridDims.Height - 1 - InPosition.Y) * InCellSize, InPosition.X * InCellSize, 0.0) + FVector(CellSize * 0.5);
 }
 
 void ACTGFallingKey::SetKeyType(ECTGKeyType Key) 
