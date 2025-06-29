@@ -17,8 +17,7 @@ void ACTGRhythmGameModeBase::StartPlay()
 
     // FSettings RhythmSettings;
     RhythmSettings.GridDims = FDim{GridDims.X, GridDims.Y};
-    uint32 RandPositionX = FMath::RandRange(1, GridDims.X - 2);
-    RhythmSettings.StartPosition = FPosition{RandPositionX, 1};
+    RhythmSettings.StartPosition = FPosition{0, 0};
     RhythmSettings.GameSpeed = GameSpeed;
 
     // Init CTGGrid
@@ -28,12 +27,6 @@ void ACTGRhythmGameModeBase::StartPlay()
     check(GridVisual);
     GridVisual->SetModel(RhythmSettings, CellSize);
     GridVisual->FinishSpawning(GridOrigin);
-
-    // Init falling actors
-    FallingKeyVisual = GetWorld()->SpawnActorDeferred<ACTGFallingKey>(FallingKeyVisualClass, GridOrigin);
-    check(FallingKeyVisual);
-    FallingKeyVisual->SetModel(RhythmSettings, CellSize);
-    FallingKeyVisual->FinishSpawning(GridOrigin);
 
     // Set pawn location fitting grid in viewport
     auto* PC = GetWorld()->GetFirstPlayerController();
@@ -52,7 +45,7 @@ void ACTGRhythmGameModeBase::StartPlay()
     ColorTableIndex = FMath::RandRange(0, RowsCount - 1);
     UpdateColors();
 
-    // GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true);
+    GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true);
 }
 
 void ACTGRhythmGameModeBase::FindFog() 
@@ -93,12 +86,16 @@ void ACTGRhythmGameModeBase::SpawnFallingKey(ECTGKeyType Key)
 {
     if (UWorld* World = GetWorld())
     {
-        FActorSpawnParameters SpawnParams;
-        ACTGFallingKey* NewKey = World->SpawnActor<ACTGFallingKey>(
-            ACTGFallingKey::StaticClass(), FVector(0.0f, 0.0f, 1100.0f), FRotator::ZeroRotator, SpawnParams);
-        if (NewKey)
-        {
-            NewKey->SetKeyType(Key);
-        }
+        uint32 RandPositionX = FMath::RandRange(1, GridDims.X - 2);
+        RhythmSettings.StartPosition = FPosition{RandPositionX, 1};
+
+        const FTransform GridOrigin = FTransform::Identity;
+
+        // Init falling actors
+        FallingKeyVisual = GetWorld()->SpawnActorDeferred<ACTGFallingKey>(FallingKeyVisualClass, GridOrigin);
+        check(FallingKeyVisual);
+        FallingKeyVisual->SetModel(RhythmSettings, CellSize);
+        FallingKeyVisual->SetKeyType(Key);
+        FallingKeyVisual->FinishSpawning(GridOrigin);
     }
 }

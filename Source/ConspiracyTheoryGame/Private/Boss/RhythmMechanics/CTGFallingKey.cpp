@@ -63,10 +63,10 @@ void ACTGFallingKey::SetKeyType(ECTGKeyType Key)
 
 void ACTGFallingKey::CheckHit() 
 {
-    Destroy();
+    KeyMeshActor->Destroy();
 }
 
 void ACTGFallingKey::OnMissed() 
 {
-    Destroy();
+    KeyMeshActor->Destroy();
 }

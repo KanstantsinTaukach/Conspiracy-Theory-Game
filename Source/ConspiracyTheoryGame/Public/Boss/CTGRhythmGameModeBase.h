@@ -31,6 +31,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.01", clampMax = "5"), Category = "RhythmGameSettings")
     float GameSpeed{0.1f};
 
+    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.01", clampMax = "5"), Category = "RhythmGameSettings")
+    float SpawnInterval = 2.0f;
+
     UPROPERTY(EditDefaultsOnly)
     TSubclassOf<ACTGGrid> GridVisualClass;
 
@@ -53,18 +56,15 @@ private:
     UPROPERTY()
     AExponentialHeightFog* Fog;
 
+    FSettings RhythmSettings;
+
     uint32 ColorTableIndex{0};
+
+    FTimerHandle SpawnTimerHandle;
 
     void FindFog();
 
     void UpdateColors();
 
-    UPROPERTY(EditAnywhere, Category = "KeySpawning")
-    float SpawnInterval = 1.0f;
-
-    FTimerHandle SpawnTimerHandle;
-
     void SpawnRandomFallingKey();
-
-    FSettings RhythmSettings;
 };
