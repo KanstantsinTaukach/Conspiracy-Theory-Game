@@ -31,8 +31,8 @@ protected:
     UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.01", clampMax = "5"), Category = "RhythmGameSettings")
     float GameSpeed{0.1f};
 
-    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.01", clampMax = "5"), Category = "RhythmGameSettings")
-    float SpawnInterval = 2.0f;
+    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.5", clampMax = "5"), Category = "RhythmGameSettings")
+    float SpawnInterval = 2.5f;
 
     UPROPERTY(EditDefaultsOnly)
     TSubclassOf<ACTGGrid> GridVisualClass;

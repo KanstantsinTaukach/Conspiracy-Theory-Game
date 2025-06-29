@@ -40,6 +40,7 @@ protected:
 private:
     FSettings Settings;
     uint32 CellSize;
+    float Delta = 0.1f;
     float TimeSinceLastMove = 0.0f;
 
     UPROPERTY()

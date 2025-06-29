@@ -11,6 +11,7 @@ ACTGFallingKey::ACTGFallingKey()
 void ACTGFallingKey::SetModel(const FSettings& InSettings, uint32 InCellSize)
 {
     Settings = InSettings;
+    Settings.GameSpeed = FMath::RandRange(Settings.GameSpeed - Delta, Settings.GameSpeed + Delta);
     CellSize = InCellSize;
 }
 
@@ -63,10 +64,20 @@ void ACTGFallingKey::SetKeyType(ECTGKeyType Key)
 
 void ACTGFallingKey::CheckHit() 
 {
-    KeyMeshActor->Destroy();
+    if (KeyMeshActor)
+    {
+        KeyMeshActor->Destroy();
+    }
+
+    Destroy();
 }
 
 void ACTGFallingKey::OnMissed() 
 {
-    KeyMeshActor->Destroy();
+    if (KeyMeshActor)
+    {
+        KeyMeshActor->Destroy();
+    }
+
+    Destroy();
 }
