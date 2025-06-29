@@ -8,47 +8,65 @@ ACTGFallingKey::ACTGFallingKey()
     PrimaryActorTick.bCanEverTick = true;
 }
 
-void ACTGFallingKey::SetModel(const FSettings& InSettings, uint32 InCellSize) 
+void ACTGFallingKey::SetModel(const FSettings& InSettings, uint32 InCellSize)
 {
     Settings = InSettings;
     CellSize = InCellSize;
 }
 
-void ACTGFallingKey::BeginPlay() 
+void ACTGFallingKey::BeginPlay()
 {
     Super::BeginPlay();
 
-    const FTransform Transform = FTransform(ActorPositionToVector(Settings.StartPosition, CellSize, Settings.GridDims));
-    auto* FallingKeyActor = GetWorld()->SpawnActor<AActor>(FallingKeyClass, Transform);
+    if (FallingKeyClass)
+    {
+        const FTransform Transform = FTransform(ActorPositionToVector(Settings.StartPosition, CellSize, Settings.GridDims));
+        KeyMeshActor = GetWorld()->SpawnActor<AActor>(FallingKeyClass, Transform);
+    }
 }
 
 void ACTGFallingKey::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    for (auto& FallingActor : FallingActors)
+    TimeSinceLastMove += DeltaTime;
+
+    if (TimeSinceLastMove >= Settings.GameSpeed)
     {
-        //FallingActor->SetActorLocation(ActorPositionToVector(Settings.StartPosition, CellSize, Settings.GridDims));
-        FallingActor->UpdateActorPosition();
+        UpdateActorPosition();
+        TimeSinceLastMove = 0.0f;
     }
 }
 
-void ACTGFallingKey::UpdateActorPosition() 
+void ACTGFallingKey::UpdateActorPosition()
 {
-    this->Settings.StartPosition.Y -= 1;
-    this->SetActorLocation(ActorPositionToVector(Settings.StartPosition, CellSize, Settings.GridDims));
+    if (!KeyMeshActor) return;
+    Settings.StartPosition.Y = Settings.StartPosition.Y + 1;
+
+    KeyMeshActor->SetActorLocation(ActorPositionToVector(Settings.StartPosition, CellSize, Settings.GridDims));
+
+    if (Settings.StartPosition.Y == Settings.GridDims.Height - 1)
+    {
+        OnMissed();
+    }
 }
 
-FVector ACTGFallingKey::ActorPositionToVector(FPosition& InPosition, uint32 InCellSize, FDim& InDim) 
+FVector ACTGFallingKey::ActorPositionToVector(FPosition& InPosition, uint32 InCellSize, FDim& InDim)
 {
     return FVector((Settings.GridDims.Height - 1 - InPosition.Y) * InCellSize, InPosition.X * InCellSize, 0.0) + FVector(CellSize * 0.5);
 }
 
-void ACTGFallingKey::SetKeyType(ECTGKeyType Key) 
+void ACTGFallingKey::SetKeyType(ECTGKeyType Key)
 {
     KeyType = Key;
 }
 
-void ACTGFallingKey::CheckHit() {}
+void ACTGFallingKey::CheckHit() 
+{
+    Destroy();
+}
 
-void ACTGFallingKey::OnMissed() {}
+void ACTGFallingKey::OnMissed() 
+{
+    Destroy();
+}

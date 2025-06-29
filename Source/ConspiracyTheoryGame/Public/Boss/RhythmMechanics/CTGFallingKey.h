@@ -18,14 +18,9 @@ public:
     ACTGFallingKey();
 
     virtual void BeginPlay() override;
-
     virtual void Tick(float DeltaTime) override;
 
     void SetModel(const FSettings& InSettings, uint32 InCellSize);
-
-    void UpdateActorPosition();
-
-
 
     void SetKeyType(ECTGKeyType Key);
 
@@ -45,9 +40,12 @@ protected:
 private:
     FSettings Settings;
     uint32 CellSize;
+    float TimeSinceLastMove = 0.0f;
 
     UPROPERTY()
-    TArray<ACTGFallingKey*> FallingActors;
+    AActor* KeyMeshActor;
 
     FVector ActorPositionToVector(FPosition& InPosition, uint32 InCellSize, FDim& InDim);
+
+    void UpdateActorPosition();
 };
