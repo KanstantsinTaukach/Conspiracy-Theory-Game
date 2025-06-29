@@ -27,13 +27,14 @@ private:
 
     void MoveToNextPatrolPoint();
 
-    UPROPERTY()
-    APawn* ChaseTarget;
+
 
     void LoseTarget();
-    void ResumePatrol();
+
 
 public:
+    UPROPERTY()
+    APawn* ChaseTarget;
     UPROPERTY(BlueprintReadOnly, Category = "AI")
     bool bIsChasing = false;
 
@@ -47,7 +48,7 @@ public:
     FTimerHandle ReturnToPatrolTimerHandle;
 
     void StartChasing(APawn* Target);
-
+    void ResumePatrol();
     /** Radius of visual detection */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception")
     float SightRadius = 1000.f;

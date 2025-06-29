@@ -28,8 +28,15 @@ void ACTGFallingKey::Tick(float DeltaTime)
 
     for (auto& FallingActor : FallingActors)
     {
-        FallingActor->SetActorLocation(ActorPositionToVector(Settings.StartPosition, CellSize, Settings.GridDims));
+        //FallingActor->SetActorLocation(ActorPositionToVector(Settings.StartPosition, CellSize, Settings.GridDims));
+        FallingActor->UpdateActorPosition();
     }
+}
+
+void ACTGFallingKey::UpdateActorPosition() 
+{
+    this->Settings.StartPosition.Y -= 1;
+    this->SetActorLocation(ActorPositionToVector(Settings.StartPosition, CellSize, Settings.GridDims));
 }
 
 FVector ACTGFallingKey::ActorPositionToVector(FPosition& InPosition, uint32 InCellSize, FDim& InDim) 

@@ -40,7 +40,8 @@ void AEnemyAIController::Tick(float DeltaTime)
     if (!ChaseTarget)
     {
 
-        if (PatrolPoints.Num() > 0 && GetPathFollowingComponent()->GetStatus() != EPathFollowingStatus::Moving)
+        if (PatrolPoints.Num() > 0 && GetPathFollowingComponent()->GetStatus() != EPathFollowingStatus::Moving &&
+            !GetWorld()->GetTimerManager().IsTimerActive(ReturnToPatrolTimerHandle))
         {
             MoveToNextPatrolPoint();
         }
@@ -48,7 +49,6 @@ void AEnemyAIController::Tick(float DeltaTime)
     }
 
     MoveToActor(ChaseTarget);
-
 
     const FVector TargetLocation = ChaseTarget->GetActorLocation();
     const FVector MyLocation = GetPawn()->GetActorLocation();
@@ -59,13 +59,11 @@ void AEnemyAIController::Tick(float DeltaTime)
 
     if (bCanSee || bCanHear)
     {
-
         GetWorld()->GetTimerManager().ClearTimer(LoseTargetTimerHandle);
         bIsChasing = true;
     }
-    else if (bIsChasing)  
+    else if (bIsChasing)
     {
-
         if (!GetWorld()->GetTimerManager().IsTimerActive(LoseTargetTimerHandle))
         {
             GetWorld()->GetTimerManager().SetTimer(LoseTargetTimerHandle, this, &AEnemyAIController::LoseTarget, TimeToLoseTarget, false);
@@ -123,6 +121,19 @@ void AEnemyAIController::LoseTarget()
         EnemyChar->bIsChasing = false;
         EnemyChar->StopChaseSound();
         EnemyChar->StartPatrolSound();
+
+
+        StopMovement();
+
+
+        if (EnemyChar->LostTargetMontage)
+        {
+            UAnimInstance* AnimInstance = EnemyChar->GetMesh()->GetAnimInstance();
+            if (AnimInstance)
+            {
+                AnimInstance->Montage_Play(EnemyChar->LostTargetMontage);
+            }
+        }
     }
 
 

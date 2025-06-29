@@ -66,7 +66,7 @@ void AEnemyCharacter::BeginPlay()
 
 void AEnemyCharacter::OnSeePawn(APawn* Pawn)
 {
-    if (bIsChasing) return;  
+    if (bIsChasing || bIsStunned) return;
 
     bIsChasing = true;
 
@@ -85,9 +85,10 @@ void AEnemyCharacter::OnSeePawn(APawn* Pawn)
     }
 }
 
+
 void AEnemyCharacter::OnHearNoise(APawn* InstigatorPawn, const FVector& Location, float Volume)
 {
-    if (bIsChasing) return;
+    if (bIsChasing || bIsStunned) return;
 
     bIsChasing = true;
 
@@ -121,6 +122,52 @@ void AEnemyCharacter::StartPatrolSound()
         PatrolLoopAudio->Play();
     }
 }
+void AEnemyCharacter::Stun()
+{
+    if (bIsStunned) return;
+
+    bIsStunned = true;
+
+    AEnemyAIController* AIController = Cast<AEnemyAIController>(GetController());
+    if (AIController)
+    {
+        // Прерываем погоню
+        AIController->ChaseTarget = nullptr;
+        AIController->bIsChasing = false;
+        StopChaseSound();
+
+        bIsChasing = false;
+
+        AIController->StopMovement();
+        AIController->ClearFocus(EAIFocusPriority::Gameplay);
+
+        AIController->GetWorldTimerManager().ClearTimer(AIController->LoseTargetTimerHandle);
+        AIController->GetWorldTimerManager().ClearTimer(AIController->ReturnToPatrolTimerHandle);
+    }
+
+    if (StunMontage)
+    {
+        UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+        if (AnimInstance)
+        {
+            AnimInstance->Montage_Play(StunMontage);
+        }
+    }
+
+    if (AIController)
+    {
+        AIController->GetWorldTimerManager().SetTimer(
+            AIController->ReturnToPatrolTimerHandle,
+            [this, AIController]()
+            {
+                bIsStunned = false;
+                AIController->ResumePatrol();
+            },
+            StunDuration, false);
+    }
+}
+
+
 void AEnemyCharacter::StopChaseSound()
 {
     if (ChaseAudio && ChaseAudio->IsPlaying())

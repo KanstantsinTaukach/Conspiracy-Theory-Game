@@ -30,9 +30,15 @@ public:
     UFUNCTION()
     void OnHearNoise(APawn* InstigatorPawn, const FVector& Location, float Volume);
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy|Animation")
+    UAnimMontage* LostTargetMontage;
+
     /** Looping patrol audio component */
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
     UAudioComponent* PatrolLoopAudio;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy|State")
+    bool bIsStunned = false;
 
     /** Sound used for patrol loop */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
@@ -44,6 +50,15 @@ public:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
     UAudioComponent* ChaseAudio;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy|State")
+    float StunDuration = 3.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy|Animation")
+    UAnimMontage* StunMontage;
+
+    UFUNCTION(BlueprintCallable)
+    void Stun();
 
     void StopChaseSound();
 

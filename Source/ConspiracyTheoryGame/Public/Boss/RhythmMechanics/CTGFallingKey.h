@@ -23,6 +23,10 @@ public:
 
     void SetModel(const FSettings& InSettings, uint32 InCellSize);
 
+    void UpdateActorPosition();
+
+
+
     void SetKeyType(ECTGKeyType Key);
 
     UFUNCTION()
@@ -43,7 +47,7 @@ private:
     uint32 CellSize;
 
     UPROPERTY()
-    TArray<AActor*> FallingActors;
+    TArray<ACTGFallingKey*> FallingActors;
 
     FVector ActorPositionToVector(FPosition& InPosition, uint32 InCellSize, FDim& InDim);
 };
