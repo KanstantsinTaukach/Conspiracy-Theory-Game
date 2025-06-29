@@ -21,6 +21,8 @@ public:
 
     virtual void Tick(float DeltaTime) override;
 
+    void SetModel(const FSettings& InSettings, uint32 InCellSize);
+
     void SetKeyType(ECTGKeyType Key);
 
     UFUNCTION()
@@ -30,15 +32,18 @@ public:
     void OnMissed();
 
 protected:
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "KeySettings")
-    UStaticMeshComponent* MeshComponent;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+    TSubclassOf<AActor> FallingKeyClass;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "KeySettings")
     ECTGKeyType KeyType;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "KeySettings")
-    float FallSpeed = 100.0f;
-
 private:
-    FVector EndKeyLocation;
+    FSettings Settings;
+    uint32 CellSize;
+
+    UPROPERTY()
+    TArray<AActor*> FallingActors;
+
+    FVector ActorPositionToVector(FPosition& InPosition, uint32 InCellSize, FDim& InDim);
 };

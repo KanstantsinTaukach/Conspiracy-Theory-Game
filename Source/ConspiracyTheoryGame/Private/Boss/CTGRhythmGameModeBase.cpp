@@ -2,9 +2,9 @@
 
 #include "Boss/CTGRhythmGameModeBase.h"
 #include "Boss/RhythmMechanics/CTGFallingKey.h"
+#include "Boss/RhythmMechanics/CTGGrid.h"
+#include "Boss/RhythmMechanics/CTGRhythmPawn.h"
 #include "CTGCoreTypes.h"
-#include "RhythmMechanics/CTGGrid.h"
-#include "RhythmMechanics/CTGRhythmPawn.h"
 #include "Engine/ExponentialHeightFog.h"
 #include "Components/ExponentialHeightFogComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -15,23 +15,32 @@ void ACTGRhythmGameModeBase::StartPlay()
 {
     Super::StartPlay();
 
+    // FSettings RhythmSettings;
+    RhythmSettings.GridDims = FDim{GridDims.X, GridDims.Y};
+    uint32 RandPositionX = FMath::RandRange(0, GridDims.X - 1);
+    RhythmSettings.StartPosition = FPosition{RandPositionX, 1};
+    RhythmSettings.GameSpeed = GameSpeed;
+
     // Init CTGGrid
     const FTransform GridOrigin = FTransform::Identity;
     check(GetWorld());
     GridVisual = GetWorld()->SpawnActorDeferred<ACTGGrid>(GridVisualClass, GridOrigin);
-
     check(GridVisual);
-    const FSettings MySettings{GridDims.X, GridDims.Y};
-    GridVisual->SetModel(MySettings, CellSize);
+    GridVisual->SetModel(RhythmSettings, CellSize);
     GridVisual->FinishSpawning(GridOrigin);
+
+    // Init falling actors
+    FallingKeyVisual = GetWorld()->SpawnActorDeferred<ACTGFallingKey>(FallingKeyVisualClass, GridOrigin);
+    check(FallingKeyVisual);
+    FallingKeyVisual->SetModel(RhythmSettings, CellSize);
+    FallingKeyVisual->FinishSpawning(GridOrigin);
 
     // Set pawn location fitting grid in viewport
     auto* PC = GetWorld()->GetFirstPlayerController();
     check(PC);
-
     auto* MyPawn = Cast<ACTGRhythmPawn>(PC->GetPawn());
     check(MyPawn);
-    MyPawn->UpdateLocation(MySettings.GridSize, CellSize, GridOrigin);
+    MyPawn->UpdateLocation(RhythmSettings.GridDims, CellSize, GridOrigin);
 
     //
     FindFog();

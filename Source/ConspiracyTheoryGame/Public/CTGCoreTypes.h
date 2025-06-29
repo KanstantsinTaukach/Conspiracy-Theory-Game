@@ -44,11 +44,24 @@ enum class ECTGCellType : uint8
 };
 
 USTRUCT(BlueprintType)
+struct FPosition
+{
+    GENERATED_USTRUCT_BODY()
+
+    uint32 X;
+    uint32 Y;
+};
+
+USTRUCT(BlueprintType)
 struct FSettings
 {
     GENERATED_USTRUCT_BODY()
 
-    FDim GridSize;
+    FDim GridDims{25, 40};
+
+    FPosition StartPosition{0, 0};
+
+    float GameSpeed{1.0f};
 };
 
 USTRUCT(BlueprintType)

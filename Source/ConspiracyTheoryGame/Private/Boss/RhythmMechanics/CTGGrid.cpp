@@ -24,7 +24,7 @@ void ACTGGrid::BeginPlay()
 
 void ACTGGrid::SetModel(const FSettings& InSettings, uint32 InCellSize)
 {
-    GridDim = InSettings.GridSize;
+    GridDim = InSettings.GridDims;
     CellSize = InCellSize;
     WorldWidth = GridDim.Width * CellSize;
     WorldHeight = GridDim.Height * CellSize;

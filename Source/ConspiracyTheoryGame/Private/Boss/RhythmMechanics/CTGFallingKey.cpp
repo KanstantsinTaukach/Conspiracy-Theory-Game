@@ -6,31 +6,35 @@
 ACTGFallingKey::ACTGFallingKey()
 {
     PrimaryActorTick.bCanEverTick = true;
+}
 
-    MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("MeshComponent");
-    RootComponent = MeshComponent;    
+void ACTGFallingKey::SetModel(const FSettings& InSettings, uint32 InCellSize) 
+{
+    Settings = InSettings;
+    CellSize = InCellSize;
 }
 
 void ACTGFallingKey::BeginPlay() 
 {
     Super::BeginPlay();
 
-    EndKeyLocation = GetActorLocation() - (0.0f, 0.0f, 1000.0f);
+    const FTransform Transform = FTransform(ActorPositionToVector(Settings.StartPosition, CellSize, Settings.GridDims));
+    auto* FallingKeyActor = GetWorld()->SpawnActor<AActor>(FallingKeyClass, Transform);
 }
 
 void ACTGFallingKey::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    FVector NewLocation = GetActorLocation();
-    NewLocation.Z -= FallSpeed * DeltaTime;
-    SetActorLocation(NewLocation);
-
-    if (NewLocation.Z < EndKeyLocation.Z)
+    for (auto& FallingActor : FallingActors)
     {
-        OnMissed();
-        Destroy();
+        FallingActor->SetActorLocation(ActorPositionToVector(Settings.StartPosition, CellSize, Settings.GridDims));
     }
+}
+
+FVector ACTGFallingKey::ActorPositionToVector(FPosition& InPosition, uint32 InCellSize, FDim& InDim) 
+{
+    return FVector(InPosition.Y * InCellSize, InPosition.X * InCellSize, 0.0) + FVector(CellSize * 0.5);
 }
 
 void ACTGFallingKey::SetKeyType(ECTGKeyType Key) 

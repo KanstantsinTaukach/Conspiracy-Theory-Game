@@ -8,6 +8,7 @@
 #include "CTGRhythmGameModeBase.generated.h"
 
 class ACTGGrid;
+class ACTGFallingKey;
 class AExponentialHeightFog;
 
 UCLASS()
@@ -21,14 +22,20 @@ public:
     virtual void StartPlay() override;
 
 protected:
-    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "10", clampMax = "100"))
-    FUintPoint GridDims{10, 10};
+    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "10", clampMax = "100"), Category = "RhythmGameSettings")
+    FUintPoint GridDims{15, 30};
 
-    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "10", clampMax = "100"))
+    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "10", clampMax = "100"), Category = "RhythmGameSettings")
     uint32 CellSize{10};
+
+    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.01", clampMax = "5"), Category = "RhythmGameSettings")
+    float GameSpeed{0.1f};
 
     UPROPERTY(EditDefaultsOnly)
     TSubclassOf<ACTGGrid> GridVisualClass;
+
+    UPROPERTY(EditDefaultsOnly)
+    TSubclassOf<ACTGFallingKey> FallingKeyVisualClass;
 
     UPROPERTY(EditDefaultsOnly, Category = "Design")
     UDataTable* ColorsTable;
@@ -39,6 +46,9 @@ protected:
 private:
     UPROPERTY()
     ACTGGrid* GridVisual;
+
+    UPROPERTY()
+    ACTGFallingKey* FallingKeyVisual;
 
     UPROPERTY()
     AExponentialHeightFog* Fog;
@@ -55,4 +65,6 @@ private:
     FTimerHandle SpawnTimerHandle;
 
     void SpawnRandomFallingKey();
+
+    FSettings RhythmSettings;
 };
