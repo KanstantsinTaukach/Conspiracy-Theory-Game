@@ -98,7 +98,7 @@ void ACTGRhythmGameModeBase::SpawnFallingKey(ECTGKeyType Key)
 
         if (RhythmSettings.ActorPosition.X == LastActorPositionX)
         {
-            RhythmSettings.ActorPosition.X++;
+            RhythmSettings.ActorPosition.X = (RhythmSettings.ActorPosition.X + 1) % (GridDims.X - 2);
         }
 
         const FTransform GridOrigin = FTransform::Identity;
@@ -111,6 +111,7 @@ void ACTGRhythmGameModeBase::SpawnFallingKey(ECTGKeyType Key)
         FallingKeyVisual->FinishSpawning(GridOrigin);
 
         LastActorPositionX = RhythmSettings.ActorPosition.X;
+
         ActiveFallingKeys.Add(FallingKeyVisual);
 
         FallingKeyVisual->OnDestroyed.AddDynamic(this, &ACTGRhythmGameModeBase::RemoveFallingKey);
