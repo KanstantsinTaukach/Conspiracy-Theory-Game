@@ -28,36 +28,41 @@ void ACTGRhythmPlayerController::BeginPlay()
     {
         InputSystem->AddMappingContext(MappingContext, 0);
     }
+
+    if (GetWorld() && GetWorld()->GetAuthGameMode())
+    {
+        RhythmGameMode = Cast<ACTGRhythmGameModeBase>(GetWorld()->GetAuthGameMode());
+    }
 }
 
 void ACTGRhythmPlayerController::OnUpPressed()
 {
-    if (auto* GameMode = Cast<ACTGRhythmGameModeBase>(GetWorld()->GetAuthGameMode()))
+    if (RhythmGameMode)
     {
-        GameMode->CheckPlayerInput(ECTGKeyType::ArrowUp);
+        RhythmGameMode->CheckPlayerInput(ECTGKeyType::ArrowUp);
     }
 }
 
 void ACTGRhythmPlayerController::OnDownPressed()
 {
-    if (auto* GameMode = Cast<ACTGRhythmGameModeBase>(GetWorld()->GetAuthGameMode()))
+    if (RhythmGameMode)
     {
-        GameMode->CheckPlayerInput(ECTGKeyType::ArrowDown);
+        RhythmGameMode->CheckPlayerInput(ECTGKeyType::ArrowDown);
     }
 }
 
 void ACTGRhythmPlayerController::OnLeftPressed()
 {
-    if (auto* GameMode = Cast<ACTGRhythmGameModeBase>(GetWorld()->GetAuthGameMode()))
+    if (RhythmGameMode)
     {
-        GameMode->CheckPlayerInput(ECTGKeyType::ArrowLeft);
+        RhythmGameMode->CheckPlayerInput(ECTGKeyType::ArrowLeft);
     }
 }
 
 void ACTGRhythmPlayerController::OnRightPressed()
 {
-    if (auto* GameMode = Cast<ACTGRhythmGameModeBase>(GetWorld()->GetAuthGameMode()))
+    if (RhythmGameMode)
     {
-        GameMode->CheckPlayerInput(ECTGKeyType::ArrowRight);
+        RhythmGameMode->CheckPlayerInput(ECTGKeyType::ArrowRight);
     }
 }

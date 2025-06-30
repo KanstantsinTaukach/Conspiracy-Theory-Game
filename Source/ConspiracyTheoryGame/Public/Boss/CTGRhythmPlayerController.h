@@ -8,6 +8,7 @@
 
 class UInputAction;
 class UInputMappingContext;
+class ACTGRhythmGameModeBase;
 
 UCLASS()
 class CONSPIRACYTHEORYGAME_API ACTGRhythmPlayerController : public APlayerController
@@ -45,4 +46,7 @@ protected:
 
     UFUNCTION()
     void OnRightPressed();
+
+    private:
+    ACTGRhythmGameModeBase* RhythmGameMode;
 };
