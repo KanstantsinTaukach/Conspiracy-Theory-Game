@@ -80,4 +80,7 @@ struct FGridColors : public FTableRowBase
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
     FLinearColor SkyAtmosphereColor;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+    FLinearColor FallingKeyColor;
 };

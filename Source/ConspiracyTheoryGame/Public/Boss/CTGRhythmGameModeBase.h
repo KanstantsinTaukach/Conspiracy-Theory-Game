@@ -30,7 +30,7 @@ public:
     int32 GetBossHealth() const { return BossHealth; };
     UFUNCTION(BlueprintCallable)
     void RemoveBossHealth(int32 Delta);
-    
+
     UFUNCTION()
     void CheckPlayerInput(ECTGKeyType InputKey);
 
@@ -54,7 +54,7 @@ protected:
     TSubclassOf<ACTGFallingKey> FallingKeyVisualClass;
 
     UPROPERTY(EditDefaultsOnly, Category = "Design")
-    UDataTable* ColorsTable;
+    TObjectPtr<UDataTable> ColorsTable;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     int32 PlayerHealth = 2500;
@@ -69,13 +69,13 @@ protected:
 
 private:
     UPROPERTY()
-    ACTGGrid* GridVisual;
+    TObjectPtr<ACTGGrid> GridVisual;
 
     UPROPERTY()
-    ACTGFallingKey* FallingKeyVisual;
+    TObjectPtr<ACTGFallingKey> FallingKeyVisual;
 
     UPROPERTY()
-    AExponentialHeightFog* Fog;
+    TObjectPtr<AExponentialHeightFog> Fog;
 
     FSettings RhythmSettings;
 

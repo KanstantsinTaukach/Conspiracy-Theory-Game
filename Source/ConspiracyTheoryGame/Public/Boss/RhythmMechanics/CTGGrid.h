@@ -25,16 +25,16 @@ public:
 
 protected:
     UPROPERTY(VisibleAnywhere)
-    USceneComponent* Origin;
+    TObjectPtr<USceneComponent> Origin;
 
     UPROPERTY(VisibleAnywhere)
-    UStaticMeshComponent* GridMesh;
+    TObjectPtr<UStaticMeshComponent> GridMesh;
 
     virtual void BeginPlay() override;
 
 private:
     UPROPERTY()
-    UMaterialInstanceDynamic* GridMaterial;
+    TObjectPtr<UMaterialInstanceDynamic> GridMaterial;
 
     FDim GridDim;
     uint32 CellSize;

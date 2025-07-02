@@ -21,10 +21,10 @@ public:
 
 protected:
     UPROPERTY(VisibleAnywhere)
-    USceneComponent* Origin;
+    TObjectPtr<USceneComponent> Origin;
 
     UPROPERTY(VisibleAnywhere)
-    UCameraComponent* Camera;
+    TObjectPtr<UCameraComponent> Camera;
 
 private:
     FDim Dim;

@@ -12,7 +12,7 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogCTGRhythmGameModeBase, All, All);
 
-ACTGRhythmGameModeBase::ACTGRhythmGameModeBase() 
+ACTGRhythmGameModeBase::ACTGRhythmGameModeBase()
 {
     DefaultPawnClass = ACTGRhythmPawn::StaticClass();
     PlayerControllerClass = ACTGRhythmPlayerController::StaticClass();
@@ -55,7 +55,7 @@ void ACTGRhythmGameModeBase::StartPlay()
     GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true);
 }
 
-void ACTGRhythmGameModeBase::FindFog() 
+void ACTGRhythmGameModeBase::FindFog()
 {
     TArray<AActor*> Fogs;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), AExponentialHeightFog::StaticClass(), Fogs);
@@ -103,11 +103,16 @@ void ACTGRhythmGameModeBase::SpawnFallingKey(ECTGKeyType Key)
 
         const FTransform GridOrigin = FTransform::Identity;
 
+        const auto RowName = ColorsTable->GetRowNames()[ColorTableIndex];
+        const auto* ColorSet = ColorsTable->FindRow<FGridColors>(RowName, {});
+
         // Init falling actors
         FallingKeyVisual = GetWorld()->SpawnActorDeferred<ACTGFallingKey>(FallingKeyVisualClass, GridOrigin);
         check(FallingKeyVisual);
         FallingKeyVisual->SetModel(RhythmSettings, CellSize);
         FallingKeyVisual->SetKeyType(Key);
+        FallingKeyVisual->UpdateScale(CellSize);
+        FallingKeyVisual->UpdateColors(*ColorSet);
         FallingKeyVisual->FinishSpawning(GridOrigin);
 
         LastActorPositionX = RhythmSettings.ActorPosition.X;
@@ -150,7 +155,7 @@ void ACTGRhythmGameModeBase::CheckPlayerInput(ECTGKeyType InputKey)
     }
 }
 
-void ACTGRhythmGameModeBase::RemoveFallingKey(AActor* DestroyedActor) 
+void ACTGRhythmGameModeBase::RemoveFallingKey(AActor* DestroyedActor)
 {
     if (auto* FallingKey = Cast<ACTGFallingKey>(DestroyedActor))
     {
@@ -158,13 +163,13 @@ void ACTGRhythmGameModeBase::RemoveFallingKey(AActor* DestroyedActor)
     }
 }
 
-void ACTGRhythmGameModeBase::RemovePlayerHealth(int32 Delta) 
+void ACTGRhythmGameModeBase::RemovePlayerHealth(int32 Delta)
 {
     PlayerHealth = FMath::Max(0, PlayerHealth - Delta);
     UE_LOG(LogCTGRhythmGameModeBase, Display, TEXT("PLAYER HEALTH IS: %d"), PlayerHealth);
 }
 
-void ACTGRhythmGameModeBase::RemoveBossHealth(int32 Delta) 
+void ACTGRhythmGameModeBase::RemoveBossHealth(int32 Delta)
 {
     BossHealth = FMath::Max(0, BossHealth - Delta);
     UE_LOG(LogCTGRhythmGameModeBase, Display, TEXT("BOSS HEALTH IS: %d"), BossHealth);

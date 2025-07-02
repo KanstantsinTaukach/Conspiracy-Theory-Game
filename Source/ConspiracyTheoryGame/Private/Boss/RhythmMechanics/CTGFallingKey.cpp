@@ -7,6 +7,14 @@
 ACTGFallingKey::ACTGFallingKey()
 {
     PrimaryActorTick.bCanEverTick = true;
+
+    Origin = CreateDefaultSubobject<USceneComponent>("Origin");
+    check(Origin);
+    SetRootComponent(Origin);
+
+    GridMesh = CreateDefaultSubobject<UStaticMeshComponent>("GridMesh");
+    check(GridMesh);
+    GridMesh->SetupAttachment(Origin);
 }
 
 void ACTGFallingKey::SetModel(const FSettings& InSettings, uint32 InCellSize)
@@ -17,15 +25,21 @@ void ACTGFallingKey::SetModel(const FSettings& InSettings, uint32 InCellSize)
     CellSize = InCellSize;
 }
 
-void ACTGFallingKey::BeginPlay()
+void ACTGFallingKey::UpdateColors(const FGridColors& Colors)
+{
+
+}
+
+void ACTGFallingKey::UpdateScale(uint32 InCellSize) 
+{
+
+}
+
+void ACTGFallingKey::ACTGFallingKey::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (FallingKeyClass)
-    {
-        const FTransform Transform = FTransform(ActorPositionToVector(Settings.ActorPosition, CellSize, Settings.GridDims));
-        KeyMeshActor = GetWorld()->SpawnActor<AActor>(FallingKeyClass, Transform);
-    }
+    UpdateActorPosition();
 }
 
 void ACTGFallingKey::Tick(float DeltaTime)
@@ -43,10 +57,11 @@ void ACTGFallingKey::Tick(float DeltaTime)
 
 void ACTGFallingKey::UpdateActorPosition()
 {
-    if (!KeyMeshActor) return;
+    if (!GridMesh) return;
     Settings.ActorPosition.Y = Settings.ActorPosition.Y + 1;
 
-    KeyMeshActor->SetActorLocation(ActorPositionToVector(Settings.ActorPosition, CellSize, Settings.GridDims));
+    FVector NewLocation = ActorPositionToVector(Settings.ActorPosition, CellSize, Settings.GridDims);
+    Origin->SetWorldLocation(NewLocation);
 
     if (Settings.ActorPosition.Y == Settings.GridDims.Height - 1)
     {
@@ -59,7 +74,7 @@ FVector ACTGFallingKey::ActorPositionToVector(FPosition& InPosition, uint32 InCe
     return FVector((Settings.GridDims.Height - 1 - InPosition.Y) * InCellSize, InPosition.X * InCellSize, 0.0) + FVector(CellSize * 0.5);
 }
 
-void ACTGFallingKey::OnMissed() 
+void ACTGFallingKey::OnMissed()
 {
     if (auto* GameMode = Cast<ACTGRhythmGameModeBase>(GetWorld()->GetAuthGameMode()))
     {
@@ -70,12 +85,7 @@ void ACTGFallingKey::OnMissed()
     DestroyFallingKey();
 }
 
-void ACTGFallingKey::DestroyFallingKey() 
+void ACTGFallingKey::DestroyFallingKey()
 {
-    if (KeyMeshActor)
-    {
-        KeyMeshActor->Destroy();
-    }
-
     Destroy();
 }

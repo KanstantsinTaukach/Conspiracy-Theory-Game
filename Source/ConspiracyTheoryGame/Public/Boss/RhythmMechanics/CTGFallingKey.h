@@ -32,6 +32,9 @@ public:
 
     FPosition GetCurrentPosition() const { return Settings.ActorPosition; };
 
+    void UpdateColors(const FGridColors& Colors);
+    void UpdateScale(uint32 InCellSize);
+
     UFUNCTION()
     void OnMissed();
 
@@ -39,14 +42,14 @@ public:
     void DestroyFallingKey();
 
 protected:
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-    TSubclassOf<AActor> FallingKeyClass;
+    UPROPERTY(VisibleAnywhere)
+    TObjectPtr<USceneComponent> Origin;
+
+    UPROPERTY(VisibleAnywhere)
+    TObjectPtr<UStaticMeshComponent> GridMesh;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "KeySettings")
     ECTGKeyType KeyType;
-
-    UPROPERTY()
-    AActor* KeyMeshActor;
 
 private:
     FSettings Settings;
