@@ -46,7 +46,7 @@ protected:
     TObjectPtr<USceneComponent> Origin;
 
     UPROPERTY(VisibleAnywhere)
-    TObjectPtr<UStaticMeshComponent> GridMesh;
+    TObjectPtr<UStaticMeshComponent> FallingKeyMesh;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "KeySettings")
     ECTGKeyType KeyType;

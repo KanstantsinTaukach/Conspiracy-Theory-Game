@@ -12,9 +12,9 @@ ACTGFallingKey::ACTGFallingKey()
     check(Origin);
     SetRootComponent(Origin);
 
-    GridMesh = CreateDefaultSubobject<UStaticMeshComponent>("GridMesh");
-    check(GridMesh);
-    GridMesh->SetupAttachment(Origin);
+    FallingKeyMesh = CreateDefaultSubobject<UStaticMeshComponent>("FallingKeyMesh");
+    check(FallingKeyMesh);
+    FallingKeyMesh->SetupAttachment(Origin);
 }
 
 void ACTGFallingKey::SetModel(const FSettings& InSettings, uint32 InCellSize)
@@ -27,12 +27,21 @@ void ACTGFallingKey::SetModel(const FSettings& InSettings, uint32 InCellSize)
 
 void ACTGFallingKey::UpdateColors(const FGridColors& Colors)
 {
-
+    if (auto* MeshMaterial = FallingKeyMesh->CreateAndSetMaterialInstanceDynamic(0))
+    {
+        MeshMaterial->SetVectorParameterValue("FallingKeyColor", Colors.FallingKeyColor);
+    }
 }
 
 void ACTGFallingKey::UpdateScale(uint32 InCellSize) 
 {
+    check(FallingKeyMesh->GetStaticMesh());
+    const FBox Box = FallingKeyMesh->GetStaticMesh()->GetBoundingBox();
+    const FVector Size = Box.GetSize();
 
+    check(Size.X);
+    check(Size.Y);
+    FallingKeyMesh->SetRelativeScale3D(FVector(InCellSize / Size.X, InCellSize / Size.Y, InCellSize / Size.Z));
 }
 
 void ACTGFallingKey::ACTGFallingKey::BeginPlay()
@@ -57,7 +66,7 @@ void ACTGFallingKey::Tick(float DeltaTime)
 
 void ACTGFallingKey::UpdateActorPosition()
 {
-    if (!GridMesh) return;
+    if (!FallingKeyMesh) return;
     Settings.ActorPosition.Y = Settings.ActorPosition.Y + 1;
 
     FVector NewLocation = ActorPositionToVector(Settings.ActorPosition, CellSize, Settings.GridDims);
