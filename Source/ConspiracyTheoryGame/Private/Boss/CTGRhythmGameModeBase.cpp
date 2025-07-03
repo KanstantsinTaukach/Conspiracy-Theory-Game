@@ -93,13 +93,14 @@ void ACTGRhythmGameModeBase::SpawnFallingKey(ECTGKeyType Key)
 {
     if (UWorld* World = GetWorld())
     {
-        uint32 RandPositionX = FMath::RandRange(1, GridDims.X - 2);
-        RhythmSettings.ActorPosition = FPosition{RandPositionX, 1};
-
-        if (RhythmSettings.ActorPosition.X == LastActorPositionX)
+        uint32 RandPositionX;
+        do
         {
-            RhythmSettings.ActorPosition.X = (RhythmSettings.ActorPosition.X + 1) % (GridDims.X - 2);
-        }
+            RandPositionX = FMath::RandRange(1, GridDims.X - 2);
+        } while (RandPositionX == LastActorPositionX);
+
+        RhythmSettings.ActorPosition = FPosition{RandPositionX, 1};
+        LastActorPositionX = RhythmSettings.ActorPosition.X;
 
         const FTransform GridOrigin = FTransform::Identity;
 
@@ -114,8 +115,6 @@ void ACTGRhythmGameModeBase::SpawnFallingKey(ECTGKeyType Key)
         FallingKeyVisual->UpdateScale(CellSize);
         FallingKeyVisual->UpdateColors(*ColorSet);
         FallingKeyVisual->FinishSpawning(GridOrigin);
-
-        LastActorPositionX = RhythmSettings.ActorPosition.X;
 
         ActiveFallingKeys.Add(FallingKeyVisual);
 

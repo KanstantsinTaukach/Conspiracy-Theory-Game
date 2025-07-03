@@ -20,7 +20,8 @@ public class ConspiracyTheoryGame : ModuleRules
             "NavigationSystem",
             "StateTreeModule",
             "GameplayStateTreeModule",
-            "UMG"
+            "UMG",
+            "Niagara"
         });
 
         PrivateDependencyModuleNames.AddRange(new string[] { });

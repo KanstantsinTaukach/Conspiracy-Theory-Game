@@ -8,6 +8,7 @@
 #include "CTGFallingKey.generated.h"
 
 class UStaticMeshComponent;
+class UNiagaraSystem;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFallingKeyDestroyedSignature, AActor*, DestroyedActor);
 
@@ -41,6 +42,8 @@ public:
     UFUNCTION()
     void DestroyFallingKey();
 
+    void Explode();
+
 protected:
     UPROPERTY(VisibleAnywhere)
     TObjectPtr<USceneComponent> Origin;
@@ -51,11 +54,16 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "KeySettings")
     ECTGKeyType KeyType;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
+    TObjectPtr<UNiagaraSystem> ExplosionEffect;
+
 private:
     FSettings Settings;
     uint32 CellSize;
     float Delta = 0.05f;
     float TimeSinceLastMove = 0.0f;
+
+    FLinearColor ExplodeColor;
 
     FVector ActorPositionToVector(FPosition& InPosition, uint32 InCellSize, FDim& InDim);
 

@@ -3,6 +3,8 @@
 #include "Boss/RhythmMechanics/CTGFallingKey.h"
 #include "Components/StaticMeshComponent.h"
 #include "CTGRhythmGameModeBase.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 ACTGFallingKey::ACTGFallingKey()
 {
@@ -31,9 +33,11 @@ void ACTGFallingKey::UpdateColors(const FGridColors& Colors)
     {
         MeshMaterial->SetVectorParameterValue("FallingKeyColor", Colors.FallingKeyColor);
     }
+
+    ExplodeColor = Colors.FallingKeyColor;
 }
 
-void ACTGFallingKey::UpdateScale(uint32 InCellSize) 
+void ACTGFallingKey::UpdateScale(uint32 InCellSize)
 {
     check(FallingKeyMesh->GetStaticMesh());
     const FBox Box = FallingKeyMesh->GetStaticMesh()->GetBoundingBox();
@@ -41,7 +45,7 @@ void ACTGFallingKey::UpdateScale(uint32 InCellSize)
 
     check(Size.X);
     check(Size.Y);
-    FallingKeyMesh->SetRelativeScale3D(FVector(InCellSize / Size.X, InCellSize / Size.Y, InCellSize / Size.Z));
+    FallingKeyMesh->SetRelativeScale3D(FVector(InCellSize / Size.X, InCellSize / Size.Y, InCellSize / Size.Z / 2.0));
 }
 
 void ACTGFallingKey::ACTGFallingKey::BeginPlay()
@@ -96,5 +100,15 @@ void ACTGFallingKey::OnMissed()
 
 void ACTGFallingKey::DestroyFallingKey()
 {
+    Explode();
+
     Destroy();
+}
+
+void ACTGFallingKey::Explode()
+{
+    if (UNiagaraComponent* NS = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ExplosionEffect, Origin->GetComponentLocation()))
+    {
+        NS->SetNiagaraVariableLinearColor("ExplodeColor", ExplodeColor);
+    }
 }
