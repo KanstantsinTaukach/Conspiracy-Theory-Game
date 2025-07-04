@@ -5,9 +5,18 @@
 ACTGVisualCharacter::ACTGVisualCharacter()
 {
     PrimaryActorTick.bCanEverTick = false;
+
+    CharacterHealth = CharacterMaxHealth;
 }
 
 void ACTGVisualCharacter::BeginPlay()
 {
     Super::BeginPlay();
+
+    check(CharacterMaxHealth > 0);
+}
+
+void ACTGVisualCharacter::RemoveCharacterHealth(float Delta)
+{
+    CharacterHealth = FMath::Max(0, CharacterHealth - Delta);
 }

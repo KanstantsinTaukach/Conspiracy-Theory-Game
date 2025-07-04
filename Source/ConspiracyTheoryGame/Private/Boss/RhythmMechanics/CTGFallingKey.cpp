@@ -5,6 +5,7 @@
 #include "CTGRhythmGameModeBase.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "Boss/RhythmMechanics/CTGVisualCharacter.h"
 
 ACTGFallingKey::ACTGFallingKey()
 {
@@ -89,9 +90,15 @@ FVector ACTGFallingKey::ActorPositionToVector(FPosition& InPosition, uint32 InCe
 
 void ACTGFallingKey::OnMissed()
 {
+    if (!GetWorld()) return;
+
     if (auto* GameMode = Cast<ACTGRhythmGameModeBase>(GetWorld()->GetAuthGameMode()))
     {
-        GameMode->RemovePlayerHealth(200);
+        auto* VisualPlayer = GameMode->GetVisualPlayerCharacter();
+        if (VisualPlayer)
+        {
+            VisualPlayer->RemoveCharacterHealth(100.0f);
+        }
     }
 
     OnFallingKeyDestroyed.Broadcast(this);

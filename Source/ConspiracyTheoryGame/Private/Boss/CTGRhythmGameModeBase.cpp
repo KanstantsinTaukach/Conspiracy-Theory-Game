@@ -63,6 +63,7 @@ void ACTGRhythmGameModeBase::StartPlay()
     PlayerCharacter = Cast<ACTGVisualCharacter>(RhythmPawn->SpawnVisualCharacter(PlayerCharacterClass, -TargetOffset, FRotator(33.0, 90.0f, -90.0)));
     BossCharacter = Cast<ACTGVisualCharacter>(RhythmPawn->SpawnVisualCharacter(BossCharacterClass, TargetOffset, FRotator(33.0, -90.0f, 90.0)));
 
+    // Spawn Falling Keys
     GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true);
 }
 
@@ -153,11 +154,17 @@ void ACTGRhythmGameModeBase::CheckPlayerInput(ECTGKeyType InputKey)
     {
         if (LowestKey->GetKeyType() == InputKey)
         {
-            RemoveBossHealth(100);
+            if (BossCharacter)
+            {
+                BossCharacter->RemoveCharacterHealth(100);
+            }
         }
         else
         {
-            RemovePlayerHealth(100);
+            if (PlayerCharacter)
+            {
+                PlayerCharacter->RemoveCharacterHealth(100);
+            }
         }
 
         RemoveFallingKey(LowestKey);
@@ -171,16 +178,4 @@ void ACTGRhythmGameModeBase::RemoveFallingKey(AActor* DestroyedActor)
     {
         ActiveFallingKeys.Remove(FallingKey);
     }
-}
-
-void ACTGRhythmGameModeBase::RemovePlayerHealth(int32 Delta)
-{
-    PlayerHealth = FMath::Max(0, PlayerHealth - Delta);
-    UE_LOG(LogCTGRhythmGameModeBase, Display, TEXT("PLAYER HEALTH IS: %d"), PlayerHealth);
-}
-
-void ACTGRhythmGameModeBase::RemoveBossHealth(int32 Delta)
-{
-    BossHealth = FMath::Max(0, BossHealth - Delta);
-    UE_LOG(LogCTGRhythmGameModeBase, Display, TEXT("BOSS HEALTH IS: %d"), BossHealth);
 }

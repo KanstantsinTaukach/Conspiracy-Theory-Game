@@ -23,18 +23,14 @@ public:
 
     virtual void StartPlay() override;
 
-    UFUNCTION(BlueprintCallable)
-    int32 GetPlayerHealth() const { return PlayerHealth; };
-    UFUNCTION(BlueprintCallable)
-    void RemovePlayerHealth(int32 Delta);
-
-    UFUNCTION(BlueprintCallable)
-    int32 GetBossHealth() const { return BossHealth; };
-    UFUNCTION(BlueprintCallable)
-    void RemoveBossHealth(int32 Delta);
-
     UFUNCTION()
     void CheckPlayerInput(ECTGKeyType InputKey);
+
+    UFUNCTION(BlueprintCallable)
+    ACTGVisualCharacter* GetVisualPlayerCharacter() const { return PlayerCharacter; };
+
+    UFUNCTION(BlueprintCallable)
+    ACTGVisualCharacter* GetVisualBossCharacter() const { return BossCharacter; };
 
 protected:
     UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "10", clampMax = "100"), Category = "RhythmGameSettings")
@@ -69,11 +65,6 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "5", clampMax = "20"), Category = "Characters")
     int32 VisualCharacterOffset = 10;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-    int32 PlayerHealth = 2500;
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-    int32 BossHealth = 2500;
 
     UPROPERTY()
     TArray<ACTGFallingKey*> ActiveFallingKeys;
