@@ -9,6 +9,7 @@
 #include "Components/ExponentialHeightFogComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Boss/CTGRhythmPlayerController.h"
+#include "Boss/UI/CTGBossHUD.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogCTGRhythmGameModeBase, All, All);
 
@@ -51,6 +52,9 @@ void ACTGRhythmGameModeBase::StartPlay()
     check(RowsCount >= 1);
     ColorTableIndex = FMath::RandRange(0, RowsCount - 1);
     UpdateColors();
+
+    HUD = Cast<ACTGBossHUD>(PC->GetHUD());
+    check(HUD);
 
     GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true);
 }

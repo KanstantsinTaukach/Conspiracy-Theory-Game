@@ -10,6 +10,7 @@
 class ACTGGrid;
 class ACTGFallingKey;
 class AExponentialHeightFog;
+class ACTGBossHUD;
 
 UCLASS()
 class CONSPIRACYTHEORYGAME_API ACTGRhythmGameModeBase : public AGameModeBase
@@ -55,6 +56,9 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "Design")
     TObjectPtr<UDataTable> ColorsTable;
+
+    UPROPERTY()
+    TObjectPtr<ACTGBossHUD> HUD;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     int32 PlayerHealth = 2500;
