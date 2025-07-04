@@ -63,8 +63,8 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Characters")
     TSubclassOf<ACTGVisualCharacter> BossCharacterClass;
 
-    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "5", clampMax = "20"), Category = "Characters")
-    int32 VisualCharacterOffset = 10;
+    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "1", clampMax = "20"), Category = "Characters")
+    int32 VisualCharacterOffset = 3;
 
     UPROPERTY()
     TArray<ACTGFallingKey*> ActiveFallingKeys;
