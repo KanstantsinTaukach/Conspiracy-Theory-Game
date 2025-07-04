@@ -19,6 +19,9 @@ public:
 
     void UpdateLocation(const FDim& InDim, uint32 InCellSize, const FTransform& InGridOrigin);
 
+    UFUNCTION()
+    AActor* SpawnVisualCharacter(TSubclassOf<AActor> ActorClass, int32 ActorOffset, const FRotator& TargetRotation);
+
 protected:
     UPROPERTY(VisibleAnywhere)
     TObjectPtr<USceneComponent> Origin;
@@ -36,4 +39,6 @@ private:
     double VerticalFOV(double HorizontalFOVDegrees, double ViewportAspectHW);
 
     void OnViewportResized(FViewport* Viewport, uint32 Val);
+
+    void PositionCharacter(AActor* TargetActor, int32 YOffset, const FRotator& TargetRotation);
 };

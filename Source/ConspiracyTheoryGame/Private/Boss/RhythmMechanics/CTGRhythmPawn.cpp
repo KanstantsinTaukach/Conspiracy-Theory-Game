@@ -74,3 +74,27 @@ void ACTGRhythmPawn::OnViewportResized(FViewport* Viewport, uint32 Val)
     const FVector NewPawnLocation = GridOrigin.GetLocation() + 0.5 * FVector(WorldHeight, WorldWidth, LocationZ);
     SetActorLocation(NewPawnLocation);
 }
+
+AActor* ACTGRhythmPawn::SpawnVisualCharacter(TSubclassOf<AActor> ActorClass, int32 ActorOffset, const FRotator& TargetRotation)
+{
+    if (!GetWorld()) return nullptr;
+
+    double GridWidth = Dim.Width * CellSize;
+
+    const auto SpawnedActor = GetWorld()->SpawnActor<AActor>(ActorClass, FVector::ZeroVector, FRotator::ZeroRotator);
+    PositionCharacter(SpawnedActor, ActorOffset, TargetRotation);
+
+    return SpawnedActor;
+}
+
+void ACTGRhythmPawn::PositionCharacter(AActor* TargetActor, int32 YOffset, const FRotator& TargetRotation)
+{
+    if (!TargetActor) return;
+
+    const FVector GridLocation = GridOrigin.GetLocation();
+    double WorldHeight = Dim.Height * CellSize;
+    double WorldWidth = Dim.Width * CellSize;
+
+    TargetActor->SetActorLocation(FVector(WorldHeight * 0.5, WorldWidth * 0.5 + YOffset, GridLocation.Z * 0.5));
+    TargetActor->SetActorRotation(TargetRotation);
+}

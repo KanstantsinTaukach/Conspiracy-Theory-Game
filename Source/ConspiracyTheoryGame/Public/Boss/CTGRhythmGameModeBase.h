@@ -11,6 +11,7 @@ class ACTGGrid;
 class ACTGFallingKey;
 class AExponentialHeightFog;
 class ACTGBossHUD;
+class ACTGVisualCharacter;
 
 UCLASS()
 class CONSPIRACYTHEORYGAME_API ACTGRhythmGameModeBase : public AGameModeBase
@@ -60,6 +61,15 @@ protected:
     UPROPERTY()
     TObjectPtr<ACTGBossHUD> HUD;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Characters")
+    TSubclassOf<ACTGVisualCharacter> PlayerCharacterClass;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Characters")
+    TSubclassOf<ACTGVisualCharacter> BossCharacterClass;
+
+    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "5", clampMax = "20"), Category = "Characters")
+    int32 VisualCharacterOffset = 10;
+
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     int32 PlayerHealth = 2500;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -80,6 +90,12 @@ private:
 
     UPROPERTY()
     TObjectPtr<AExponentialHeightFog> Fog;
+
+    UPROPERTY()
+    TObjectPtr<ACTGVisualCharacter> PlayerCharacter;
+
+    UPROPERTY()
+    TObjectPtr<ACTGVisualCharacter> BossCharacter;
 
     FSettings RhythmSettings;
 

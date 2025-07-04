@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Boss/CTGRhythmPlayerController.h"
 #include "Boss/UI/CTGBossHUD.h"
+#include "Boss/RhythmMechanics/CTGVisualCharacter.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogCTGRhythmGameModeBase, All, All);
 
@@ -39,9 +40,9 @@ void ACTGRhythmGameModeBase::StartPlay()
     // Set pawn location fitting grid in viewport
     auto* PC = GetWorld()->GetFirstPlayerController();
     check(PC);
-    auto* MyPawn = Cast<ACTGRhythmPawn>(PC->GetPawn());
-    check(MyPawn);
-    MyPawn->UpdateLocation(RhythmSettings.GridDims, CellSize, GridOrigin);
+    auto* RhythmPawn = Cast<ACTGRhythmPawn>(PC->GetPawn());
+    check(RhythmPawn);
+    RhythmPawn->UpdateLocation(RhythmSettings.GridDims, CellSize, GridOrigin);
 
     //
     FindFog();
@@ -55,6 +56,12 @@ void ACTGRhythmGameModeBase::StartPlay()
 
     HUD = Cast<ACTGBossHUD>(PC->GetHUD());
     check(HUD);
+
+    // Spawn Player and Boss
+    int32 TargetOffset = (RhythmSettings.GridDims.Width * 0.5 + VisualCharacterOffset) * CellSize;
+
+    PlayerCharacter = Cast<ACTGVisualCharacter>(RhythmPawn->SpawnVisualCharacter(PlayerCharacterClass, -TargetOffset, FRotator(33.0, 90.0f, -90.0)));
+    BossCharacter = Cast<ACTGVisualCharacter>(RhythmPawn->SpawnVisualCharacter(BossCharacterClass, TargetOffset, FRotator(33.0, -90.0f, 90.0)));
 
     GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true);
 }

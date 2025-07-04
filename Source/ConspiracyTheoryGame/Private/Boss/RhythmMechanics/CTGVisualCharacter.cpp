@@ -4,20 +4,10 @@
 
 ACTGVisualCharacter::ACTGVisualCharacter()
 {
-    PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.bCanEverTick = false;
 }
 
 void ACTGVisualCharacter::BeginPlay()
 {
     Super::BeginPlay();
-}
-
-void ACTGVisualCharacter::Tick(float DeltaTime)
-{
-    Super::Tick(DeltaTime);
-}
-
-void ACTGVisualCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-    Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
