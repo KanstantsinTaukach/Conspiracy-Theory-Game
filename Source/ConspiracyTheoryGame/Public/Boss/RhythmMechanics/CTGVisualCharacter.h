@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "CTGVisualCharacter.generated.h"
 
+//DECLARE_MULTICAST_DELEGATE_TwoParams(FOnHealthChangedSignature, float, float);
+
 UCLASS()
 class CONSPIRACYTHEORYGAME_API ACTGVisualCharacter : public ACharacter
 {
@@ -14,11 +16,13 @@ class CONSPIRACYTHEORYGAME_API ACTGVisualCharacter : public ACharacter
 public:
     ACTGVisualCharacter();
 
+    //FOnHealthChangedSignature OnHealthChanged;
+
     UFUNCTION(BlueprintCallable, Category = "Health")
     float GetCharacterHealth() const { return CharacterHealth; };
 
     UFUNCTION(BlueprintCallable, Category = "Health")
-    void RemoveCharacterHealth(float Delta);
+    void SetHealth(float NewHealth);
 
     UFUNCTION(BlueprintCallable, Category = "Health")
     float GetHealthPercent() const { return CharacterHealth / CharacterMaxHealth; };

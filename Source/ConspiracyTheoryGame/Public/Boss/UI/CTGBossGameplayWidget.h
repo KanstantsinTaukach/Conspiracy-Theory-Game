@@ -26,24 +26,4 @@ protected:
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UProgressBar> BossHealthProgressBar;
-
-    //UPROPERTY(Transient, meta = (BindWidgetAnim))
-    //TObjectPtr<UWidgetAnimation> DamageAnimation;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
-    float PercentColorThreshold = 0.3f;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
-    FLinearColor GoodColor = FLinearColor::White;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
-    FLinearColor BadColor = FLinearColor::Red;
-
-    virtual void NativeOnInitialized() override;
-
-private:
-    void OnHealthChanged(float Health, float HealthDelta);
-
-    void UpdatePlayerHealthBar();
-    void UpdateBossHealthBar();
 };

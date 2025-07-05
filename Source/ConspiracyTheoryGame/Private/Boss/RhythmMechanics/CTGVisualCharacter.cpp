@@ -16,7 +16,11 @@ void ACTGVisualCharacter::BeginPlay()
     check(CharacterMaxHealth > 0);
 }
 
-void ACTGVisualCharacter::RemoveCharacterHealth(float Delta)
+void ACTGVisualCharacter::SetHealth(float NewHealth)
 {
-    CharacterHealth = FMath::Max(0, CharacterHealth - Delta);
+    const auto NextHealt = FMath::Clamp(NewHealth, 0.0f, CharacterMaxHealth);
+    const auto HealthDelta = NextHealt - CharacterHealth;
+    CharacterHealth = NextHealt;
+
+    //OnHealthChanged.Broadcast(CharacterHealth, HealthDelta);
 }

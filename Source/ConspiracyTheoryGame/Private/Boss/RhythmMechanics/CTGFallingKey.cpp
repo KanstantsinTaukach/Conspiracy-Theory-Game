@@ -97,7 +97,7 @@ void ACTGFallingKey::OnMissed()
         auto* VisualPlayer = GameMode->GetVisualPlayerCharacter();
         if (VisualPlayer)
         {
-            VisualPlayer->RemoveCharacterHealth(100.0f);
+            VisualPlayer->SetHealth(VisualPlayer->GetCharacterHealth() - 100.0f);
         }
     }
 

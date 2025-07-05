@@ -54,14 +54,14 @@ void ACTGRhythmGameModeBase::StartPlay()
     ColorTableIndex = FMath::RandRange(0, RowsCount - 1);
     UpdateColors();
 
-    HUD = Cast<ACTGBossHUD>(PC->GetHUD());
-    check(HUD);
-
     // Spawn Player and Boss
     int32 TargetOffset = (RhythmSettings.GridDims.Width * 0.5 + VisualCharacterOffset) * CellSize;
 
     PlayerCharacter = Cast<ACTGVisualCharacter>(RhythmPawn->SpawnVisualCharacter(PlayerCharacterClass, -TargetOffset, FRotator(33.0, 90.0f, -90.0)));
     BossCharacter = Cast<ACTGVisualCharacter>(RhythmPawn->SpawnVisualCharacter(BossCharacterClass, TargetOffset, FRotator(33.0, -90.0f, 90.0)));
+
+    HUD = Cast<ACTGBossHUD>(PC->GetHUD());
+    check(HUD);
 
     // Spawn Falling Keys
     GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true);
@@ -108,10 +108,10 @@ void ACTGRhythmGameModeBase::SpawnFallingKey(ECTGKeyType Key)
         uint32 RandPositionX;
         do
         {
-            RandPositionX = FMath::RandRange(1, GridDims.X - 2);
+            RandPositionX = FMath::RandRange(0, GridDims.X - 1);
         } while (RandPositionX == LastActorPositionX);
 
-        RhythmSettings.ActorPosition = FPosition{RandPositionX, 1};
+        RhythmSettings.ActorPosition = FPosition{RandPositionX, 0};
         LastActorPositionX = RhythmSettings.ActorPosition.X;
 
         const FTransform GridOrigin = FTransform::Identity;
@@ -156,14 +156,14 @@ void ACTGRhythmGameModeBase::CheckPlayerInput(ECTGKeyType InputKey)
         {
             if (BossCharacter)
             {
-                BossCharacter->RemoveCharacterHealth(100);
+                BossCharacter->SetHealth(BossCharacter->GetCharacterHealth() - 300.0f);
             }
         }
         else
         {
             if (PlayerCharacter)
             {
-                PlayerCharacter->RemoveCharacterHealth(100);
+                PlayerCharacter->SetHealth(PlayerCharacter->GetCharacterHealth() - 50.0f);
             }
         }
 
