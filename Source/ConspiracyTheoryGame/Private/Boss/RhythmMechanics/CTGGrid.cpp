@@ -52,8 +52,13 @@ void ACTGGrid::UpdateColors(const FGridColors& Colors)
     if (GridMaterial)
     {
         GridMaterial->SetVectorParameterValue("BackgroundColor", Colors.GridBackgroundColor);
-        GridMaterial->SetVectorParameterValue("LineColor", Colors.GridLineColor);
-        GridMaterial->SetVectorParameterValue("WallColor", Colors.GridWallColor);
+        //GridMaterial->SetVectorParameterValue("LineColor", Colors.GridLineColor);
+        //GridMaterial->SetVectorParameterValue("WallColor", Colors.GridWallColor);
+        GridMaterial->SetVectorParameterValue("FailColor", Colors.GridFailColor);
+        GridMaterial->SetVectorParameterValue("PerfectColor", Colors.GridPerfectColor);
+        GridMaterial->SetVectorParameterValue("GreatColor", Colors.GridGreatColor);
+        GridMaterial->SetVectorParameterValue("GoodColor", Colors.GridGoodColor);
+        GridMaterial->SetVectorParameterValue("RiskColor", Colors.GridRiskColor);
     }
 }
 
