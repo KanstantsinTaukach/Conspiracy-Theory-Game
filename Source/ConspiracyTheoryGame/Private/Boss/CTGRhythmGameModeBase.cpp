@@ -18,6 +18,7 @@ ACTGRhythmGameModeBase::ACTGRhythmGameModeBase()
 {
     DefaultPawnClass = ACTGRhythmPawn::StaticClass();
     PlayerControllerClass = ACTGRhythmPlayerController::StaticClass();
+    HUDClass = ACTGBossHUD::StaticClass();
 }
 
 void ACTGRhythmGameModeBase::StartPlay()

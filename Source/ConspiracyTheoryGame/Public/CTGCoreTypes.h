@@ -35,14 +35,6 @@ struct FDim
     uint32 Height;
 };
 
-UENUM(BlueprintType)
-enum class ECTGCellType : uint8
-{
-    Empty = 0,
-    Wall,
-    FallingKey
-};
-
 USTRUCT(BlueprintType)
 struct FPosition
 {
