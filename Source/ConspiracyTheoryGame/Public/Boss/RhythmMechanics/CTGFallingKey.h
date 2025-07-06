@@ -10,7 +10,7 @@
 class UStaticMeshComponent;
 class UNiagaraSystem;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFallingKeyDestroyedSignature, AActor*, DestroyedActor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnGetZoneDamageSignature, bool, bIsBoss, float, Damage);
 
 UCLASS()
 class CONSPIRACYTHEORYGAME_API ACTGFallingKey : public AActor
@@ -24,7 +24,7 @@ public:
     virtual void Tick(float DeltaTime) override;
 
     UPROPERTY(BlueprintAssignable)
-    FOnFallingKeyDestroyedSignature OnFallingKeyDestroyed;
+    FOnGetZoneDamageSignature OnGetZoneDamage;
 
     void SetModel(const FSettings& InSettings, uint32 InCellSize);
 
@@ -67,9 +67,9 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
     float GoodZoneDamage = 20.0f;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
-    float FailZoneDamage = 50.0f;
+    float FailZoneDamage = 100.0f;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
-    float MissZoneDamage = 100.0f;
+    float MissZoneDamage = 50.0f;
 
 private:
     FSettings Settings;

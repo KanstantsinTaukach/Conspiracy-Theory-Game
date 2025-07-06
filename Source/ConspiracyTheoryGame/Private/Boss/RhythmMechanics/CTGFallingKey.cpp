@@ -119,11 +119,12 @@ void ACTGFallingKey::OnMissed()
         auto* VisualPlayer = GameMode->GetVisualPlayerCharacter();
         if (VisualPlayer)
         {
-            VisualPlayer->SetHealth(VisualPlayer->GetCharacterHealth() - FailZoneDamage);
+            float Damage;
+            GetZoneDamage(Damage);
+            VisualPlayer->SetHealth(VisualPlayer->GetCharacterHealth() - Damage);
         }
     }
 
-    OnFallingKeyDestroyed.Broadcast(this);
     DestroyFallingKey();
 }
 
@@ -132,6 +133,14 @@ void ACTGFallingKey::DestroyFallingKey()
     Explode();
 
     Destroy();
+}
+
+void ACTGFallingKey::Explode()
+{
+    if (UNiagaraComponent* NS = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ExplosionEffect, Origin->GetComponentLocation()))
+    {
+        NS->SetNiagaraVariableLinearColor("ExplodeColor", ExplodeColor);
+    }
 }
 
 bool ACTGFallingKey::GetZoneDamage(float& Damage)
@@ -166,13 +175,7 @@ bool ACTGFallingKey::GetZoneDamage(float& Damage)
         IsDamageToBoss = false;
     }
 
-    return IsDamageToBoss;
-}
+    OnGetZoneDamage.Broadcast(IsDamageToBoss, Damage);
 
-void ACTGFallingKey::Explode()
-{
-    if (UNiagaraComponent* NS = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ExplosionEffect, Origin->GetComponentLocation()))
-    {
-        NS->SetNiagaraVariableLinearColor("ExplodeColor", ExplodeColor);
-    }
+    return IsDamageToBoss;
 }
