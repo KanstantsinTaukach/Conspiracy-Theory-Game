@@ -6,7 +6,8 @@
 #include "GameFramework/Character.h"
 #include "CTGVisualCharacter.generated.h"
 
-//DECLARE_MULTICAST_DELEGATE_TwoParams(FOnHealthChangedSignature, float, float);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnHealthChangedSignature, float, float);
+DECLARE_MULTICAST_DELEGATE(FOnDeathSignature);
 
 UCLASS()
 class CONSPIRACYTHEORYGAME_API ACTGVisualCharacter : public ACharacter
@@ -16,7 +17,8 @@ class CONSPIRACYTHEORYGAME_API ACTGVisualCharacter : public ACharacter
 public:
     ACTGVisualCharacter();
 
-    //FOnHealthChangedSignature OnHealthChanged;
+    FOnHealthChangedSignature OnHealthChanged;
+    FOnDeathSignature OnDeath;
 
     UFUNCTION(BlueprintCallable, Category = "Health")
     float GetCharacterHealth() const { return CharacterHealth; };
@@ -27,6 +29,9 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Health")
     float GetHealthPercent() const { return CharacterHealth / CharacterMaxHealth; };
 
+    UFUNCTION(BlueprintCallable)
+    bool IsDead() const { return CharacterHealth <= 0.0f; };
+
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     float CharacterHealth = 1000;
@@ -34,5 +39,16 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     float CharacterMaxHealth = 1000;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Animation")
+    TObjectPtr<UAnimMontage> DanceAnimMontage;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Animation")
+    TObjectPtr<UAnimMontage> DamageAnimMontage;
+
     virtual void BeginPlay() override;
+
+private:
+    FTimerHandle DanceRestartTimerHandle;
+
+    void PlayDanceAnimation();
 };

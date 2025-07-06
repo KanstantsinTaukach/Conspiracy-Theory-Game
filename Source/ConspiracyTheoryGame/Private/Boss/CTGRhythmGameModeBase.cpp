@@ -61,6 +61,9 @@ void ACTGRhythmGameModeBase::StartPlay()
     PlayerCharacter = Cast<ACTGVisualCharacter>(RhythmPawn->SpawnVisualCharacter(PlayerCharacterClass, -TargetOffset, FRotator(33.0, 90.0f, -90.0)));
     BossCharacter = Cast<ACTGVisualCharacter>(RhythmPawn->SpawnVisualCharacter(BossCharacterClass, TargetOffset, FRotator(33.0, -90.0f, 90.0)));
 
+    PlayerCharacter->OnDeath.AddUObject(this, &ACTGRhythmGameModeBase::OnPlayerCharacterDeath);
+    BossCharacter->OnDeath.AddUObject(this, &ACTGRhythmGameModeBase::OnBossCharacterDeath);
+
     HUD = Cast<ACTGBossHUD>(PC->GetHUD());
     check(HUD);
 
@@ -182,4 +185,14 @@ void ACTGRhythmGameModeBase::RemoveFallingKey(AActor* DestroyedActor)
     {
         ActiveFallingKeys.Remove(FallingKey);
     }
+}
+
+void ACTGRhythmGameModeBase::OnPlayerCharacterDeath() 
+{
+    UE_LOG(LogCTGRhythmGameModeBase, Display, TEXT("PLAYER IS DEAD"));
+}
+
+void ACTGRhythmGameModeBase::OnBossCharacterDeath() 
+{
+    UE_LOG(LogCTGRhythmGameModeBase, Display, TEXT("BOSS IS DEAD"));
 }

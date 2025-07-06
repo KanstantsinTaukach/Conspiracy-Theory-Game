@@ -102,6 +102,9 @@ private:
 
     void SpawnRandomFallingKey();
 
+    void OnPlayerCharacterDeath();
+    void OnBossCharacterDeath();
+
     UFUNCTION()
     void RemoveFallingKey(AActor* DestroyedActor);
 };
