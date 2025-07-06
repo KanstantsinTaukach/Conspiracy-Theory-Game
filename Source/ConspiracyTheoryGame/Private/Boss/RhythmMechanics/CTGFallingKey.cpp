@@ -121,6 +121,9 @@ void ACTGFallingKey::OnMissed()
         {
             float Damage;
             GetZoneDamage(Damage);
+
+            OnGetZoneDamage.Broadcast(false, Damage);
+
             VisualPlayer->SetHealth(VisualPlayer->GetCharacterHealth() - Damage);
         }
     }
@@ -174,8 +177,6 @@ bool ACTGFallingKey::GetZoneDamage(float& Damage)
         Damage = MissZoneDamage;
         IsDamageToBoss = false;
     }
-
-    OnGetZoneDamage.Broadcast(IsDamageToBoss, Damage);
 
     return IsDamageToBoss;
 }

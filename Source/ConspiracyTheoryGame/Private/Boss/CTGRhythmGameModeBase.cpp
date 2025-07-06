@@ -161,6 +161,8 @@ void ACTGRhythmGameModeBase::CheckPlayerInput(ECTGKeyType InputKey)
 
         if (LowestKey->GetKeyType() == InputKey && bIsDamageToBoss)
         {
+            bIsDamageToBoss = true;
+
             if (BossCharacter)
             {
                 BossCharacter->SetHealth(BossCharacter->GetCharacterHealth() - Damage);
@@ -168,12 +170,15 @@ void ACTGRhythmGameModeBase::CheckPlayerInput(ECTGKeyType InputKey)
         }
         else
         {
+            bIsDamageToBoss = false;
+
             if (PlayerCharacter)
             {
                 PlayerCharacter->SetHealth(PlayerCharacter->GetCharacterHealth() - Damage);
             }
         }
 
+        LowestKey->OnGetZoneDamage.Broadcast(bIsDamageToBoss, Damage);
         RemoveFallingKey(LowestKey);
         LowestKey->DestroyFallingKey();
     }
