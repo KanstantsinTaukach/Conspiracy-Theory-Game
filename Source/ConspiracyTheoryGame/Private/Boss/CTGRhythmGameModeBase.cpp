@@ -98,7 +98,7 @@ void ACTGRhythmGameModeBase::UpdateColors()
 
 void ACTGRhythmGameModeBase::SpawnRandomFallingKey()
 {
-    ECTGKeyType RandomKeyType = static_cast<ECTGKeyType>(FMath::RandRange(0, 0));
+    ECTGKeyType RandomKeyType = static_cast<ECTGKeyType>(FMath::RandRange(0, 3));
     SpawnFallingKey(RandomKeyType);
 }
 

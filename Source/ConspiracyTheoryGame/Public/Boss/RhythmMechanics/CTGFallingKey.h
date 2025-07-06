@@ -28,7 +28,7 @@ public:
 
     void SetModel(const FSettings& InSettings, uint32 InCellSize);
 
-    void SetKeyType(ECTGKeyType Key) { KeyType = Key; };
+    void SetKeyType(ECTGKeyType Key);
     ECTGKeyType GetKeyType() const { return KeyType; };
 
     FPosition GetCurrentPosition() const { return Settings.ActorPosition; };
@@ -53,6 +53,9 @@ protected:
 
     UPROPERTY(VisibleAnywhere)
     TObjectPtr<UStaticMeshComponent> FallingKeyMesh;
+
+    UPROPERTY(EditDefaultsOnly, Category = "KeySettings")
+    TMap<ECTGKeyType, TObjectPtr<UStaticMesh>> KeyMeshes;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "KeySettings")
     ECTGKeyType KeyType;

@@ -28,6 +28,21 @@ void ACTGFallingKey::SetModel(const FSettings& InSettings, uint32 InCellSize)
     CellSize = InCellSize;
 }
 
+void ACTGFallingKey::SetKeyType(ECTGKeyType Key)
+{
+    KeyType = Key;
+
+    if (FallingKeyMesh && KeyMeshes.Contains(KeyType))
+    {
+        UStaticMesh* MeshToSet = KeyMeshes[KeyType];
+        if (MeshToSet)
+        {
+            FallingKeyMesh->SetStaticMesh(MeshToSet);
+            UpdateScale(CellSize);
+        }
+    }
+}
+
 void ACTGFallingKey::UpdateColors(const FGridColors& Colors)
 {
     if (auto* MeshMaterial = FallingKeyMesh->CreateAndSetMaterialInstanceDynamic(0))
@@ -143,7 +158,7 @@ bool ACTGFallingKey::GetZoneDamage(float& Damage)
         Damage = MissZoneDamage;
         IsDamageToBoss = false;
     }
-    
+
     return IsDamageToBoss;
 }
 
