@@ -98,7 +98,7 @@ void ACTGRhythmGameModeBase::UpdateColors()
 
 void ACTGRhythmGameModeBase::SpawnRandomFallingKey()
 {
-    ECTGKeyType RandomKeyType = static_cast<ECTGKeyType>(FMath::RandRange(0, 3));
+    ECTGKeyType RandomKeyType = static_cast<ECTGKeyType>(FMath::RandRange(0, 0));
     SpawnFallingKey(RandomKeyType);
 }
 
@@ -153,18 +153,21 @@ void ACTGRhythmGameModeBase::CheckPlayerInput(ECTGKeyType InputKey)
 
     if (LowestKey)
     {
-        if (LowestKey->GetKeyType() == InputKey)
+        float Damage;
+        bool bIsDamageToBoss = LowestKey->GetZoneDamage(Damage);
+
+        if (LowestKey->GetKeyType() == InputKey && bIsDamageToBoss)
         {
             if (BossCharacter)
             {
-                BossCharacter->SetHealth(BossCharacter->GetCharacterHealth() - 300.0f);
+                BossCharacter->SetHealth(BossCharacter->GetCharacterHealth() - Damage);
             }
         }
         else
         {
             if (PlayerCharacter)
             {
-                PlayerCharacter->SetHealth(PlayerCharacter->GetCharacterHealth() - 50.0f);
+                PlayerCharacter->SetHealth(PlayerCharacter->GetCharacterHealth() - Damage);
             }
         }
 

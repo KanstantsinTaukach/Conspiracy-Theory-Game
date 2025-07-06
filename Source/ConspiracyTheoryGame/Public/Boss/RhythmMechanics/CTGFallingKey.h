@@ -42,6 +42,9 @@ public:
     UFUNCTION()
     void DestroyFallingKey();
 
+    UFUNCTION()
+    bool GetZoneDamage(float& Damage);
+
     void Explode();
 
 protected:
@@ -57,6 +60,17 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
     TObjectPtr<UNiagaraSystem> ExplosionEffect;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
+    float PerfectZoneDamage = 100.0f;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
+    float GreatZoneDamage = 50.0f;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
+    float GoodZoneDamage = 20.0f;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
+    float FailZoneDamage = 50.0f;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
+    float MissZoneDamage = 100.0f;
+
 private:
     FSettings Settings;
     uint32 CellSize;
@@ -65,7 +79,7 @@ private:
 
     FLinearColor ExplodeColor;
 
-    FVector ActorPositionToVector(FPosition& InPosition, uint32 InCellSize, FDim& InDim);
+    FVector ActorPositionToVector(FPosition& InPosition, uint32 InCellSize);
 
     void UpdateActorPosition();
 };

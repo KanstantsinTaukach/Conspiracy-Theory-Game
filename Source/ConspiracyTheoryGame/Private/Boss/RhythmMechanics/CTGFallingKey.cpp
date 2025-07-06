@@ -74,7 +74,7 @@ void ACTGFallingKey::UpdateActorPosition()
     if (!FallingKeyMesh) return;
     Settings.ActorPosition.Y = Settings.ActorPosition.Y + 1;
 
-    FVector NewLocation = ActorPositionToVector(Settings.ActorPosition, CellSize, Settings.GridDims);
+    FVector NewLocation = ActorPositionToVector(Settings.ActorPosition, CellSize);
     Origin->SetWorldLocation(NewLocation);
 
     if (Settings.ActorPosition.Y == Settings.GridDims.Height - 1)
@@ -83,7 +83,7 @@ void ACTGFallingKey::UpdateActorPosition()
     }
 }
 
-FVector ACTGFallingKey::ActorPositionToVector(FPosition& InPosition, uint32 InCellSize, FDim& InDim)
+FVector ACTGFallingKey::ActorPositionToVector(FPosition& InPosition, uint32 InCellSize)
 {
     return FVector((Settings.GridDims.Height - 1 - InPosition.Y) * InCellSize, InPosition.X * InCellSize, 0.0) + FVector(CellSize * 0.5);
 }
@@ -97,7 +97,7 @@ void ACTGFallingKey::OnMissed()
         auto* VisualPlayer = GameMode->GetVisualPlayerCharacter();
         if (VisualPlayer)
         {
-            VisualPlayer->SetHealth(VisualPlayer->GetCharacterHealth() - 100.0f);
+            VisualPlayer->SetHealth(VisualPlayer->GetCharacterHealth() - FailZoneDamage);
         }
     }
 
@@ -110,6 +110,41 @@ void ACTGFallingKey::DestroyFallingKey()
     Explode();
 
     Destroy();
+}
+
+bool ACTGFallingKey::GetZoneDamage(float& Damage)
+{
+    bool IsDamageToBoss = false;
+    const int32 CurrentY = Settings.ActorPosition.Y;
+    const int32 GridHeigth = Settings.GridDims.Height;
+
+    if (CurrentY == GridHeigth - 1)
+    {
+        Damage = FailZoneDamage;
+        IsDamageToBoss = false;
+    }
+    else if (CurrentY == GridHeigth - 2)
+    {
+        Damage = PerfectZoneDamage;
+        IsDamageToBoss = true;
+    }
+    else if (CurrentY == GridHeigth - 3 || CurrentY == GridHeigth - 4)
+    {
+        Damage = GreatZoneDamage;
+        IsDamageToBoss = true;
+    }
+    else if (CurrentY == GridHeigth - 5 || CurrentY == GridHeigth - 6)
+    {
+        Damage = GoodZoneDamage;
+        IsDamageToBoss = true;
+    }
+    else
+    {
+        Damage = MissZoneDamage;
+        IsDamageToBoss = false;
+    }
+    
+    return IsDamageToBoss;
 }
 
 void ACTGFallingKey::Explode()
