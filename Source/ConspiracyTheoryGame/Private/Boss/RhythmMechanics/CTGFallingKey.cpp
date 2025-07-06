@@ -32,14 +32,21 @@ void ACTGFallingKey::SetKeyType(ECTGKeyType Key)
 {
     KeyType = Key;
 
-    if (FallingKeyMesh && KeyMeshes.Contains(KeyType))
+    if (FallingKeyMesh)
     {
-        UStaticMesh* MeshToSet = KeyMeshes[KeyType];
-        if (MeshToSet)
-        {
-            FallingKeyMesh->SetStaticMesh(MeshToSet);
-            UpdateScale(CellSize);
-        }
+        FallingKeyMesh->SetRelativeRotation(GetRotationForDirection(KeyType));
+    }
+}
+
+FRotator ACTGFallingKey::GetRotationForDirection(ECTGKeyType Direction) const
+{
+    switch (Direction)
+    {
+        case ECTGKeyType::ArrowUp: return FRotator(0.0f, 180.0f, 0.0f);
+        case ECTGKeyType::ArrowDown: return FRotator(0.0f, 0.0f, 0.0f);
+        case ECTGKeyType::ArrowLeft: return FRotator(0.0f, 90.0f, 0.0f);
+        case ECTGKeyType::ArrowRight: return FRotator(0.0f, -90.0f, 0.0f);
+        default: return FRotator::ZeroRotator;
     }
 }
 

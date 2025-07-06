@@ -54,9 +54,6 @@ protected:
     UPROPERTY(VisibleAnywhere)
     TObjectPtr<UStaticMeshComponent> FallingKeyMesh;
 
-    UPROPERTY(EditDefaultsOnly, Category = "KeySettings")
-    TMap<ECTGKeyType, TObjectPtr<UStaticMesh>> KeyMeshes;
-
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "KeySettings")
     ECTGKeyType KeyType;
 
@@ -85,4 +82,6 @@ private:
     FVector ActorPositionToVector(FPosition& InPosition, uint32 InCellSize);
 
     void UpdateActorPosition();
+
+    FRotator GetRotationForDirection(ECTGKeyType Direction) const;
 };
