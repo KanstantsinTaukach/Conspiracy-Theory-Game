@@ -48,7 +48,7 @@ void ACTGRhythmGameModeBase::StartPlay()
     //
     FindFog();
 
-    // Update colors
+    //Update colors
     check(ColorsTable);
     const auto RowsCount = ColorsTable->GetRowNames().Num();
     check(RowsCount >= 1);
