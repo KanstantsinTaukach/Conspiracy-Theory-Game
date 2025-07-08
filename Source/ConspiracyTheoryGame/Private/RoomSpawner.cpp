@@ -1,5 +1,6 @@
 #include "RoomSpawner.h"
 #include "Kismet/GameplayStatics.h"
+#include "CollisionQueryParams.h"
 #include "Engine/World.h"
 #include "PickUpSpawner.h"
 #include "Pickups/CTGBasePickup.h"
@@ -7,6 +8,8 @@
 #include "NavMesh/RecastNavMesh.h"
 #include "NavigationSystem.h"
 #include "DrawDebugHelpers.h"
+
+
 
 // Sets default values
 ARoomSpawner::ARoomSpawner()
@@ -58,6 +61,37 @@ void ARoomSpawner::RebuildNavigation()
     }
 }
 
+void ARoomSpawner::SpawnEnemies()
+{
+    if (!EnemyClass) return;
+    if (SpawnedRooms.Num() <= 1) return;  // Нет комнат кроме стартовой
+
+    TArray<ARoomBase*> RoomsToSpawnIn = SpawnedRooms;
+
+    // Убираем первую комнату (по умолчанию это StartRoom)
+    RoomsToSpawnIn.RemoveAt(0);
+
+    // Перемешиваем
+    RoomsToSpawnIn.Sort([](const ARoomBase& A, const ARoomBase& B) { return FMath::RandBool(); });
+
+    int32 NumToSpawn = FMath::Min(EnemiesToSpawn, RoomsToSpawnIn.Num());
+
+    for (int32 i = 0; i < NumToSpawn; ++i)
+    {
+        ARoomBase* Room = RoomsToSpawnIn[i];
+        if (!Room) continue;
+
+        FVector RoomLocation = Room->GetActorLocation();
+        FVector SpawnLocation = RoomLocation + FVector(100, 0, 300);
+        
+
+        FActorSpawnParameters Params;
+        Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+        GetWorld()->SpawnActor<AEnemyCharacter>(EnemyClass, SpawnLocation, FRotator::ZeroRotator, Params);
+    }
+}
+
 void ARoomSpawner::GenerateDungeon()
 {
     if (!StartRoomClass) return;
@@ -96,6 +130,7 @@ void ARoomSpawner::GenerateDungeon()
     }
     CloseUnconnectedExits();
     SpawnPickups();
+    SpawnEnemies();
     GetWorldTimerManager().SetTimerForNextTick(this, &ARoomSpawner::RebuildNavigation);
 }
 
@@ -115,14 +150,14 @@ void ARoomSpawner::CloseUnconnectedExits()
         for (const FRoomExit& Exit : Room->RoomExits)
         {
 
-            FVector ExitWorldLocation = Room->GetActorTransform().TransformPosition(Exit.Location);
+            FVector ExitWorldLocation = Room->GetActorTransform().TransformPosition(Exit.Location) + (0, 0, 20);
             FRotator ExitWorldRotation = Room->GetActorRotation() + Exit.Rotation;
 
 
             FVector CenterToExitDir = (ExitWorldLocation - RoomCenter).GetSafeNormal();
 
 
-            float DesiredOffset = RoomSize.GetMax() * 0.5f;  
+            float DesiredOffset = RoomSize.GetMax() * 0.5f + 60.0;  
             FVector BlockerPosition = ExitWorldLocation - CenterToExitDir * DesiredOffset;
 
 

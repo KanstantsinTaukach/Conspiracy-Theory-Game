@@ -7,6 +7,7 @@
 #include "CTGBasePickup.h"
 #include "PickupSpawner.h"
 #include "RoomBase.h"
+#include "EnemyCharacter.h"
 #include "RoomSpawner.generated.h"
 
 UCLASS()
@@ -21,6 +22,15 @@ public:
     TSubclassOf<ARoomBase> StartRoomClass;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Settings")
     float BlockerSpawnOffset = 0.5f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemies")
+    TSubclassOf<AEnemyCharacter> EnemyClass;
+
+    UPROPERTY(EditAnywhere, Category = "Enemies")
+    int32 EnemiesToSpawn = 5;
+
+    UFUNCTION(BlueprintCallable, Category = "Enemies")
+    void SpawnEnemies();
 
     UPROPERTY(EditAnywhere)
     TArray<TSubclassOf<ARoomBase>> RoomTypes;
@@ -58,5 +68,6 @@ private:
     bool IsLocationFree(FVector Location, float Radius = 500.0f);
 
     void GenerateDungeon();
+
     void RebuildNavigation();
 };
