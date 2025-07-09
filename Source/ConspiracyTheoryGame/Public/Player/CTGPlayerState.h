@@ -17,12 +17,18 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Points")
     int32 Points;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Points")
+    int32 PointsToUnlockBoss = 2000;
+
 public:
     UPROPERTY(BlueprintAssignable, Category = "Events")
     FOnPointsChangedSignature OnPointsChanged;
 
     UFUNCTION(BlueprintCallable, Category = "Points")
     int32 GetPoints() const { return Points; };
+
+    UFUNCTION(BlueprintCallable, Category = "Points")
+    int32 GetPointsToUnlockBoss() const { return PointsToUnlockBoss; };
 
     UFUNCTION(BlueprintCallable, Category = "Points")
     int32 GetPreviousPoints() const { return PreviousPoints; };

@@ -22,6 +22,7 @@ void ACTGBasePickup::BeginPlay()
     Super::BeginPlay();
 
     check(CollisionComponent);
+    check(MeshComponent);
 }
 
 void ACTGBasePickup::ShowPickup()

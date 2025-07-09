@@ -14,6 +14,7 @@ class CONSPIRACYTHEORYGAME_API UCTGGameInstance : public UGameInstance
 public:
     FName GetStartupLevelName() const { return StartupLevelName; };
     FName GetMenuLevelName() const { return MenuLevelName; };
+    FName GetBossLevelName() const { return BossLevelName; };
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Game")
@@ -21,4 +22,7 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "Game")
     FName MenuLevelName = NAME_None;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Game")
+    FName BossLevelName = NAME_None;
 };
