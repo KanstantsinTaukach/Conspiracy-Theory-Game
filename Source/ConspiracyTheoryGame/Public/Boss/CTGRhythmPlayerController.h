@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/PlayerController.h"
+#include "Player/CTGPlayerController.h"
 #include "CTGRhythmPlayerController.generated.h"
 
 class UInputAction;
@@ -11,7 +11,7 @@ class UInputMappingContext;
 class ACTGRhythmGameModeBase;
 
 UCLASS()
-class CONSPIRACYTHEORYGAME_API ACTGRhythmPlayerController : public APlayerController
+class CONSPIRACYTHEORYGAME_API ACTGRhythmPlayerController : public ACTGPlayerController
 {
     GENERATED_BODY()
 

@@ -193,14 +193,6 @@ void ACTGRhythmGameModeBase::RemoveFallingKey(AActor* DestroyedActor)
     }
 }
 
-void ACTGRhythmGameModeBase::SetMatchState(ECTGMatchState State)
-{
-    if (MatchState == State) return;
-
-    MatchState = State;
-    OnMatchStateChanged.Broadcast(MatchState);
-}
-
 void ACTGRhythmGameModeBase::OnPlayerCharacterDeath()
 {
     if (PlayerCharacter && PlayerCharacter->IsDead())
@@ -215,4 +207,15 @@ void ACTGRhythmGameModeBase::OnBossCharacterDeath()
     {
         SetMatchState(ECTGMatchState::GameOver);
     }
+}
+
+bool ACTGRhythmGameModeBase::ClearPause()
+{
+    const bool PauseCleared = Super::ClearPause();
+    if (PauseCleared)
+    {
+        SetMatchState(ECTGMatchState::FightingWithBoss);
+    }
+
+    return PauseCleared;
 }

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameModeBase.h"
+#include "CTGGameModeBase.h"
 #include "CTGCoreTypes.h"
 #include "CTGRhythmGameModeBase.generated.h"
 
@@ -14,7 +14,7 @@ class ACTGBossHUD;
 class ACTGVisualCharacter;
 
 UCLASS()
-class CONSPIRACYTHEORYGAME_API ACTGRhythmGameModeBase : public AGameModeBase
+class CONSPIRACYTHEORYGAME_API ACTGRhythmGameModeBase : public ACTGGameModeBase
 {
     GENERATED_BODY()
 
@@ -22,8 +22,6 @@ public:
     ACTGRhythmGameModeBase();
 
     virtual void StartPlay() override;
-
-    FOnMatchStateChangeSignature OnMatchStateChanged;
 
     UFUNCTION()
     void CheckPlayerInput(ECTGKeyType InputKey);
@@ -33,6 +31,8 @@ public:
 
     UFUNCTION(BlueprintCallable)
     ACTGVisualCharacter* GetVisualBossCharacter() const { return BossCharacter; };
+
+    virtual bool ClearPause() override;
 
 protected:
     UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "10", clampMax = "100"), Category = "RhythmGameSettings")
@@ -98,8 +98,6 @@ private:
 
     FTimerHandle SpawnTimerHandle;
 
-    ECTGMatchState MatchState = ECTGMatchState::WaitingToStart;
-
     void FindFog();
 
     void UpdateColors();
@@ -108,8 +106,6 @@ private:
 
     void OnPlayerCharacterDeath();
     void OnBossCharacterDeath();
-
-    void SetMatchState(ECTGMatchState State);
 
     UFUNCTION()
     void RemoveFallingKey(AActor* DestroyedActor);

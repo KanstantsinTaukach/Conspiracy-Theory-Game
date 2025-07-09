@@ -10,6 +10,7 @@ void ACTGBossHUD::BeginPlay()
 
     GameWidgets.Add(ECTGMatchState::FightingWithBoss, CreateWidget<UUserWidget>(GetWorld(), BossGameplayWidgetClass));
     GameWidgets.Add(ECTGMatchState::GameOver, CreateWidget<UUserWidget>(GetWorld(), GameOverWidgetClass));
+    GameWidgets.Add(ECTGMatchState::Pause, CreateWidget<UUserWidget>(GetWorld(), PauseWidgetClass));
 
     for (auto GameWidgetPair : GameWidgets)
     {
