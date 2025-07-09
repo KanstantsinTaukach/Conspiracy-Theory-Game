@@ -14,6 +14,8 @@ class CONSPIRACYTHEORYGAME_API UCTGGameInstance : public UGameInstance
 public:
     FName GetStartupLevelName() const { return StartupLevelName; };
     FName GetMenuLevelName() const { return MenuLevelName; };
+
+    UFUNCTION(BlueprintCallable)
     FName GetBossLevelName() const { return BossLevelName; };
 
 protected:
