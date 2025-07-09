@@ -23,6 +23,8 @@ public:
 
     virtual void StartPlay() override;
 
+    FOnMatchStateChangeSignature OnMatchStateChanged;
+
     UFUNCTION()
     void CheckPlayerInput(ECTGKeyType InputKey);
 
@@ -96,6 +98,8 @@ private:
 
     FTimerHandle SpawnTimerHandle;
 
+    ECTGMatchState MatchState = ECTGMatchState::WaitingToStart;
+
     void FindFog();
 
     void UpdateColors();
@@ -104,6 +108,8 @@ private:
 
     void OnPlayerCharacterDeath();
     void OnBossCharacterDeath();
+
+    void SetMatchState(ECTGMatchState State);
 
     UFUNCTION()
     void RemoveFallingKey(AActor* DestroyedActor);

@@ -4,9 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
+#include "CTGCoreTypes.h"
 #include "CTGBossHUD.generated.h"
-
-class UCTGBossGameplayWidget;
 
 UCLASS()
 class CONSPIRACYTHEORYGAME_API ACTGBossHUD : public AHUD
@@ -14,12 +13,20 @@ class CONSPIRACYTHEORYGAME_API ACTGBossHUD : public AHUD
     GENERATED_BODY()
 
 protected:
-    UPROPERTY(EditDefaultsOnly, Category = "UI")
-    TSubclassOf<UCTGBossGameplayWidget> BossGameplayWidgetClass;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UUserWidget> BossGameplayWidgetClass;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UUserWidget> GameOverWidgetClass;
 
     virtual void BeginPlay() override;
 
 private:
     UPROPERTY()
-    TObjectPtr<UCTGBossGameplayWidget> BossGameplayWidget;
+    TMap<ECTGMatchState, UUserWidget*> GameWidgets;
+
+    UPROPERTY()
+    UUserWidget* CurrentWidget = nullptr;
+
+    void OnMatchStateChanged(ECTGMatchState State);
 };

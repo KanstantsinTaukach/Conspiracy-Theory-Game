@@ -25,6 +25,8 @@ void ACTGRhythmGameModeBase::StartPlay()
 {
     Super::StartPlay();
 
+    SetMatchState(ECTGMatchState::FightingWithBoss);
+
     // FSettings RhythmSettings;
     RhythmSettings.GridDims = FDim{GridDims.X, GridDims.Y};
     RhythmSettings.ActorPosition = FPosition{0, 0};
@@ -48,7 +50,7 @@ void ACTGRhythmGameModeBase::StartPlay()
     //
     FindFog();
 
-    //Update colors
+    // Update colors
     check(ColorsTable);
     const auto RowsCount = ColorsTable->GetRowNames().Num();
     check(RowsCount >= 1);
@@ -58,14 +60,13 @@ void ACTGRhythmGameModeBase::StartPlay()
     // Spawn Player and Boss
     int32 TargetOffset = (RhythmSettings.GridDims.Width * 0.5 + VisualCharacterOffset) * CellSize;
 
-    PlayerCharacter = Cast<ACTGVisualCharacter>(RhythmPawn->SpawnVisualCharacter(PlayerCharacterClass, -TargetOffset, FRotator(33.0, 90.0f, -90.0)));
-    BossCharacter = Cast<ACTGVisualCharacter>(RhythmPawn->SpawnVisualCharacter(BossCharacterClass, TargetOffset, FRotator(33.0, -90.0f, 90.0)));
+    PlayerCharacter =
+        Cast<ACTGVisualCharacter>(RhythmPawn->SpawnVisualCharacter(PlayerCharacterClass, -TargetOffset, FRotator(33.0, 90.0f, -90.0)));
+    BossCharacter =
+        Cast<ACTGVisualCharacter>(RhythmPawn->SpawnVisualCharacter(BossCharacterClass, TargetOffset, FRotator(33.0, -90.0f, 90.0)));
 
     PlayerCharacter->OnDeath.AddUObject(this, &ACTGRhythmGameModeBase::OnPlayerCharacterDeath);
     BossCharacter->OnDeath.AddUObject(this, &ACTGRhythmGameModeBase::OnBossCharacterDeath);
-
-    HUD = Cast<ACTGBossHUD>(PC->GetHUD());
-    check(HUD);
 
     // Spawn Falling Keys
     GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true);
@@ -192,12 +193,26 @@ void ACTGRhythmGameModeBase::RemoveFallingKey(AActor* DestroyedActor)
     }
 }
 
-void ACTGRhythmGameModeBase::OnPlayerCharacterDeath() 
+void ACTGRhythmGameModeBase::SetMatchState(ECTGMatchState State)
 {
-    UE_LOG(LogCTGRhythmGameModeBase, Display, TEXT("PLAYER IS DEAD"));
+    if (MatchState == State) return;
+
+    MatchState = State;
+    OnMatchStateChanged.Broadcast(MatchState);
 }
 
-void ACTGRhythmGameModeBase::OnBossCharacterDeath() 
+void ACTGRhythmGameModeBase::OnPlayerCharacterDeath()
 {
-    UE_LOG(LogCTGRhythmGameModeBase, Display, TEXT("BOSS IS DEAD"));
+    if (PlayerCharacter && PlayerCharacter->IsDead())
+    {
+        SetMatchState(ECTGMatchState::GameOver);
+    }
+}
+
+void ACTGRhythmGameModeBase::OnBossCharacterDeath()
+{
+    if (BossCharacter && BossCharacter->IsDead())
+    {
+        SetMatchState(ECTGMatchState::GameOver);
+    }
 }
