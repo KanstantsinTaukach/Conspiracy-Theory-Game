@@ -205,7 +205,7 @@ void ACTGRhythmGameModeBase::OnBossCharacterDeath()
 {
     if (BossCharacter && BossCharacter->IsDead())
     {
-        SetMatchState(ECTGMatchState::GameOver);
+        SetMatchState(ECTGMatchState::PlayerWin);
     }
 }
 

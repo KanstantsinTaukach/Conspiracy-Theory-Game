@@ -17,10 +17,13 @@ protected:
     TSubclassOf<UUserWidget> BossGameplayWidgetClass;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UUserWidget> PauseWidgetClass;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UUserWidget> GameOverWidgetClass;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
-    TSubclassOf<UUserWidget> PauseWidgetClass;
+    TSubclassOf<UUserWidget> PlayerWinWidgetClass;
 
     virtual void BeginPlay() override;
 

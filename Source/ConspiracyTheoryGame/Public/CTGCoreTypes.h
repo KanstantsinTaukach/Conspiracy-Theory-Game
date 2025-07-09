@@ -12,7 +12,8 @@ enum class ECTGMatchState : uint8
 	InProgress,
 	FightingWithBoss,
 	Pause,
-	GameOver
+	GameOver,
+    PlayerWin
 };
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnMatchStateChangeSignature, ECTGMatchState);
