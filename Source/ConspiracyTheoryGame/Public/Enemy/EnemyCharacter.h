@@ -57,6 +57,26 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy|Animation")
     UAnimMontage* StunMontage;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy|Weapon")
+    UStaticMesh* WeaponMesh;
+
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy|Weapon")
+    UStaticMeshComponent* WeaponComponent;
+
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy|Animation")
+    UAnimMontage* AttackMontage;
+
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy|Level")
+    FName LevelToOpen;
+    UFUNCTION()
+    void OnWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+        bool bFromSweep, const FHitResult& SweepResult);
+
+    void StartAttack();
+
     UFUNCTION(BlueprintCallable)
     void Stun();
 

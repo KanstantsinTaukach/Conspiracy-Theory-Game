@@ -53,6 +53,8 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception")
     float SightRadius = 1000.f;
 
+
+
     /** Radius of hearing detection */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception")
     float HearingRadius = 600.f;
