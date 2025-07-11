@@ -27,11 +27,14 @@ protected:
     UPROPERTY(VisibleAnywhere, Category = "Components")
     USphereComponent* CollisionComponent;
 
-    UPROPERTY(VisibleAnywhere, Category = "Components")
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     UStaticMeshComponent* MeshComponent;
 
     UPROPERTY(EditAnywhere, Category = "Door")
-    FVector OpenLocationOffset = FVector(0.0f, 0.0f, 200.0f);
+    FVector OpenLocationOffset = FVector(0.0f, 0.0f, 270.0f);
+
+    UPROPERTY(EditAnywhere, Category = "Door")
+    float TimeBetweenOffsets = 0.01f;
 
     UPROPERTY(EditAnywhere, Category = "Description")
     FText DisplayName;
@@ -46,4 +49,10 @@ protected:
 
 private:
     FVector InitialLocation;
+
+    FTimerHandle DoorOffsetTimerHande;
+
+    FVector CloseLocationOffset = FVector(0.0f, 0.0f, 0.0f);
+
+    void OpenDoor();
 };

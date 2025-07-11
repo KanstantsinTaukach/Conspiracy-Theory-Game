@@ -25,6 +25,8 @@ void ACTGLockedBossDoor::BeginPlay()
     check(CollisionComponent);
     check(MeshComponent);
 
+    InitialLocation = MeshComponent->GetComponentLocation();
+
     if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
     {
         if (const auto PS = Cast<ACTGPlayerState>(PC->PlayerState))
@@ -42,13 +44,26 @@ void ACTGLockedBossDoor::Interact_Implementation(APawn* InstigatorPawn)
     {
         if (PS->GetPoints() >= PS->GetPointsToUnlockBoss())
         {
-            FVector NewLocation = InitialLocation + OpenLocationOffset;
-            MeshComponent->SetWorldLocation(NewLocation);
-
-            SetActorEnableCollision(false);
-            RootComponent->SetVisibility(false, true);
+            GetWorldTimerManager().SetTimer(DoorOffsetTimerHande, this, &ACTGLockedBossDoor::OpenDoor, TimeBetweenOffsets, true);
+            OpenDoor();
         }
     }
+}
+
+void ACTGLockedBossDoor::OpenDoor() 
+{
+    if (!GetWorld() || CloseLocationOffset.Z >= OpenLocationOffset.Z)
+    {
+        SetActorEnableCollision(false);
+        RootComponent->SetVisibility(false, true);
+
+        GetWorldTimerManager().ClearTimer(DoorOffsetTimerHande);
+        return;
+    }
+
+    const float Step = 2.0f;
+    CloseLocationOffset.Z = FMath::Min(CloseLocationOffset.Z + Step, OpenLocationOffset.Z);
+    MeshComponent->SetWorldLocation(InitialLocation + CloseLocationOffset);
 }
 
 FText ACTGLockedBossDoor::GetInteractName_Implementation() const
