@@ -32,9 +32,9 @@ void ACTGRhythmPawn::UpdateLocation(const FDim& InDim, uint32 InCellSize, const 
     Viewport->ViewportResizedEvent.Remove(ResizeHandle);
     ResizeHandle = Viewport->ViewportResizedEvent.AddUObject(this, &ACTGRhythmPawn::OnViewportResized);
 
-#if WITH_EDITOR
+//#if WITH_EDITOR
     OnViewportResized(Viewport, 0);
-#endif
+//#endif
 }
 
 double ACTGRhythmPawn::HalfFOVTan(double FOVDegrees)
