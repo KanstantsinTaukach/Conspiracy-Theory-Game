@@ -63,32 +63,32 @@ struct FGridColors : public FTableRowBase
     GENERATED_USTRUCT_BODY()
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-    FLinearColor GridBackgroundColor;
+    FLinearColor GridBackgroundColor = FLinearColor::Black;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-    FLinearColor GridWallColor;
+    FLinearColor GridWallColor = FLinearColor::Black;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-    FLinearColor GridLineColor;
+    FLinearColor GridLineColor = FLinearColor::Black;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-    FLinearColor SkyAtmosphereColor;
+    FLinearColor SkyAtmosphereColor = FLinearColor::Black;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-    FLinearColor FallingKeyColor;
+    FLinearColor FallingKeyColor = FLinearColor::Black;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-    FLinearColor GridFailColor;
+    FLinearColor GridFailColor = FLinearColor::Black;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-    FLinearColor GridPerfectColor;
+    FLinearColor GridPerfectColor = FLinearColor::Black;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-    FLinearColor GridGreatColor;
+    FLinearColor GridGreatColor = FLinearColor::Black;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-    FLinearColor GridGoodColor;
+    FLinearColor GridGoodColor = FLinearColor::Black;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-    FLinearColor GridRiskColor;
+    FLinearColor GridRiskColor = FLinearColor::Black;
 };

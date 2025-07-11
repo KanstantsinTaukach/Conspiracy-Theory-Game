@@ -35,7 +35,7 @@ public:
     virtual bool ClearPause() override;
 
 protected:
-    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "10", clampMax = "100"), Category = "RhythmGameSettings")
+    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "5", clampMax = "100"), Category = "RhythmGameSettings")
     FUintPoint GridDims{15, 30};
 
     UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "10", clampMax = "100"), Category = "RhythmGameSettings")

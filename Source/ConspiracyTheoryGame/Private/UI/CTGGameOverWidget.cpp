@@ -24,11 +24,11 @@ void UCTGGameOverWidget::OnRestartLevel()
     const auto CTGGameInstance = GetWorld()->GetGameInstance<UCTGGameInstance>();
     if (!CTGGameInstance) return;
 
-    if (CTGGameInstance->GetStartupLevelName().IsNone())
+    if (CTGGameInstance->GetBossLevelName().IsNone())
     {
         UE_LOG(LogCTGGameOverWidget, Error, TEXT("Level name is NONE"));
         return;
     }
 
-    UGameplayStatics::OpenLevel(this, CTGGameInstance->GetStartupLevelName());
+    UGameplayStatics::OpenLevel(this, CTGGameInstance->GetBossLevelName());
 }
