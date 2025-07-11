@@ -64,14 +64,14 @@ void ARoomSpawner::RebuildNavigation()
 void ARoomSpawner::SpawnEnemies()
 {
     if (!EnemyClass) return;
-    if (SpawnedRooms.Num() <= 1) return;  // Нет комнат кроме стартовой
+    if (SpawnedRooms.Num() <= 1) return;  
 
     TArray<ARoomBase*> RoomsToSpawnIn = SpawnedRooms;
 
-    // Убираем первую комнату (по умолчанию это StartRoom)
+
     RoomsToSpawnIn.RemoveAt(0);
 
-    // Перемешиваем
+
     RoomsToSpawnIn.Sort([](const ARoomBase& A, const ARoomBase& B) { return FMath::RandBool(); });
 
     int32 NumToSpawn = FMath::Min(EnemiesToSpawn, RoomsToSpawnIn.Num());
@@ -82,7 +82,7 @@ void ARoomSpawner::SpawnEnemies()
         if (!Room) continue;
 
         FVector RoomLocation = Room->GetActorLocation();
-        FVector SpawnLocation = RoomLocation + FVector(100, 0, 300);
+        FVector SpawnLocation = RoomLocation + FVector(150, 0, 500);
         
 
         FActorSpawnParameters Params;
@@ -157,7 +157,7 @@ void ARoomSpawner::CloseUnconnectedExits()
             FVector CenterToExitDir = (ExitWorldLocation - RoomCenter).GetSafeNormal();
 
 
-            float DesiredOffset = RoomSize.GetMax() * 0.5f + 60.0;  
+            float DesiredOffset = RoomSize.GetMax() * 0.5f + 80.0;  
             FVector BlockerPosition = ExitWorldLocation - CenterToExitDir * DesiredOffset;
 
 

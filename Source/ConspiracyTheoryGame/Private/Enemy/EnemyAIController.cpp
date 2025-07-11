@@ -49,10 +49,20 @@ void AEnemyAIController::Tick(float DeltaTime)
     }
 
     MoveToActor(ChaseTarget);
+    float DistanceToTarget = FVector::Dist(ChaseTarget->GetActorLocation(), GetPawn()->GetActorLocation());
+
+    if (DistanceToTarget < 150.0f)
+    {
+        AEnemyCharacter* EnemyChar = Cast<AEnemyCharacter>(GetPawn());
+        if (EnemyChar)
+        {
+            EnemyChar->StartAttack();
+        }
+    }
 
     const FVector TargetLocation = ChaseTarget->GetActorLocation();
     const FVector MyLocation = GetPawn()->GetActorLocation();
-    const float DistanceToTarget = FVector::Distance(TargetLocation, MyLocation);
+    DistanceToTarget = FVector::Distance(TargetLocation, MyLocation);
 
     const bool bCanSee = LineOfSightTo(ChaseTarget);
     const bool bCanHear = DistanceToTarget < HearingRadius;
@@ -145,3 +155,5 @@ void AEnemyAIController::ResumePatrol()
 
     MoveToNextPatrolPoint();
 }
+
+

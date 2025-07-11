@@ -13,6 +13,10 @@ AEnemyCharacter::AEnemyCharacter()
 {
     PrimaryActorTick.bCanEverTick = true;
 
+    WeaponComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponComponent"));
+    WeaponComponent->SetupAttachment(GetMesh(), FName("LeftHandMiddlePoint"));
+    WeaponComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+    WeaponComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 
     PawnSensing = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensing"));
     PawnSensing->SightRadius = 350.f;
@@ -50,7 +54,10 @@ void AEnemyCharacter::Tick(float DeltaTime)
 void AEnemyCharacter::BeginPlay()
 {
     Super::BeginPlay();
-
+    if (WeaponMesh && WeaponComponent)
+    {
+        WeaponComponent->SetStaticMesh(WeaponMesh);
+    }
     if (PawnSensing)
     {
         PawnSensing->OnSeePawn.AddDynamic(this, &AEnemyCharacter::OnSeePawn);
@@ -61,6 +68,10 @@ void AEnemyCharacter::BeginPlay()
     {
         PatrolLoopAudio->SetSound(PatrolLoopSound);
         PatrolLoopAudio->Play();
+    }
+    if (WeaponComponent)
+    {
+        WeaponComponent->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnWeaponOverlap);
     }
 }
 
@@ -85,6 +96,17 @@ void AEnemyCharacter::OnSeePawn(APawn* Pawn)
     }
 }
 
+void AEnemyCharacter::StartAttack()
+{
+    if (AttackMontage)
+    {
+        UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+        if (AnimInstance)
+        {
+            AnimInstance->Montage_Play(AttackMontage);
+        }
+    }
+}
 
 void AEnemyCharacter::OnHearNoise(APawn* InstigatorPawn, const FVector& Location, float Volume)
 {
@@ -122,6 +144,8 @@ void AEnemyCharacter::StartPatrolSound()
         PatrolLoopAudio->Play();
     }
 }
+
+
 void AEnemyCharacter::Stun()
 {
     if (bIsStunned) return;
@@ -131,7 +155,7 @@ void AEnemyCharacter::Stun()
     AEnemyAIController* AIController = Cast<AEnemyAIController>(GetController());
     if (AIController)
     {
-        // Прерываем погоню
+
         AIController->ChaseTarget = nullptr;
         AIController->bIsChasing = false;
         StopChaseSound();
@@ -176,3 +200,17 @@ void AEnemyCharacter::StopChaseSound()
     }
 }
 
+void AEnemyCharacter::OnWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+    int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+    if (!OtherActor) return;
+
+    APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+    if (OtherActor == PlayerPawn)
+    {
+        if (!LevelToOpen.IsNone())
+        {
+            UGameplayStatics::OpenLevel(this, LevelToOpen);
+        }
+    }
+}
