@@ -1,6 +1,7 @@
 // Team Development of a Conspiracy Theory Game for GameBOX.
 
 #include "Player/CTGCharacter.h"
+#include "Enemy/EnemyCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CTGInteractionComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -58,6 +59,7 @@ void ACTGCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
         EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &ACTGCharacter::StartCrouch);
         EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &ACTGCharacter::StopCrouch);
         EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &ACTGCharacter::PrimaryInteract);
+        EnhancedInputComponent->BindAction(StunAction, ETriggerEvent::Triggered, this, &ACTGCharacter::TryStunEnemies);
     }
 }
 
@@ -98,6 +100,38 @@ void ACTGCharacter::PrimaryInteract()
     {
         InteractionComponent->PrimaryInteract();
     }
+}
+
+void ACTGCharacter::TryStunEnemies()
+{
+    FVector Start = CameraComponent->GetComponentLocation();
+    FVector ForwardVector = CameraComponent->GetForwardVector();
+    FVector End = Start + ForwardVector * StunDistance;
+
+
+    TArray<FHitResult> OutHits;
+    FCollisionShape Sphere = FCollisionShape::MakeSphere(StunRadius);
+
+    bool bHit = GetWorld()->SweepMultiByChannel(OutHits, Start, End, FQuat::Identity,
+        ECC_Pawn,  
+        Sphere);
+
+    if (bHit)
+    {
+        for (const FHitResult& Hit : OutHits)
+        {
+            if (AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(Hit.GetActor()))
+            {
+                if (!Enemy->bIsStunned)  
+                {
+                    Enemy->Stun();
+                }
+            }
+        }
+    }
+
+
+    DrawDebugSphere(GetWorld(), End, StunRadius, 16, FColor::Green, false, 2.0f);
 }
 
 FVector ACTGCharacter::GetPawnViewLocation() const

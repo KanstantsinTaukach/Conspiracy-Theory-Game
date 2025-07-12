@@ -2,6 +2,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "CollisionQueryParams.h"
 #include "Engine/World.h"
+
 #include "PickUpSpawner.h"
 #include "Pickups/CTGBasePickup.h"
 #include "Engine/StaticMeshActor.h"
@@ -102,10 +103,26 @@ void ARoomSpawner::GenerateDungeon()
 
     SpawnedRooms.Add(StartRoom);
     UE_LOG(LogTemp, Warning, TEXT("Start room has %d exits"), StartRoom->RoomExits.Num());
+
+TArray<TSubclassOf<ARoomBase>> ShuffledRoomTypes = RoomTypes;
+
+    // Самодельный перемешивающий цикл
+    for (int32 i = 0; i < ShuffledRoomTypes.Num(); ++i)
+    {
+        int32 SwapIndex = FMath::RandRange(i, ShuffledRoomTypes.Num() - 1);
+        if (i != SwapIndex)
+        {
+            ShuffledRoomTypes.Swap(i, SwapIndex);
+        }
+    }
+
     TArray<ARoomBase*> Frontier;
     Frontier.Add(StartRoom);
 
-    while (SpawnedRooms.Num() < TotalRooms && Frontier.Num() > 0)
+    int32 RoomTypeIndex = 0;
+
+    // Спавним все обычные комнаты
+    while (SpawnedRooms.Num() < TotalRooms - 1 && Frontier.Num() > 0)
     {
         ARoomBase* CurrentRoom = Frontier.Pop();
         for (FRoomExit& Exit : CurrentRoom->RoomExits)
@@ -116,8 +133,16 @@ void ARoomSpawner::GenerateDungeon()
 
             if (!IsLocationFree(SpawnLocation)) continue;
 
-            TSubclassOf<ARoomBase> RoomToSpawn =
-                (SpawnedRooms.Num() == TotalRooms - 1) ? BossRoomClass : RoomTypes[FMath::RandRange(0, RoomTypes.Num() - 1)];
+            TSubclassOf<ARoomBase> RoomToSpawn;
+            if (ShuffledRoomTypes.IsValidIndex(RoomTypeIndex))
+            {
+                RoomToSpawn = ShuffledRoomTypes[RoomTypeIndex++];
+            }
+            else
+            {
+                UE_LOG(LogTemp, Warning, TEXT("Ran out of room types"));
+                continue;
+            }
 
             ARoomBase* NewRoom = GetWorld()->SpawnActor<ARoomBase>(RoomToSpawn, SpawnLocation, SpawnRotation, Params);
             if (NewRoom)
@@ -125,15 +150,50 @@ void ARoomSpawner::GenerateDungeon()
                 Exit.bIsConnected = true;
                 SpawnedRooms.Add(NewRoom);
                 Frontier.Add(NewRoom);
+
+                if (SpawnedRooms.Num() >= TotalRooms - 1) break;
             }
         }
     }
+
+
+    bool bBossSpawned = false;
+
+    if (SpawnedRooms.Num() > 0)
+    {
+        ARoomBase* LastRoom = SpawnedRooms.Last();
+
+        for (FRoomExit& Exit : LastRoom->RoomExits)
+        {
+            if (Exit.bIsConnected) continue;
+
+            FVector SpawnLocation = LastRoom->GetExitLocation(Exit.Direction);
+            FRotator SpawnRotation = LastRoom->GetExitRotation(Exit.Direction);
+
+            if (!IsLocationFree(SpawnLocation)) continue;
+
+            ARoomBase* BossRoom = GetWorld()->SpawnActor<ARoomBase>(BossRoomClass, SpawnLocation, SpawnRotation, Params);
+            if (BossRoom)
+            {
+                Exit.bIsConnected = true;
+                SpawnedRooms.Add(BossRoom);
+                bBossSpawned = true;
+                UE_LOG(LogTemp, Warning, TEXT("Boss room spawned successfully on last room."));
+                break;
+            }
+        }
+    }
+
+    if (!bBossSpawned)
+    {
+        UE_LOG(LogTemp, Error, TEXT("Failed to spawn boss room - no valid exits on last room."));
+    }
+
     CloseUnconnectedExits();
     SpawnPickups();
     SpawnEnemies();
     GetWorldTimerManager().SetTimerForNextTick(this, &ARoomSpawner::RebuildNavigation);
 }
-
 void ARoomSpawner::CloseUnconnectedExits()
 {
     if (!ExitBlockerMesh) return;

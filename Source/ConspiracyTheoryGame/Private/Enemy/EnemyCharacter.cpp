@@ -73,6 +73,7 @@ void AEnemyCharacter::BeginPlay()
     {
         WeaponComponent->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnWeaponOverlap);
     }
+
 }
 
 void AEnemyCharacter::OnSeePawn(APawn* Pawn)
