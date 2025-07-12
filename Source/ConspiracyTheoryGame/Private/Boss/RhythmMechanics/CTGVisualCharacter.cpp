@@ -17,6 +17,11 @@ void ACTGVisualCharacter::BeginPlay()
 
     check(CharacterMaxHealth > 0);
 
+    if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+    {
+        AnimInstance->OnMontageEnded.AddDynamic(this, &ACTGVisualCharacter::OnAnimationEnded);
+    }
+
     PlayDanceAnimation();
 }
 
@@ -24,33 +29,27 @@ void ACTGVisualCharacter::SetHealth(float NewHealth)
 {
     if (IsDead()) return;
 
-    const auto NextHealt = FMath::Clamp(NewHealth, 0.0f, CharacterMaxHealth);
-    const auto HealthDelta = NextHealt - CharacterHealth;
-    CharacterHealth = NextHealt;
+    const auto NextHealth = FMath::Clamp(NewHealth, 0.0f, CharacterMaxHealth);
+    const auto HealthDelta = NextHealth - CharacterHealth;
+    CharacterHealth = NextHealth;
 
     OnHealthChanged.Broadcast(CharacterHealth, HealthDelta);
 
     if (HealthDelta < 0.0f && DamageAnimMontage)
     {
-        StopAnimMontage(DanceAnimMontage);
+        if (CurrentDanceAnimMontage)
+        {
+            StopAnimMontage(CurrentDanceAnimMontage);
+        }
 
-        float Duration = PlayAnimMontage(DamageAnimMontage);
-        if (Duration > 0.0f)
-        {
-            GetWorld()->GetTimerManager().ClearTimer(DanceRestartTimerHandle);
-            GetWorld()->GetTimerManager().SetTimer(DanceRestartTimerHandle, this, &ACTGVisualCharacter::PlayDanceAnimation, Duration, false);            
-        }
-        else
-        {
-            PlayDanceAnimation();
-        }
+        PlayAnimMontage(DamageAnimMontage);
     }
 
     if (IsDead())
     {
-        StopAnimMontage(DanceAnimMontage);
+        StopAnimMontage(CurrentDanceAnimMontage);
         StopAnimMontage(DamageAnimMontage);
-        GetWorld()->GetTimerManager().ClearTimer(DanceRestartTimerHandle);
+        CurrentDanceAnimMontage = nullptr;
 
         OnDeath.Broadcast();
     }
@@ -60,8 +59,28 @@ void ACTGVisualCharacter::PlayDanceAnimation()
 {
     if (IsDead()) return;
 
-    if (DanceAnimMontage)
+    if (DanceAnimations.Num() > 0)
     {
-        PlayAnimMontage(DanceAnimMontage);
+        int8 CurrentIndex = FMath::RandRange(0, DanceAnimations.Num() - 1);
+        CurrentDanceAnimMontage = DanceAnimations[CurrentIndex];
+    }
+
+    if (CurrentDanceAnimMontage)
+    {
+        PlayAnimMontage(CurrentDanceAnimMontage);
+    }
+}
+
+void ACTGVisualCharacter::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+    if (IsDead()) return;
+
+    if (Montage == DamageAnimMontage)
+    {
+        PlayDanceAnimation();
+    }
+    else if (Montage == CurrentDanceAnimMontage && !bInterrupted)
+    {
+        PlayDanceAnimation();
     }
 }

@@ -40,7 +40,7 @@ protected:
     float CharacterMaxHealth = 1000;
 
     UPROPERTY(EditDefaultsOnly, Category = "Animation")
-    TObjectPtr<UAnimMontage> DanceAnimMontage;
+    TArray<UAnimMontage*> DanceAnimations;
 
     UPROPERTY(EditDefaultsOnly, Category = "Animation")
     TObjectPtr<UAnimMontage> DamageAnimMontage;
@@ -48,7 +48,10 @@ protected:
     virtual void BeginPlay() override;
 
 private:
-    FTimerHandle DanceRestartTimerHandle;
+    TObjectPtr<UAnimMontage> CurrentDanceAnimMontage;
 
     void PlayDanceAnimation();
+
+    UFUNCTION()
+    void OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted);
 };
