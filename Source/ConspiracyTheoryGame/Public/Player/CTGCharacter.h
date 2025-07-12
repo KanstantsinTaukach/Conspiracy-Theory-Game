@@ -53,6 +53,16 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Input")
     UInputAction* InteractAction;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
+    UInputAction* StunAction;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Stun")
+    float StunDistance = 1000.0f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Stun")
+    float StunRadius = 300.0f;
+
+
     virtual void BeginPlay() override;
 
     void Move(const FInputActionValue& Value);
@@ -62,6 +72,7 @@ protected:
     void StopCrouch(const FInputActionValue& Value);
 
     void PrimaryInteract();
+    void TryStunEnemies();
 
     virtual FVector GetPawnViewLocation() const override;
 };
