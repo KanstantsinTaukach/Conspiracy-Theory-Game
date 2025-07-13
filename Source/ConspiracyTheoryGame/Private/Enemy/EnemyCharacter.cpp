@@ -253,74 +253,62 @@ void AEnemyCharacter::HandlePlayerCaught()
 {
     if (!bIsOverlappingPlayer)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Player not overlapping, aborting HandlePlayerCaught"));
         return;
-    }
-
-    // Спавним виджет
-    if (CatchWidgetClass)
-    {
-        APlayerController* PC = Cast<APlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-        if (PC)
-        {
-            UUserWidget* CatchWidget = CreateWidget<UUserWidget>(PC, CatchWidgetClass);
-            if (CatchWidget)
-            {
-                CatchWidget->AddToViewport();
-            }
-        }
     }
 
     APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
     if (!PlayerPawn)
     {
-        UE_LOG(LogTemp, Error, TEXT("PlayerPawn is null!"));
         return;
     }
 
     APlayerController* PC = Cast<APlayerController>(PlayerPawn->GetController());
     if (!PC)
     {
-        UE_LOG(LogTemp, Error, TEXT("PlayerController is null!"));
         return;
     }
+    UUserWidget* CatchWidget = nullptr;
+    if (CatchWidgetClass)
+    {
+        CatchWidget = CreateWidget<UUserWidget>(PC, CatchWidgetClass);
+        if (CatchWidget)
+        {
+            CatchWidget->AddToViewport();
+        }
+    }
+
+
+    PC->SetIgnoreMoveInput(true);
+    PC->SetIgnoreLookInput(true);
 
     ACTGPlayerState* PS = Cast<ACTGPlayerState>(PC->PlayerState);
-    if (!PS)
+    if (PS)
     {
-        UE_LOG(LogTemp, Error, TEXT("PlayerState is null or wrong type!"));
-        return;
+        UCTGSaveGame* SaveGame = Cast<UCTGSaveGame>(UGameplayStatics::CreateSaveGameObject(UCTGSaveGame::StaticClass()));
+        if (SaveGame)
+        {
+            SaveGame->SavedPoints = PS->GetPoints() / 2;
+            UGameplayStatics::SaveGameToSlot(SaveGame, "CTGSlot", 0);
+        }
     }
 
-    UE_LOG(LogTemp, Warning, TEXT("Current points: %d"), PS->GetPoints());
-
-    UCTGSaveGame* SaveGame = Cast<UCTGSaveGame>(UGameplayStatics::CreateSaveGameObject(UCTGSaveGame::StaticClass()));
-    if (!SaveGame)
-    {
-        UE_LOG(LogTemp, Error, TEXT("Failed to create SaveGame object!"));
-        return;
-    }
-
-    SaveGame->SavedPoints = PS->GetPoints() / 2;
-
-    bool bSaveSuccess = UGameplayStatics::SaveGameToSlot(SaveGame, "CTGSlot", 0);
-    if (!bSaveSuccess)
-    {
-        UE_LOG(LogTemp, Error, TEXT("Failed to save game!"));
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Game saved successfully! Points: %d"), SaveGame->SavedPoints);
-    }
 
     if (!LevelToOpen.IsNone())
     {
         FTimerHandle DelayHandle;
         GetWorldTimerManager().SetTimer(
-            DelayHandle, [this]() { UGameplayStatics::OpenLevel(this, LevelToOpen); }, 0.1f, false);
-    }
-    else
-    {
-        UE_LOG(LogTemp, Error, TEXT("LevelToOpen is not set!"));
+            DelayHandle,
+            [this, PC]()
+            {
+
+                if (PC)
+                {
+                    PC->SetIgnoreMoveInput(false);
+                    PC->SetIgnoreLookInput(false);
+                }
+
+                UGameplayStatics::OpenLevel(this, LevelToOpen);
+            },
+            CatchWidgetDisplayTime, false);
     }
 }

@@ -79,6 +79,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy|Animation")
     UAnimMontage* AttackMontage;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+    float CatchWidgetDisplayTime = 2.0f;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy|Level")
     FName LevelToOpen;
     UFUNCTION()
