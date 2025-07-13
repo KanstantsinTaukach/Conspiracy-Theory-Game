@@ -29,6 +29,7 @@ public:
     void SetModel(const FSettings& InSettings, uint32 InCellSize);
 
     void SetKeyType(ECTGKeyType Key);
+    UFUNCTION(BlueprintCallable)
     ECTGKeyType GetKeyType() const { return KeyType; };
 
     FPosition GetCurrentPosition() const { return Settings.ActorPosition; };
@@ -51,7 +52,7 @@ protected:
     UPROPERTY(VisibleAnywhere)
     TObjectPtr<USceneComponent> Origin;
 
-    UPROPERTY(VisibleAnywhere)
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     TObjectPtr<UStaticMeshComponent> FallingKeyMesh;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "KeySettings")
