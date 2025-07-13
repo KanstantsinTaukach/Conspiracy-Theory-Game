@@ -85,4 +85,6 @@ private:
     void UpdateActorPosition();
 
     FRotator GetRotationForDirection(ECTGKeyType Direction) const;
+
+    void RotateKey();
 };

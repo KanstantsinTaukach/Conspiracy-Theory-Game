@@ -87,6 +87,7 @@ void ACTGFallingKey::Tick(float DeltaTime)
     if (TimeSinceLastMove >= Settings.GameSpeed)
     {
         UpdateActorPosition();
+        //RotateKey();
         TimeSinceLastMove = 0.0f;
     }
 }
@@ -103,6 +104,14 @@ void ACTGFallingKey::UpdateActorPosition()
     {
         OnMissed();
     }
+}
+
+void ACTGFallingKey::RotateKey() 
+{
+    if (!FallingKeyMesh) return;
+
+    FRotator NewRotation = FRotator(0.0f, -90.0f, 0.0f);
+    Origin->SetWorldRotation(Origin->GetRelativeRotation() + NewRotation);
 }
 
 FVector ACTGFallingKey::ActorPositionToVector(FPosition& InPosition, uint32 InCellSize)
