@@ -13,11 +13,24 @@ class CONSPIRACYTHEORYGAME_API AEnemyCharacter : public ACharacter
 {
     GENERATED_BODY()
 private:
+    FTimerHandle OverlapCatchTimerHandle;
+
 protected:
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override;
 
 public:
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UUserWidget> CatchWidgetClass;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Capture")
+    float OverlapTimeToCatch = 2.0f;
+
+    float CurrentOverlapTime = 0.0f;
+
+    bool bIsOverlappingPlayer = false;
+
     bool bIsChasing = false;
     AEnemyCharacter();
 
@@ -60,20 +73,24 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy|Weapon")
     UStaticMesh* WeaponMesh;
 
-
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy|Weapon")
     UStaticMeshComponent* WeaponComponent;
 
-
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy|Animation")
     UAnimMontage* AttackMontage;
-
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy|Level")
     FName LevelToOpen;
     UFUNCTION()
     void OnWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
         bool bFromSweep, const FHitResult& SweepResult);
+
+    void OnInitialCatchTimerExpired();
+
+    void OnWeaponEndOverlap(
+        UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+    void HandlePlayerCaught();
 
     void StartAttack();
 

@@ -1,10 +1,14 @@
 // Team Development of a Conspiracy Theory Game for GameBOX.
 
-
 #include "Enemy/EnemyCharacter.h"
 #include "Enemy/EnemyAIController.h"
+#include "Player/CTGPlayerState.h"
+#include "CTGSaveGame.h"
+#include "Blueprint/UserWidget.h"
 #include "Perception/PawnSensingComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/PlayerController.h"
+
 #include "DrawDebugHelpers.h"
 #include "TimerManager.h"
 
@@ -16,7 +20,9 @@ AEnemyCharacter::AEnemyCharacter()
     WeaponComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponComponent"));
     WeaponComponent->SetupAttachment(GetMesh(), FName("LeftHandMiddlePoint"));
     WeaponComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-    WeaponComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+    WeaponComponent->SetGenerateOverlapEvents(true);
+    WeaponComponent->SetCollisionObjectType(ECC_WorldDynamic);
+    WeaponComponent->SetCollisionResponseToAllChannels(ECR_Overlap);
 
     PawnSensing = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensing"));
     PawnSensing->SightRadius = 350.f;
@@ -69,11 +75,12 @@ void AEnemyCharacter::BeginPlay()
         PatrolLoopAudio->SetSound(PatrolLoopSound);
         PatrolLoopAudio->Play();
     }
+
     if (WeaponComponent)
     {
         WeaponComponent->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnWeaponOverlap);
+        WeaponComponent->OnComponentEndOverlap.AddDynamic(this, &AEnemyCharacter::OnWeaponEndOverlap);
     }
-
 }
 
 void AEnemyCharacter::OnSeePawn(APawn* Pawn)
@@ -99,14 +106,19 @@ void AEnemyCharacter::OnSeePawn(APawn* Pawn)
 
 void AEnemyCharacter::StartAttack()
 {
-    if (AttackMontage)
+    if (!AttackMontage)
     {
-        UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-        if (AnimInstance)
-        {
-            AnimInstance->Montage_Play(AttackMontage);
-        }
+        UE_LOG(LogTemp, Error, TEXT("AttackMontage is NULL!"));
+        return;
     }
+    UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+    if (!AnimInstance)
+    {
+        UE_LOG(LogTemp, Error, TEXT("AnimInstance is NULL!"));
+        return;
+    }
+    UE_LOG(LogTemp, Warning, TEXT("Playing AttackMontage"));
+    AnimInstance->Montage_Play(AttackMontage);
 }
 
 void AEnemyCharacter::OnHearNoise(APawn* InstigatorPawn, const FVector& Location, float Volume)
@@ -145,7 +157,6 @@ void AEnemyCharacter::StartPatrolSound()
         PatrolLoopAudio->Play();
     }
 }
-
 
 void AEnemyCharacter::Stun()
 {
@@ -192,7 +203,6 @@ void AEnemyCharacter::Stun()
     }
 }
 
-
 void AEnemyCharacter::StopChaseSound()
 {
     if (ChaseAudio && ChaseAudio->IsPlaying())
@@ -209,9 +219,108 @@ void AEnemyCharacter::OnWeaponOverlap(UPrimitiveComponent* OverlappedComponent, 
     APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
     if (OtherActor == PlayerPawn)
     {
-        if (!LevelToOpen.IsNone())
+        if (!bIsOverlappingPlayer)
         {
-            UGameplayStatics::OpenLevel(this, LevelToOpen);
+            bIsOverlappingPlayer = true;
+
+            StartAttack();
+
+
+            GetWorldTimerManager().SetTimer(
+                OverlapCatchTimerHandle, this, &AEnemyCharacter::OnInitialCatchTimerExpired, OverlapTimeToCatch, false);
         }
+    }
+}
+
+void AEnemyCharacter::OnWeaponEndOverlap(
+    UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+    APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+    if (OtherActor == PlayerPawn)
+    {
+        bIsOverlappingPlayer = false;
+
+        GetWorldTimerManager().ClearTimer(OverlapCatchTimerHandle);
+    }
+}
+void AEnemyCharacter::OnInitialCatchTimerExpired()
+{
+
+    GetWorldTimerManager().SetTimer(OverlapCatchTimerHandle, this, &AEnemyCharacter::HandlePlayerCaught, 2.0f, false);
+}
+
+void AEnemyCharacter::HandlePlayerCaught()
+{
+    if (!bIsOverlappingPlayer)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Player not overlapping, aborting HandlePlayerCaught"));
+        return;
+    }
+
+    // Спавним виджет
+    if (CatchWidgetClass)
+    {
+        APlayerController* PC = Cast<APlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+        if (PC)
+        {
+            UUserWidget* CatchWidget = CreateWidget<UUserWidget>(PC, CatchWidgetClass);
+            if (CatchWidget)
+            {
+                CatchWidget->AddToViewport();
+            }
+        }
+    }
+
+    APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+    if (!PlayerPawn)
+    {
+        UE_LOG(LogTemp, Error, TEXT("PlayerPawn is null!"));
+        return;
+    }
+
+    APlayerController* PC = Cast<APlayerController>(PlayerPawn->GetController());
+    if (!PC)
+    {
+        UE_LOG(LogTemp, Error, TEXT("PlayerController is null!"));
+        return;
+    }
+
+    ACTGPlayerState* PS = Cast<ACTGPlayerState>(PC->PlayerState);
+    if (!PS)
+    {
+        UE_LOG(LogTemp, Error, TEXT("PlayerState is null or wrong type!"));
+        return;
+    }
+
+    UE_LOG(LogTemp, Warning, TEXT("Current points: %d"), PS->GetPoints());
+
+    UCTGSaveGame* SaveGame = Cast<UCTGSaveGame>(UGameplayStatics::CreateSaveGameObject(UCTGSaveGame::StaticClass()));
+    if (!SaveGame)
+    {
+        UE_LOG(LogTemp, Error, TEXT("Failed to create SaveGame object!"));
+        return;
+    }
+
+    SaveGame->SavedPoints = PS->GetPoints() / 2;
+
+    bool bSaveSuccess = UGameplayStatics::SaveGameToSlot(SaveGame, "CTGSlot", 0);
+    if (!bSaveSuccess)
+    {
+        UE_LOG(LogTemp, Error, TEXT("Failed to save game!"));
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Game saved successfully! Points: %d"), SaveGame->SavedPoints);
+    }
+
+    if (!LevelToOpen.IsNone())
+    {
+        FTimerHandle DelayHandle;
+        GetWorldTimerManager().SetTimer(
+            DelayHandle, [this]() { UGameplayStatics::OpenLevel(this, LevelToOpen); }, 0.1f, false);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("LevelToOpen is not set!"));
     }
 }

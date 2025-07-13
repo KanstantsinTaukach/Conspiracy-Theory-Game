@@ -263,13 +263,27 @@ void ARoomSpawner::SpawnPickups()
     TArray<AActor*> FoundSpawners;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), APickUpSpawner::StaticClass(), FoundSpawners);
 
-    int32 CurrentIndex = 0;
+    if (PickupSequence.Num() == 0 || FoundSpawners.Num() == 0)
+    {
+        return;
+    }
+
+    // ѕеремешиваем спавнеры, чтобы пор€док был случайный
+    for (int32 i = FoundSpawners.Num() - 1; i > 0; --i)
+    {
+        int32 SwapIndex = FMath::RandRange(0, i);
+        FoundSpawners.Swap(i, SwapIndex);
+    }
+
     int32 SpawnedGuaranteed = 0;
 
     for (int32 i = 0; i < FoundSpawners.Num(); ++i)
     {
         APickUpSpawner* Spawner = Cast<APickUpSpawner>(FoundSpawners[i]);
-        if (!Spawner || !Spawner->PickupClass) continue;
+        if (!Spawner || !Spawner->PickupClass)
+        {
+            continue;
+        }
 
         bool bShouldSpawn = false;
 
@@ -278,19 +292,24 @@ void ARoomSpawner::SpawnPickups()
             bShouldSpawn = true;
             ++SpawnedGuaranteed;
         }
-        else if (FMath::FRandRange(0.f, 100.f) <= RandomPickupChance)
+        else
         {
-            bShouldSpawn = true;
+            if (FMath::FRandRange(0.f, 100.f) <= RandomPickupChance)
+            {
+                bShouldSpawn = true;
+            }
         }
 
-        if (bShouldSpawn && PickupSequence.IsValidIndex(CurrentIndex))
+        if (bShouldSpawn)
         {
+            // ¬ыбираем случайный пикап из массива
+            int32 RandomPickupIndex = FMath::RandRange(0, PickupSequence.Num() - 1);
+
             FActorSpawnParameters Params;
             Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
             GetWorld()->SpawnActor<ACTGBasePickup>(
-                PickupSequence[CurrentIndex], Spawner->GetActorLocation(), Spawner->GetActorRotation(), Params);
-            ++CurrentIndex;
+                PickupSequence[RandomPickupIndex], Spawner->GetActorLocation(), Spawner->GetActorRotation(), Params);
         }
     }
 }
