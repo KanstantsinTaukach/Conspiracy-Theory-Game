@@ -12,6 +12,7 @@ class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 class UCTGInteractionComponent;
+class ACTGKsilanCharacter;
 
 UCLASS()
 class CONSPIRACYTHEORYGAME_API ACTGCharacter : public ACharacter
@@ -62,6 +63,8 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Stun")
     float StunRadius = 300.0f;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Spawning")
+    TSubclassOf<ACTGKsilanCharacter> KsilanClass;
 
     virtual void BeginPlay() override;
 
