@@ -18,6 +18,7 @@ public:
     UFUNCTION(BlueprintCallable)
     FName GetBossLevelName() const { return BossLevelName; };
 
+
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Game")
     FName StartupLevelName = NAME_None;
