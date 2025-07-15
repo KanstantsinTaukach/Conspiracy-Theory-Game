@@ -28,34 +28,34 @@ public:
 
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-    USpringArmComponent* SpringArm;
+    TObjectPtr<USpringArmComponent> SpringArm;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-    UCameraComponent* CameraComponent;
+    TObjectPtr<UCameraComponent> CameraComponent;
 
     UPROPERTY(VisibleAnywhere, Category = "Components")
-    UCTGInteractionComponent* InteractionComponent;
+    TObjectPtr<UCTGInteractionComponent> InteractionComponent;
 
     UPROPERTY(EditDefaultsOnly, Category = "Input")
-    UInputMappingContext* MappingContext;
+    TObjectPtr<UInputMappingContext> MappingContext;
 
     UPROPERTY(EditDefaultsOnly, Category = "Input")
-    UInputAction* MovementAction;
+    TObjectPtr<UInputAction> MovementAction;
 
     UPROPERTY(EditDefaultsOnly, Category = "Input")
-    UInputAction* LookAction;
+    TObjectPtr<UInputAction> LookAction;
 
     UPROPERTY(EditDefaultsOnly, Category = "Input")
-    UInputAction* JumpAction;
+    TObjectPtr<UInputAction> JumpAction;
 
     UPROPERTY(EditDefaultsOnly, Category = "Input")
-    UInputAction* CrouchAction;
+    TObjectPtr<UInputAction> CrouchAction;
 
     UPROPERTY(EditDefaultsOnly, Category = "Input")
-    UInputAction* InteractAction;
+    TObjectPtr<UInputAction> InteractAction;
 
     UPROPERTY(EditDefaultsOnly, Category = "Input")
-    UInputAction* StunAction;
+    TObjectPtr<UInputAction> StunAction;
 
     UPROPERTY(EditDefaultsOnly, Category = "Stun")
     float StunDistance = 1000.0f;
