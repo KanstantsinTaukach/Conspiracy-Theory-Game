@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "CTGGameInstance.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Sound/SoundCue.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogCTGMainMenuWidget, All, All)
 
@@ -35,7 +36,7 @@ void UCTGMainMenuWidget::OnStartGame()
         UE_LOG(LogCTGMainMenuWidget, Error, TEXT("Level name is NONE"));
         return;
     }
-
+    UGameplayStatics::PlaySound2D(GetWorld(), StartGameSound);
     UGameplayStatics::OpenLevel(this, CTGGameInstance->GetStartupLevelName());
 }
 
