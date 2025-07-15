@@ -7,6 +7,7 @@
 #include "CTGMainMenuWidget.generated.h"
 
 class UButton;
+class USoundCue;
 
 UCLASS()
 class CONSPIRACYTHEORYGAME_API UCTGMainMenuWidget : public UUserWidget
@@ -15,10 +16,13 @@ class CONSPIRACYTHEORYGAME_API UCTGMainMenuWidget : public UUserWidget
 
 protected:
     UPROPERTY(meta = (BindWidget))
-    UButton* StartGameButton;
+    TObjectPtr<UButton> StartGameButton;
 
     UPROPERTY(meta = (BindWidget))
-    UButton* QuitGameButton;
+    TObjectPtr<UButton> QuitGameButton;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
+    TObjectPtr<USoundCue> StartGameSound;
 
     virtual void NativeOnInitialized() override;
 

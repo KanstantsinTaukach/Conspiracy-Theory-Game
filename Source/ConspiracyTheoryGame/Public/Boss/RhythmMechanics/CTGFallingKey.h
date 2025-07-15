@@ -62,15 +62,15 @@ protected:
     TObjectPtr<UNiagaraSystem> ExplosionEffect;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
-    float PerfectZoneDamage = 100.0f;
+    float PerfectZoneDamage = 25.0f;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
-    float GreatZoneDamage = 50.0f;
+    float GreatZoneDamage = 10.0f;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
-    float GoodZoneDamage = 20.0f;
+    float GoodZoneDamage = 5.0f;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
-    float FailZoneDamage = 100.0f;
+    float FailZoneDamage = 30.0f;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
-    float MissZoneDamage = 50.0f;
+    float MissZoneDamage = 20.0f;
 
 private:
     FSettings Settings;

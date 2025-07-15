@@ -3,6 +3,8 @@
 #include "Pickups/CTGBasePickup.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Kismet/Gameplaystatics.h"
+#include "Sound/SoundCue.h"
 
 ACTGBasePickup::ACTGBasePickup()
 {
@@ -32,6 +34,8 @@ void ACTGBasePickup::ShowPickup()
 
 void ACTGBasePickup::HidePickup()
 {
+    UGameplayStatics::PlaySound2D(GetWorld(), PickupSound);
+
     SetPickupState(false);
 }
 
