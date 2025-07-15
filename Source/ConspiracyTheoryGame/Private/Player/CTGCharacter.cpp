@@ -9,6 +9,7 @@
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Player/CTGKsilanCharacter.h"
 
 ACTGCharacter::ACTGCharacter()
 {
@@ -38,6 +39,23 @@ void ACTGCharacter::BeginPlay()
         if(const auto InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
         {
             InputSystem->AddMappingContext(MappingContext, 0);
+        }
+    }
+
+    if (GetWorld() && KsilanClass)
+    {
+        FActorSpawnParameters SpawnParams;
+        SpawnParams.Owner = this;
+        SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+        FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() * (-50.0f) + FVector(0.0f, 0.0f, 25.0f);
+        FRotator SpawnRotation = GetActorRotation();
+
+        auto* KsilanCharacter = GetWorld()->SpawnActor<ACTGKsilanCharacter>(KsilanClass, SpawnLocation, SpawnRotation, SpawnParams);
+
+        if (KsilanCharacter)
+        {
+            KsilanCharacter->SetOwnerActor(this);;
         }
     }
 }

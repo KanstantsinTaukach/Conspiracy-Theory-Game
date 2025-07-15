@@ -2,6 +2,7 @@
 
 #include "Player/CTGPlayerState.h"
 #include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 #include "CTGSaveGame.h"
 
 void ACTGPlayerState::BeginPlay()
@@ -30,6 +31,11 @@ void ACTGPlayerState::AddPoints(int32 Delta)
 
     PreviousPoints = Points;
     Points += Delta;
+
+    if (Points >= PointsToUnlockBoss)
+    {
+        UGameplayStatics::PlaySound2D(GetWorld(), DoorUnlockedSound);
+    }
 
     OnPointsChanged.Broadcast(this, Points, Delta);
 }

@@ -23,7 +23,7 @@ ACTGFallingKey::ACTGFallingKey()
 void ACTGFallingKey::SetModel(const FSettings& InSettings, uint32 InCellSize)
 {
     Settings = InSettings;
-    Delta = Settings.GameSpeed / 10;
+    Delta = Settings.GameSpeed / 50;
     Settings.GameSpeed = FMath::RandRange(Settings.GameSpeed - Delta, Settings.GameSpeed + Delta);
     CellSize = InCellSize;
 }

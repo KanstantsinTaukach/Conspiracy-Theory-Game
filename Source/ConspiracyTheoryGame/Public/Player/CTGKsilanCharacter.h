@@ -21,14 +21,14 @@ public:
 
 protected:
     UPROPERTY(EditAnywhere, Category = "Follow")
-    float FollowDistance = 50.0f;
+    float FollowDistance = -20.0f;
 
     UPROPERTY(EditAnywhere, Category = "Follow")
-    float FollowHeight = 50.0f;
-
-    UPROPERTY(EditAnywhere, Category = "Follow")
-    float FollowSpeed = 5.0f;
+    float FollowHeight = 20.0f;
 
     UPROPERTY(EditAnywhere, Category = "Follow")
     AActor* OwnerActor = nullptr;
+
+    UPROPERTY(EditAnywhere, Category = "Follow")
+    FName FollowSocketName;
 };

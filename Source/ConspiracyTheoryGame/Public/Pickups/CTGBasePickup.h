@@ -9,6 +9,7 @@
 
 class USphereComponent;
 class UStaticMeshComponent;
+class USoundCue;
 
 UCLASS()
 class CONSPIRACYTHEORYGAME_API ACTGBasePickup : public AActor, public ICTGGameplayInterface
@@ -25,10 +26,13 @@ public:
 
 protected:
     UPROPERTY(VisibleAnywhere, Category = "Components")
-    USphereComponent* CollisionComponent;
+    TObjectPtr<USphereComponent> CollisionComponent;
 
     UPROPERTY(VisibleAnywhere, Category = "Components")
-    UStaticMeshComponent* MeshComponent;
+    TObjectPtr<UStaticMeshComponent> MeshComponent;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Sound)
+    TObjectPtr<USoundCue> PickupSound;
 
     UPROPERTY(EditAnywhere, Category = "Description")
     FText DisplayName;

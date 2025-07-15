@@ -6,6 +6,8 @@
 #include "GameFramework/PlayerState.h"
 #include "CTGPlayerState.generated.h"
 
+class USoundCue;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnPointsChangedSignature, ACTGPlayerState*, PlayerState, int32, NewPoints, int32, Delta);
 
 UCLASS()
@@ -19,6 +21,9 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "Points")
     int32 PointsToUnlockBoss = 2000;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
+    TObjectPtr<USoundCue> DoorUnlockedSound;
 
 public:
     UPROPERTY(BlueprintAssignable, Category = "Events")
