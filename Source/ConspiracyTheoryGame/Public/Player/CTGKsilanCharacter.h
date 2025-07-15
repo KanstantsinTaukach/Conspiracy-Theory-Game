@@ -28,4 +28,7 @@ protected:
 
     UPROPERTY(EditAnywhere, Category = "Follow")
     AActor* OwnerActor = nullptr;
+
+    UPROPERTY(EditAnywhere, Category = "Follow")
+    FName FollowSocketName;
 };
