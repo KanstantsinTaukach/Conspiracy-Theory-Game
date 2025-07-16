@@ -69,7 +69,7 @@ void ACTGRhythmGameModeBase::StartPlay()
     BossCharacter->OnDeath.AddUObject(this, &ACTGRhythmGameModeBase::OnBossCharacterDeath);
 
     // Spawn Falling Keys
-    GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true);
+    GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true, 0.2f);
 }
 
 void ACTGRhythmGameModeBase::FindFog()
@@ -198,6 +198,8 @@ void ACTGRhythmGameModeBase::OnPlayerCharacterDeath()
     if (PlayerCharacter && PlayerCharacter->IsDead())
     {
         SetMatchState(ECTGMatchState::GameOver);
+
+        GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
     }
 }
 
@@ -206,6 +208,8 @@ void ACTGRhythmGameModeBase::OnBossCharacterDeath()
     if (BossCharacter && BossCharacter->IsDead())
     {
         SetMatchState(ECTGMatchState::PlayerWin);
+
+        GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
     }
 }
 
