@@ -43,7 +43,8 @@ public:
 
     virtual void OnConstruction(const FTransform& Transform) override;
     virtual void BeginPlay() override;
-
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Room")
+    bool bSpawnPatrolPoint = true;
     UFUNCTION(BlueprintCallable)
     FVector GetLocalExitLocation(ERoomDirection Direction) const;
 

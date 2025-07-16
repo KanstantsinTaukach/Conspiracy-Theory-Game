@@ -109,6 +109,13 @@ FTransform ARoomBase::GetWorldExitTransform(const FRoomExit& Exit) const
 void ARoomBase::SpawnPatrolTargetPoint()
 {
     if (!GetWorld()) return;
+
+    if (!bSpawnPatrolPoint)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Спавн точки патруля отключен переменной bSpawnPatrolPoint."));
+        return;
+    }
+
     if (!bIsBossRoom && !bIsStartRoom)
     {
         FVector CenterLocation = GetActorLocation() + FVector(0, 0, 100.f);

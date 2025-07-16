@@ -1,6 +1,14 @@
 // Team Development of a Conspiracy Theory Game for GameBOX.
 
 #include "Player/CTGCharacter.h"
+
+#include "Engine/World.h"
+#include "DrawDebugHelpers.h"
+#include "CollisionQueryParams.h"
+#include "Kismet/GameplayStatics.h"
+#include "CollisionShape.h"
+#include "PhysicsEngine/BodyInstance.h"  
+#include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "Enemy/EnemyCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CTGInteractionComponent.h"
@@ -65,6 +73,11 @@ void ACTGCharacter::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 }
 
+void ACTGCharacter::SetIsChased(bool bChased)
+{
+    bIsChased = bChased;
+}
+
 void ACTGCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -79,6 +92,12 @@ void ACTGCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
         EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &ACTGCharacter::PrimaryInteract);
         EnhancedInputComponent->BindAction(StunAction, ETriggerEvent::Triggered, this, &ACTGCharacter::TryStunEnemies);
     }
+}
+
+void ACTGCharacter::OnStunMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+
+    GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 }
 
 void ACTGCharacter::Move(const FInputActionValue& Value) 
@@ -112,46 +131,137 @@ void ACTGCharacter::StopCrouch(const FInputActionValue& Value)
     UnCrouch();
 }
 
-void ACTGCharacter::PrimaryInteract() 
+void ACTGCharacter::PrimaryInteract()
 {
-    if(InteractionComponent)
+    if (bIsInteracting)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Already interacting, ignoring input"));
+        return;
+    }
+
+    // Звук
+    if (InteractSound)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, InteractSound, GetActorLocation());
+    }
+
+    if (InteractionComponent)
     {
         InteractionComponent->PrimaryInteract();
+    }
+
+    if (InteractMontage && GetMesh())
+    {
+        UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+        if (AnimInstance)
+        {
+            float MontageDuration = AnimInstance->Montage_Play(InteractMontage);
+            if (MontageDuration > 0.f)
+            {
+                bIsInteracting = true;
+                GetCharacterMovement()->DisableMovement();
+
+                FOnMontageEnded EndDelegate;
+                EndDelegate.BindUObject(this, &ACTGCharacter::OnInteractMontageEnded);
+                AnimInstance->Montage_SetEndDelegate(EndDelegate, InteractMontage);
+            }
+        }
     }
 }
 
 void ACTGCharacter::TryStunEnemies()
 {
+    if (!bCanStun)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Stun on cooldown"));
+        return;
+    }
+
+
+    if (StunMontage)
+    {
+        UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+        if (AnimInstance)
+        {
+
+            AnimInstance->Montage_Play(StunMontage.Get());
+
+
+            GetCharacterMovement()->DisableMovement();
+
+
+            FAnimMontageInstance* MontageInstance = AnimInstance->GetActiveInstanceForMontage(StunMontage.Get());
+            if (MontageInstance)
+            {
+                MontageInstance->OnMontageEnded.BindUObject(this, &ACTGCharacter::OnStunMontageEnded);
+            }
+            bCanStun = false;
+            GetWorldTimerManager().SetTimer(StunCooldownTimer, this, &ACTGCharacter::ResetStun, StunCooldown, false);
+        }
+    }
+
+
     FVector Start = CameraComponent->GetComponentLocation();
     FVector ForwardVector = CameraComponent->GetForwardVector();
     FVector End = Start + ForwardVector * StunDistance;
 
 
-    TArray<FHitResult> OutHits;
-    FCollisionShape Sphere = FCollisionShape::MakeSphere(StunRadius);
+    FCollisionQueryParams QueryParams;
+    QueryParams.AddIgnoredActor(this);
 
-    bool bHit = GetWorld()->SweepMultiByChannel(OutHits, Start, End, FQuat::Identity,
-        ECC_Pawn,  
-        Sphere);
+    float SphereRadius = 50.f;
+
+    TArray<FHitResult> HitResults;
+
+    bool bHit = GetWorld()->SweepMultiByChannel(
+        HitResults, Start, End, FQuat::Identity, ECC_Pawn, FCollisionShape::MakeSphere(SphereRadius), QueryParams);
 
     if (bHit)
     {
-        for (const FHitResult& Hit : OutHits)
+        for (const FHitResult& Hit : HitResults)
         {
-            if (AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(Hit.GetActor()))
+            AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(Hit.GetActor());
+            if (!Enemy) continue;
+
+            FVector ToTarget = (Enemy->GetActorLocation() - Start);
+            float Distance = ToTarget.Size();
+            ToTarget.Normalize();
+
+            float DotProduct = FVector::DotProduct(ForwardVector, ToTarget);
+            float Degrees = FMath::Acos(DotProduct) * (180.f / PI);
+
+            if (Degrees <= StunConeAngle)
             {
-                if (!Enemy->bIsStunned)  
+                if (!Enemy->bIsStunned)
                 {
                     Enemy->Stun();
+                    UE_LOG(LogTemp, Log, TEXT("Stunned enemy %s, angle %.1f, distance %.1f"), *Enemy->GetName(), Degrees, Distance);
                 }
             }
         }
     }
 
 
-    DrawDebugSphere(GetWorld(), End, StunRadius, 16, FColor::Green, false, 2.0f);
+    DrawDebugSphere(GetWorld(), End, SphereRadius, 16, FColor::Green, false, 2.0f);
+
+    FVector RightCone = ForwardVector.RotateAngleAxis(StunConeAngle, FVector::UpVector) * StunDistance;
+    FVector LeftCone = ForwardVector.RotateAngleAxis(-StunConeAngle, FVector::UpVector) * StunDistance;
+
+    DrawDebugLine(GetWorld(), Start, Start + RightCone, FColor::Yellow, false, 2.0f, 0, 1.5f);
+    DrawDebugLine(GetWorld(), Start, Start + LeftCone, FColor::Yellow, false, 2.0f, 0, 1.5f);
 }
 
+void ACTGCharacter::ResetStun()
+{
+    bCanStun = true;
+    UE_LOG(LogTemp, Log, TEXT("Stun cooldown reset"));
+}
+
+void ACTGCharacter::OnInteractMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+    bIsInteracting = false;
+    GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+}
 FVector ACTGCharacter::GetPawnViewLocation() const
 {
     return CameraComponent->GetComponentLocation();
