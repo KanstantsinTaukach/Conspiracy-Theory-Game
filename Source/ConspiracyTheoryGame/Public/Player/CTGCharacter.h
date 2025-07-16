@@ -20,7 +20,7 @@ class CONSPIRACYTHEORYGAME_API ACTGCharacter : public ACharacter
     GENERATED_BODY()
 
 public:
-    ACTGCharacter();
+    ACTGCharacter(const FObjectInitializer& OfjInit);
 
     virtual void Tick(float DeltaTime) override;
     UFUNCTION(BlueprintCallable, Category = "Chase")
@@ -42,24 +42,24 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stun")
     float StunCooldown = 3.0f;
 
-
     bool bCanStun = true;
-
 
     FTimerHandle StunCooldownTimer;
 
-
     void ResetStun();
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
     UAnimMontage* InteractMontage;
 
-
     bool bIsInteracting = false;
 
-
     void OnInteractMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
     USoundBase* InteractSound;
+
+    UFUNCTION(BlueprintCallable, Category = "Movenent")
+    bool IsCharacterRunning() const;
 
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -87,13 +87,13 @@ protected:
     TObjectPtr<UInputAction> CrouchAction;
 
     UPROPERTY(EditDefaultsOnly, Category = "Input")
+    TObjectPtr<UInputAction> SprintAction;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
     TObjectPtr<UInputAction> InteractAction;
 
     UPROPERTY(EditDefaultsOnly, Category = "Input")
     TObjectPtr<UInputAction> StunAction;
-
-
-
 
     UPROPERTY(EditDefaultsOnly, Category = "Spawning")
     TSubclassOf<ACTGKsilanCharacter> KsilanClass;
@@ -111,4 +111,11 @@ protected:
     void TryStunEnemies();
 
     virtual FVector GetPawnViewLocation() const override;
+
+private:
+    bool WantsToSprint = false;
+    bool IsMoving = false;
+
+    void OnStartSprinting();
+    void OnStopSprinting();
 };

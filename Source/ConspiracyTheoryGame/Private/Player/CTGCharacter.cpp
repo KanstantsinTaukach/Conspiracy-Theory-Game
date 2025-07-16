@@ -1,13 +1,12 @@
 // Team Development of a Conspiracy Theory Game for GameBOX.
 
 #include "Player/CTGCharacter.h"
-
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
 #include "CollisionQueryParams.h"
 #include "Kismet/GameplayStatics.h"
 #include "CollisionShape.h"
-#include "PhysicsEngine/BodyInstance.h"  
+#include "PhysicsEngine/BodyInstance.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "Enemy/EnemyCharacter.h"
 #include "Camera/CameraComponent.h"
@@ -18,8 +17,10 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Player/CTGKsilanCharacter.h"
+#include "Components/CTGCharacterMovementComponent.h"
 
-ACTGCharacter::ACTGCharacter()
+ACTGCharacter::ACTGCharacter(const FObjectInitializer& OfjInit)
+    : Super(OfjInit.SetDefaultSubobjectClass<UCTGCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
     PrimaryActorTick.bCanEverTick = true;
 
@@ -42,9 +43,9 @@ void ACTGCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
-    if(const auto PC = Cast<APlayerController>(Controller))
+    if (const auto PC = Cast<APlayerController>(Controller))
     {
-        if(const auto InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
+        if (const auto InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
         {
             InputSystem->AddMappingContext(MappingContext, 0);
         }
@@ -63,7 +64,8 @@ void ACTGCharacter::BeginPlay()
 
         if (KsilanCharacter)
         {
-            KsilanCharacter->SetOwnerActor(this);;
+            KsilanCharacter->SetOwnerActor(this);
+            ;
         }
     }
 }
@@ -82,13 +84,15 @@ void ACTGCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-    if(const auto EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+    if (const auto EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
     {
         EnhancedInputComponent->BindAction(MovementAction, ETriggerEvent::Triggered, this, &ACTGCharacter::Move);
         EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ACTGCharacter::Look);
         EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
         EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &ACTGCharacter::StartCrouch);
         EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &ACTGCharacter::StopCrouch);
+        EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ACTGCharacter::OnStartSprinting);
+        EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ACTGCharacter::OnStopSprinting);
         EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &ACTGCharacter::PrimaryInteract);
         EnhancedInputComponent->BindAction(StunAction, ETriggerEvent::Triggered, this, &ACTGCharacter::TryStunEnemies);
     }
@@ -100,9 +104,11 @@ void ACTGCharacter::OnStunMontageEnded(UAnimMontage* Montage, bool bInterrupted)
     GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 }
 
-void ACTGCharacter::Move(const FInputActionValue& Value) 
+void ACTGCharacter::Move(const FInputActionValue& Value)
 {
     const FVector2D MovementVector = Value.Get<FVector2D>();
+
+    IsMoving = (MovementVector.X != 0.0f || MovementVector.Y != 0.0f);
 
     const FRotator Rotation = Controller->GetControlRotation();
     const FRotator YawRotation(0.0f, Rotation.Yaw, 0.0f);
@@ -113,7 +119,7 @@ void ACTGCharacter::Move(const FInputActionValue& Value)
     AddMovementInput(RightDirection, MovementVector.X);
 }
 
-void ACTGCharacter::Look(const FInputActionValue& Value) 
+void ACTGCharacter::Look(const FInputActionValue& Value)
 {
     const FVector2D LookAxisVector = Value.Get<FVector2D>();
 
@@ -121,14 +127,29 @@ void ACTGCharacter::Look(const FInputActionValue& Value)
     AddControllerYawInput(LookAxisVector.X);
 }
 
-void ACTGCharacter::StartCrouch(const FInputActionValue& Value) 
+void ACTGCharacter::StartCrouch(const FInputActionValue& Value)
 {
     Crouch();
 }
 
-void ACTGCharacter::StopCrouch(const FInputActionValue& Value) 
+void ACTGCharacter::StopCrouch(const FInputActionValue& Value)
 {
     UnCrouch();
+}
+
+void ACTGCharacter::OnStartSprinting()
+{
+    WantsToSprint = true;
+}
+
+void ACTGCharacter::OnStopSprinting()
+{
+    WantsToSprint = false;
+}
+
+bool ACTGCharacter::IsCharacterRunning() const
+{
+    return WantsToSprint && IsMoving && !GetVelocity().IsZero();
 }
 
 void ACTGCharacter::PrimaryInteract()
@@ -177,7 +198,6 @@ void ACTGCharacter::TryStunEnemies()
         return;
     }
 
-
     if (StunMontage)
     {
         UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -186,9 +206,7 @@ void ACTGCharacter::TryStunEnemies()
 
             AnimInstance->Montage_Play(StunMontage.Get());
 
-
             GetCharacterMovement()->DisableMovement();
-
 
             FAnimMontageInstance* MontageInstance = AnimInstance->GetActiveInstanceForMontage(StunMontage.Get());
             if (MontageInstance)
@@ -200,11 +218,9 @@ void ACTGCharacter::TryStunEnemies()
         }
     }
 
-
     FVector Start = CameraComponent->GetComponentLocation();
     FVector ForwardVector = CameraComponent->GetForwardVector();
     FVector End = Start + ForwardVector * StunDistance;
-
 
     FCollisionQueryParams QueryParams;
     QueryParams.AddIgnoredActor(this);
@@ -240,7 +256,6 @@ void ACTGCharacter::TryStunEnemies()
             }
         }
     }
-
 
     DrawDebugSphere(GetWorld(), End, SphereRadius, 16, FColor::Green, false, 2.0f);
 
