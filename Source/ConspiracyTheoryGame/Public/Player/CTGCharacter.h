@@ -25,6 +25,7 @@ public:
     virtual void Tick(float DeltaTime) override;
     UFUNCTION(BlueprintCallable, Category = "Chase")
     void SetIsChased(bool bChased);
+
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stun")
     float StunDistance = 600.f;
