@@ -12,6 +12,7 @@ class ACTGFallingKey;
 class AExponentialHeightFog;
 class ACTGBossHUD;
 class ACTGVisualCharacter;
+class USoundCue;
 
 UCLASS()
 class CONSPIRACYTHEORYGAME_API ACTGRhythmGameModeBase : public ACTGGameModeBase
@@ -35,16 +36,16 @@ public:
     virtual bool ClearPause() override;
 
 protected:
-    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "5", clampMax = "100"), Category = "RhythmGameSettings")
+    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "5", cCampMax = "100"), Category = "RhythmGameSettings")
     FUintPoint GridDims{15, 30};
 
-    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "10", clampMax = "100"), Category = "RhythmGameSettings")
+    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "10", ClampMax = "100"), Category = "RhythmGameSettings")
     uint32 CellSize{10};
 
-    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.01", clampMax = "5"), Category = "RhythmGameSettings")
+    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.01", ClampMax = "5"), Category = "RhythmGameSettings")
     float GameSpeed{0.15f};
 
-    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.5", clampMax = "5"), Category = "RhythmGameSettings")
+    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.5", ClampMax = "5"), Category = "RhythmGameSettings")
     float SpawnInterval = 2.5f;
 
     UPROPERTY(EditDefaultsOnly)
@@ -67,6 +68,12 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "1", clampMax = "20"), Category = "Characters")
     int32 VisualCharacterOffset = 3;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (ClampMin = "0.01", ClampMax = "1.0"), Category = "RhythmGameSettings")
+    float TimerDelay = 0.0f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
+    TObjectPtr<USoundCue> StartGameSound;
 
     UPROPERTY()
     TArray<ACTGFallingKey*> ActiveFallingKeys;

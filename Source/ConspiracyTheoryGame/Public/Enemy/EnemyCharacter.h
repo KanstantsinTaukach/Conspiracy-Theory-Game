@@ -21,6 +21,9 @@ protected:
 
 public:
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+    USoundBase* AttackSound;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UUserWidget> CatchWidgetClass;
 
@@ -30,7 +33,7 @@ public:
     float CurrentOverlapTime = 0.0f;
 
     bool bIsOverlappingPlayer = false;
-
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     bool bIsChasing = false;
     AEnemyCharacter();
 
@@ -84,12 +87,14 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy|Level")
     FName LevelToOpen;
+
     UFUNCTION()
     void OnWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
         bool bFromSweep, const FHitResult& SweepResult);
 
     void OnInitialCatchTimerExpired();
 
+    UFUNCTION()
     void OnWeaponEndOverlap(
         UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 

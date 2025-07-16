@@ -11,6 +11,7 @@
 #include "Boss/CTGRhythmPlayerController.h"
 #include "Boss/UI/CTGBossHUD.h"
 #include "Boss/RhythmMechanics/CTGVisualCharacter.h"
+#include "Sound/SoundCue.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogCTGRhythmGameModeBase, All, All);
 
@@ -68,8 +69,12 @@ void ACTGRhythmGameModeBase::StartPlay()
     PlayerCharacter->OnDeath.AddUObject(this, &ACTGRhythmGameModeBase::OnPlayerCharacterDeath);
     BossCharacter->OnDeath.AddUObject(this, &ACTGRhythmGameModeBase::OnBossCharacterDeath);
 
+    if (StartGameSound)
+    {
+        UGameplayStatics::PlaySound2D(GetWorld(), StartGameSound);
+    }
     // Spawn Falling Keys
-    GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true);
+    GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true, TimerDelay);
 }
 
 void ACTGRhythmGameModeBase::FindFog()
@@ -198,6 +203,8 @@ void ACTGRhythmGameModeBase::OnPlayerCharacterDeath()
     if (PlayerCharacter && PlayerCharacter->IsDead())
     {
         SetMatchState(ECTGMatchState::GameOver);
+
+        GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
     }
 }
 
@@ -206,6 +213,8 @@ void ACTGRhythmGameModeBase::OnBossCharacterDeath()
     if (BossCharacter && BossCharacter->IsDead())
     {
         SetMatchState(ECTGMatchState::PlayerWin);
+
+        GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
     }
 }
 
