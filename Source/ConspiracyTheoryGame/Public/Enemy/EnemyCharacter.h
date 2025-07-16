@@ -20,6 +20,10 @@ protected:
     virtual void Tick(float DeltaTime) override;
 
 public:
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+    USoundBase* AttackSound;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UUserWidget> CatchWidgetClass;
 
@@ -29,7 +33,7 @@ public:
     float CurrentOverlapTime = 0.0f;
 
     bool bIsOverlappingPlayer = false;
-
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     bool bIsChasing = false;
     AEnemyCharacter();
 

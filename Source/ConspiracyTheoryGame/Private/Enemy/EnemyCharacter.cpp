@@ -3,6 +3,7 @@
 #include "Enemy/EnemyCharacter.h"
 #include "Enemy/EnemyAIController.h"
 #include "Player/CTGPlayerState.h"
+#include "Player/CTGCharacter.h"
 #include "CTGSaveGame.h"
 #include "Blueprint/UserWidget.h"
 #include "Perception/PawnSensingComponent.h"
@@ -102,6 +103,13 @@ void AEnemyCharacter::OnSeePawn(APawn* Pawn)
 
         StopPatrolSound();
     }
+
+    // Уведомляем игрока
+    ACTGCharacter* CTGCharacter = Cast<ACTGCharacter>(Pawn);
+    if (CTGCharacter)
+    {
+        CTGCharacter->SetIsChased(true);
+    }
 }
 
 void AEnemyCharacter::StartAttack()
@@ -111,14 +119,21 @@ void AEnemyCharacter::StartAttack()
         UE_LOG(LogTemp, Error, TEXT("AttackMontage is NULL!"));
         return;
     }
+
     UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
     if (!AnimInstance)
     {
         UE_LOG(LogTemp, Error, TEXT("AnimInstance is NULL!"));
         return;
     }
+
     UE_LOG(LogTemp, Warning, TEXT("Playing AttackMontage"));
     AnimInstance->Montage_Play(AttackMontage);
+
+    if (AttackSound)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, AttackSound, GetActorLocation());
+    }
 }
 
 void AEnemyCharacter::OnHearNoise(APawn* InstigatorPawn, const FVector& Location, float Volume)
@@ -126,7 +141,11 @@ void AEnemyCharacter::OnHearNoise(APawn* InstigatorPawn, const FVector& Location
     if (bIsChasing || bIsStunned) return;
 
     bIsChasing = true;
-
+    ACTGCharacter* PlayerCharacter = Cast<ACTGCharacter>(InstigatorPawn);
+    if (PlayerCharacter)
+    {
+        PlayerCharacter->SetIsChased(true);
+    }
     AEnemyAIController* AIController = Cast<AEnemyAIController>(GetController());
     if (AIController && InstigatorPawn)
     {
@@ -170,6 +189,15 @@ void AEnemyCharacter::Stun()
 
         AIController->ChaseTarget = nullptr;
         AIController->bIsChasing = false;
+        APawn* TargetPawn = AIController ? Cast<APawn>(AIController->GetFocusActor()) : nullptr;
+        if (TargetPawn)
+        {
+            ACTGCharacter* PlayerCharacter = Cast<ACTGCharacter>(TargetPawn);
+            if (PlayerCharacter)
+            {
+                PlayerCharacter->SetIsChased(false);
+            }
+        }
         StopChaseSound();
 
         bIsChasing = false;
