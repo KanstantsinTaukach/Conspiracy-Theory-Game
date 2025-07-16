@@ -9,7 +9,7 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogCTGMainMenuWidget, All, All)
 
-void UCTGMainMenuWidget::NativeOnInitialized() 
+void UCTGMainMenuWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
 
@@ -24,7 +24,7 @@ void UCTGMainMenuWidget::NativeOnInitialized()
     }
 }
 
-void UCTGMainMenuWidget::OnStartGame() 
+void UCTGMainMenuWidget::OnStartGame()
 {
     if (!GetWorld()) return;
 
@@ -36,11 +36,15 @@ void UCTGMainMenuWidget::OnStartGame()
         UE_LOG(LogCTGMainMenuWidget, Error, TEXT("Level name is NONE"));
         return;
     }
-    UGameplayStatics::PlaySound2D(GetWorld(), StartGameSound);
+    if (StartGameSound)
+    {
+        UGameplayStatics::PlaySound2D(GetWorld(), StartGameSound);
+    }
+
     UGameplayStatics::OpenLevel(this, CTGGameInstance->GetStartupLevelName());
 }
 
-void UCTGMainMenuWidget::OnQuitGame() 
+void UCTGMainMenuWidget::OnQuitGame()
 {
     UKismetSystemLibrary::QuitGame(this, GetOwningPlayer(), EQuitPreference::Quit, true);
 }

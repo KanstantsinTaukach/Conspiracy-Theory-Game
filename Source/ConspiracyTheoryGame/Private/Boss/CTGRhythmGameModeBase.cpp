@@ -11,6 +11,7 @@
 #include "Boss/CTGRhythmPlayerController.h"
 #include "Boss/UI/CTGBossHUD.h"
 #include "Boss/RhythmMechanics/CTGVisualCharacter.h"
+#include "Sound/SoundCue.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogCTGRhythmGameModeBase, All, All);
 
@@ -68,8 +69,12 @@ void ACTGRhythmGameModeBase::StartPlay()
     PlayerCharacter->OnDeath.AddUObject(this, &ACTGRhythmGameModeBase::OnPlayerCharacterDeath);
     BossCharacter->OnDeath.AddUObject(this, &ACTGRhythmGameModeBase::OnBossCharacterDeath);
 
+    if (StartGameSound)
+    {
+        UGameplayStatics::PlaySound2D(GetWorld(), StartGameSound);
+    }
     // Spawn Falling Keys
-    GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true, 0.2f);
+    GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true, TimerDelay);
 }
 
 void ACTGRhythmGameModeBase::FindFog()
