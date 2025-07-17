@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "NiagaraSystem.h"
+#include "Components/ArrowComponent.h"
 #include "CTGCharacter.generated.h"
 
 class USpringArmComponent;
@@ -21,6 +22,8 @@ class CONSPIRACYTHEORYGAME_API ACTGCharacter : public ACharacter
     GENERATED_BODY()
 
 public:
+    void SetBossRoomLocation(const FVector& Location);
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flash")
     UNiagaraSystem* FlashEffect;
 
@@ -68,8 +71,33 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Movenent")
     bool IsCharacterRunning() const;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+    TArray<USoundBase*> CrouchFootstepSounds;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+    TArray<USoundBase*> WalkFootstepSounds;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+    TArray<USoundBase*> RunFootstepSounds;
+    void PlayFootstep();
 
 protected:
+    UPROPERTY()
+    class ACTGPlayerState* CachedPlayerState = nullptr;
+    UFUNCTION()
+    void OnPointsChanged(ACTGPlayerState* PS, int32 NewPoints, int32 Delta);
+    FVector BossRoomLocation = FVector::ZeroVector;
+    bool bShowCompassArrow = false;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Compass", meta = (AllowPrivateAccess = "true"))
+    class UArrowComponent* CompassArrow;
+
+    FVector BossDoorLocation;
+
+    int32 Score = 0;
+    int32 CompassScoreThreshold = 2500;
+
+    void UpdateCompass();
+
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     TObjectPtr<USpringArmComponent> SpringArm;
 

@@ -2,6 +2,12 @@
 
 #include "Player/CTGCharacter.h"
 #include "Engine/World.h"
+#include "Player/CTGPlayerState.h"
+#include "Perception/AISense_Hearing.h"
+#include "Perception/AIPerceptionSystem.h"
+#include "Components/ArrowComponent.h"
+#include "GameFramework/PlayerController.h"
+#include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 #include "CollisionQueryParams.h"
 #include "Kismet/GameplayStatics.h"
@@ -19,10 +25,22 @@
 #include "Player/CTGKsilanCharacter.h"
 #include "Components/CTGCharacterMovementComponent.h"
 
+void ACTGCharacter::SetBossRoomLocation(const FVector& Location)
+{
+    BossRoomLocation = Location;
+    bShowCompassArrow = true;
+    if (CompassArrow)
+    {
+        CompassArrow->SetHiddenInGame(false);
+    }
+    UE_LOG(LogTemp, Warning, TEXT("BossRoomLocation set to: %s"), *BossRoomLocation.ToString());
+}
+
 ACTGCharacter::ACTGCharacter(const FObjectInitializer& OfjInit)
     : Super(OfjInit.SetDefaultSubobjectClass<UCTGCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
     PrimaryActorTick.bCanEverTick = true;
+
 
     SpringArm = CreateDefaultSubobject<USpringArmComponent>("SpringArm");
     SpringArm->SetupAttachment(GetRootComponent());
@@ -37,6 +55,12 @@ ACTGCharacter::ACTGCharacter(const FObjectInitializer& OfjInit)
 
     GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
     GetCharacterMovement()->MaxWalkSpeedCrouched = 200.f;
+
+    CompassArrow = CreateDefaultSubobject<UArrowComponent>(TEXT("CompassArrow"));
+    CompassArrow->SetupAttachment(RootComponent);
+    CompassArrow->SetRelativeLocation(FVector(0.f, 0.f, 120.f));
+    CompassArrow->SetArrowColor(FColor::Red);
+    CompassArrow->SetHiddenInGame(true);
 }
 
 void ACTGCharacter::BeginPlay()
@@ -53,7 +77,20 @@ void ACTGCharacter::BeginPlay()
             InputSystem->AddMappingContext(MappingContext, 0);
         }
     }
+    if (APlayerController* PC = Cast<APlayerController>(Controller))
+    {
+        CachedPlayerState = PC->GetPlayerState<ACTGPlayerState>();
+        if (CachedPlayerState)
+        {
+            CachedPlayerState->OnPointsChanged.AddDynamic(this, &ACTGCharacter::OnPointsChanged);
+            CompassScoreThreshold = CachedPlayerState->GetPointsToUnlockBoss();
+        }
+    }
 
+    if (CompassArrow)
+    {
+        CompassArrow->SetHiddenInGame(true);
+    }
     if (GetWorld() && KsilanClass)
     {
         FActorSpawnParameters SpawnParams;
@@ -76,11 +113,45 @@ void ACTGCharacter::BeginPlay()
 void ACTGCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+
+    if (Score >= CompassScoreThreshold && !BossRoomLocation.IsZero())
+    {
+        if (CompassArrow->bHiddenInGame) CompassArrow->SetHiddenInGame(false);
+        UpdateCompass();
+    }
+    else
+    {
+        if (!CompassArrow->bHiddenInGame) CompassArrow->SetHiddenInGame(true);
+    }
 }
 
 void ACTGCharacter::SetIsChased(bool bChased)
 {
     bIsChased = bChased;
+}
+
+void ACTGCharacter::OnPointsChanged(ACTGPlayerState* PS, int32 NewPoints, int32 Delta)
+{
+    Score = NewPoints;  // ќбновл€ем локальный Score
+
+    UE_LOG(LogTemp, Warning, TEXT("Points changed: %d"), NewPoints);
+
+    if (NewPoints >= CompassScoreThreshold)
+    {
+        bShowCompassArrow = true;
+        if (CompassArrow)
+        {
+            CompassArrow->SetHiddenInGame(false);
+        }
+    }
+    else
+    {
+        bShowCompassArrow = false;
+        if (CompassArrow)
+        {
+            CompassArrow->SetHiddenInGame(true);
+        }
+    }
 }
 
 void ACTGCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -283,4 +354,48 @@ void ACTGCharacter::OnInteractMontageEnded(UAnimMontage* Montage, bool bInterrup
 FVector ACTGCharacter::GetPawnViewLocation() const
 {
     return CameraComponent->GetComponentLocation();
+}
+void ACTGCharacter::UpdateCompass()
+{
+    FVector Direction = BossRoomLocation - GetActorLocation();
+    Direction.Z = 0;
+    if (Direction.IsNearlyZero()) return;
+
+    Direction.Normalize();
+
+    FRotator TargetRotation = Direction.Rotation();
+
+    // ѕлавное вращение стрелки (интерпол€ци€)
+    FRotator CurrentRotation = CompassArrow->GetComponentRotation();
+    FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, GetWorld()->GetDeltaSeconds(), 5.0f);
+
+    CompassArrow->SetWorldRotation(NewRotation);
+}
+void ACTGCharacter::PlayFootstep()
+{
+    if (!GetCharacterMovement()->IsMovingOnGround()) return;
+
+    USoundBase* SelectedSound = nullptr;
+
+    if (bIsCrouched && CrouchFootstepSounds.Num() > 0)
+    {
+        SelectedSound = CrouchFootstepSounds[FMath::RandRange(0, CrouchFootstepSounds.Num() - 1)];
+    }
+    else if (GetVelocity().Size() < 300.f && WalkFootstepSounds.Num() > 0)
+    {
+        SelectedSound = WalkFootstepSounds[FMath::RandRange(0, WalkFootstepSounds.Num() - 1)];
+    }
+    else if (RunFootstepSounds.Num() > 0)
+    {
+        SelectedSound = RunFootstepSounds[FMath::RandRange(0, RunFootstepSounds.Num() - 1)];
+    }
+
+    if (SelectedSound)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, SelectedSound, GetActorLocation());
+
+        float Loudness = bIsCrouched ? 0.3f : (GetVelocity().Size() < 300.f ? 0.6f : 1.0f);
+
+        UAISense_Hearing::ReportNoiseEvent(GetWorld(), GetActorLocation(), Loudness, this, 0.f, FName("Step"));
+    }
 }

@@ -21,6 +21,15 @@ protected:
     virtual void Tick(float DeltaTime) override;
 
 public:
+    bool bIsRunning;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Footstep")
+    TArray<USoundBase*> WalkFootstepSounds;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Footstep")
+    TArray<USoundBase*> RunFootstepSounds;
+
+    UFUNCTION(BlueprintCallable)
+    void PlayFootstep(bool bIsRunning);
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
     USoundBase* LostTargetSound;
