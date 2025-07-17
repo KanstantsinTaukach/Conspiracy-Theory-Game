@@ -72,7 +72,6 @@ void ACTGVisualCharacter::PlayDanceAnimation()
 
     int8 CurrentIndex = 0;
 
-
     if (DanceAnimations.Num() > 0)
     {
         do
