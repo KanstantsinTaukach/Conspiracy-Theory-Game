@@ -75,7 +75,8 @@ void ACTGRhythmGameModeBase::StartPlay()
         GameMusicComponent = UGameplayStatics::SpawnSound2D(GetWorld(), StartGameSound);
     }
     // Spawn Falling Keys
-    GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true, TimerDelay);
+    GetWorld()->GetTimerManager().SetTimer(
+        SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true, TimerDelay);
 }
 
 void ACTGRhythmGameModeBase::FindFog()
@@ -203,9 +204,13 @@ void ACTGRhythmGameModeBase::OnPlayerCharacterDeath()
 {
     if (PlayerCharacter && PlayerCharacter->IsDead())
     {
-        SetMatchState(ECTGMatchState::GameOver);
+        if (BossCharacter)
+        {
+            BossCharacter->StopAllCharacterAnimations();
+        }
 
-        GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
+        DestroyAllFallingKeys();
+        SetMatchState(ECTGMatchState::GameOver);
     }
 }
 
@@ -213,9 +218,13 @@ void ACTGRhythmGameModeBase::OnBossCharacterDeath()
 {
     if (BossCharacter && BossCharacter->IsDead())
     {
-        SetMatchState(ECTGMatchState::PlayerWin);
+        if (PlayerCharacter)
+        {
+            PlayerCharacter->StopAllCharacterAnimations();
+        }
 
-        GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
+        DestroyAllFallingKeys();
+        SetMatchState(ECTGMatchState::PlayerWin);
     }
 }
 
@@ -245,4 +254,20 @@ bool ACTGRhythmGameModeBase::ClearPause()
     }
 
     return PauseCleared;
+}
+
+void ACTGRhythmGameModeBase::DestroyAllFallingKeys()
+{
+    TArray<ACTGFallingKey*> KeysToDestroy = ActiveFallingKeys;
+    ActiveFallingKeys.Empty();
+
+    for (auto* Key : KeysToDestroy)
+    {
+        if (IsValid(Key))
+        {
+            Key->DestroyFallingKey();
+        }
+    }
+
+    GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
 }

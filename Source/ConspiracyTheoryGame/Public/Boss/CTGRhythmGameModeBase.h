@@ -121,4 +121,6 @@ private:
 
     UFUNCTION()
     void RemoveFallingKey(AActor* DestroyedActor);
+
+    void DestroyAllFallingKeys();
 };

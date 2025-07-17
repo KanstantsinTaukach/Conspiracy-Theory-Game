@@ -47,9 +47,7 @@ void ACTGVisualCharacter::SetHealth(float NewHealth)
 
     if (IsDead())
     {
-        StopAnimMontage(CurrentDanceAnimMontage);
-        StopAnimMontage(DamageAnimMontage);
-        CurrentDanceAnimMontage = nullptr;
+        StopAllCharacterAnimations();
 
         OnDeath.Broadcast();
     }
@@ -83,4 +81,11 @@ void ACTGVisualCharacter::OnAnimationEnded(UAnimMontage* Montage, bool bInterrup
     {
         PlayDanceAnimation();
     }
+}
+
+void ACTGVisualCharacter::StopAllCharacterAnimations() 
+{
+    StopAnimMontage(CurrentDanceAnimMontage);
+    StopAnimMontage(DamageAnimMontage);
+    CurrentDanceAnimMontage = nullptr;
 }

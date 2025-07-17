@@ -32,6 +32,9 @@ public:
     UFUNCTION(BlueprintCallable)
     bool IsDead() const { return CharacterHealth <= 0.0f; };
 
+    UFUNCTION()
+    void StopAllCharacterAnimations();
+
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     float CharacterHealth = 1000;
