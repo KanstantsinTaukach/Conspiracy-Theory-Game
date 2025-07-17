@@ -12,6 +12,7 @@
 #include "Boss/UI/CTGBossHUD.h"
 #include "Boss/RhythmMechanics/CTGVisualCharacter.h"
 #include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogCTGRhythmGameModeBase, All, All);
 
@@ -69,9 +70,9 @@ void ACTGRhythmGameModeBase::StartPlay()
     PlayerCharacter->OnDeath.AddUObject(this, &ACTGRhythmGameModeBase::OnPlayerCharacterDeath);
     BossCharacter->OnDeath.AddUObject(this, &ACTGRhythmGameModeBase::OnBossCharacterDeath);
 
-    if (StartGameSound)
+    if (StartGameSound && !GameMusicComponent)
     {
-        UGameplayStatics::PlaySound2D(GetWorld(), StartGameSound);
+        GameMusicComponent = UGameplayStatics::SpawnSound2D(GetWorld(), StartGameSound);
     }
     // Spawn Falling Keys
     GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true, TimerDelay);
@@ -218,12 +219,29 @@ void ACTGRhythmGameModeBase::OnBossCharacterDeath()
     }
 }
 
+bool ACTGRhythmGameModeBase::SetPause(APlayerController* PC, FCanUnpause CanUnpauseDelegate)
+{
+    const bool PauseSet = Super::SetPause(PC, CanUnpauseDelegate);
+
+    if (PauseSet && GameMusicComponent)
+    {
+        GameMusicComponent->SetPaused(true);
+    }
+
+    return PauseSet;
+}
+
 bool ACTGRhythmGameModeBase::ClearPause()
 {
     const bool PauseCleared = Super::ClearPause();
     if (PauseCleared)
     {
         SetMatchState(ECTGMatchState::FightingWithBoss);
+
+        if (GameMusicComponent)
+        {
+            GameMusicComponent->SetPaused(false);
+        }
     }
 
     return PauseCleared;
