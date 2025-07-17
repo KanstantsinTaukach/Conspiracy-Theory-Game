@@ -13,6 +13,7 @@ class AExponentialHeightFog;
 class ACTGBossHUD;
 class ACTGVisualCharacter;
 class USoundCue;
+class UAudioComponent;
 
 UCLASS()
 class CONSPIRACYTHEORYGAME_API ACTGRhythmGameModeBase : public ACTGGameModeBase
@@ -33,6 +34,7 @@ public:
     UFUNCTION(BlueprintCallable)
     ACTGVisualCharacter* GetVisualBossCharacter() const { return BossCharacter; };
 
+    virtual bool SetPause(APlayerController* PC, FCanUnpause CanUnpauseDelegate = FCanUnpause()) override;
     virtual bool ClearPause() override;
 
 protected:
@@ -96,6 +98,9 @@ private:
 
     UPROPERTY()
     TObjectPtr<ACTGVisualCharacter> BossCharacter;
+
+    UPROPERTY()
+    TObjectPtr<UAudioComponent> GameMusicComponent;
 
     FSettings RhythmSettings;
 
