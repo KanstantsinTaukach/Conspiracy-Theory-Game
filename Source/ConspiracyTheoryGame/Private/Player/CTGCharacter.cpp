@@ -70,6 +70,7 @@ void ACTGCharacter::BeginPlay()
     {
         Tags.Add("Player");
     }
+    ScheduleNextXylanShout();
     if (const auto PC = Cast<APlayerController>(Controller))
     {
         if (const auto InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
@@ -108,6 +109,34 @@ void ACTGCharacter::BeginPlay()
             ;
         }
     }
+}
+void ACTGCharacter::PerformXylanShout()
+{
+    if (XylanShoutSounds.Num() == 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("No XylanShoutSounds set!"));
+        return;
+    }
+
+    // Выбрать случайный звук
+    int32 Index = FMath::RandRange(0, XylanShoutSounds.Num() - 1);
+    USoundBase* SelectedShout = XylanShoutSounds[Index];
+
+    // Проиграть звук
+    UGameplayStatics::PlaySoundAtLocation(this, SelectedShout, GetActorLocation());
+
+    // Репорт для AISense_Hearing (если используется perception)
+    UAISense_Hearing::ReportNoiseEvent(GetWorld(), GetActorLocation(), ShoutLoudness, this, ShoutAggroRadius, FName("XylanShout"));
+
+    UE_LOG(LogTemp, Log, TEXT("Xylan shout played: %s"), *SelectedShout->GetName());
+
+    // Спланировать следующую
+    ScheduleNextXylanShout();
+}
+void ACTGCharacter::ScheduleNextXylanShout()
+{
+    float NextInterval = FMath::FRandRange(MinShoutInterval, MaxShoutInterval);
+    GetWorldTimerManager().SetTimer(XylanShoutTimerHandle, this, &ACTGCharacter::PerformXylanShout, NextInterval, false);
 }
 
 void ACTGCharacter::Tick(float DeltaTime)
@@ -176,6 +205,10 @@ void ACTGCharacter::OnStunMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 
     GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+    if (APlayerController* PC = Cast<APlayerController>(GetController()))
+    {
+        PC->EnableInput(PC);
+    }
 }
 
 void ACTGCharacter::Move(const FInputActionValue& Value)
@@ -254,7 +287,10 @@ void ACTGCharacter::PrimaryInteract()
             if (MontageDuration > 0.f)
             {
                 bIsInteracting = true;
-                GetCharacterMovement()->DisableMovement();
+                if (APlayerController* PC = Cast<APlayerController>(GetController()))
+                {
+                    PC->DisableInput(PC);
+                }
 
                 FOnMontageEnded EndDelegate;
                 EndDelegate.BindUObject(this, &ACTGCharacter::OnInteractMontageEnded);
@@ -280,7 +316,10 @@ void ACTGCharacter::TryStunEnemies()
 
             AnimInstance->Montage_Play(StunMontage.Get());
 
-            GetCharacterMovement()->DisableMovement();
+            if (APlayerController* PC = Cast<APlayerController>(GetController()))
+            {
+            PC->DisableInput(PC);
+            }
 
             FAnimMontageInstance* MontageInstance = AnimInstance->GetActiveInstanceForMontage(StunMontage.Get());
             if (MontageInstance)
@@ -350,6 +389,10 @@ void ACTGCharacter::OnInteractMontageEnded(UAnimMontage* Montage, bool bInterrup
 {
     bIsInteracting = false;
     GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+    if (APlayerController* PC = Cast<APlayerController>(GetController()))
+    {
+        PC->EnableInput(PC);
+    }
 }
 FVector ACTGCharacter::GetPawnViewLocation() const
 {

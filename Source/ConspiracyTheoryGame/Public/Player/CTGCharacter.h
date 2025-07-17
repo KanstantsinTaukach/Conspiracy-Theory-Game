@@ -22,6 +22,33 @@ class CONSPIRACYTHEORYGAME_API ACTGCharacter : public ACharacter
     GENERATED_BODY()
 
 public:
+
+
+    void ScheduleNextXylanShout();
+
+
+    void PerformXylanShout();
+    FTimerHandle XylanShoutTimerHandle;
+
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Xylan|Shout")
+    float MinShoutInterval = 30.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Xylan|Shout")
+    float MaxShoutInterval = 60.f;
+
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Xylan|Shout")
+    float ShoutAggroRadius = 2000.f;
+
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Xylan|Shout")
+    float ShoutLoudness = 1.0f;
+
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Xylan|Shout")
+    TArray<USoundBase*> XylanShoutSounds;
+
     void SetBossRoomLocation(const FVector& Location);
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flash")
