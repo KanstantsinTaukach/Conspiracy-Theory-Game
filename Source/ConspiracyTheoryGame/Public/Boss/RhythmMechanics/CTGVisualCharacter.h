@@ -6,6 +6,9 @@
 #include "GameFramework/Character.h"
 #include "CTGVisualCharacter.generated.h"
 
+class USoundCue;
+class UAudioComponent;
+
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnHealthChangedSignature, float, float);
 DECLARE_MULTICAST_DELEGATE(FOnDeathSignature);
 
@@ -35,6 +38,9 @@ public:
     UFUNCTION()
     void StopAllCharacterAnimations();
 
+    UFUNCTION()
+    UAudioComponent* GetVoiceComponent() const { return VoiceComponent; };
+
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     float CharacterHealth = 1000;
@@ -48,10 +54,22 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Animation")
     TObjectPtr<UAnimMontage> DamageAnimMontage;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Sound")
+    TArray<USoundCue*> DanceSounds;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Sound")
+    TArray<USoundCue*> DamageSounds;
+
     virtual void BeginPlay() override;
 
 private:
+    int8 LastAnimationIndex = 0;
+
+    UPROPERTY()
     TObjectPtr<UAnimMontage> CurrentDanceAnimMontage;
+
+    UPROPERTY()
+    TObjectPtr<UAudioComponent> VoiceComponent;
 
     void PlayDanceAnimation();
 

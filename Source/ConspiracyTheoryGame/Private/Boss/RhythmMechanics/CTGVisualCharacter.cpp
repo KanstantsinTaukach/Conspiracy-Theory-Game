@@ -3,12 +3,19 @@
 #include "Boss/RhythmMechanics/CTGVisualCharacter.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
 
 ACTGVisualCharacter::ACTGVisualCharacter()
 {
     PrimaryActorTick.bCanEverTick = false;
 
     CharacterHealth = CharacterMaxHealth;
+
+    VoiceComponent = CreateDefaultSubobject<UAudioComponent>("VoiceComponent");
+    VoiceComponent->SetupAttachment(RootComponent);
+    VoiceComponent->bAutoActivate = false;
 }
 
 void ACTGVisualCharacter::BeginPlay()
@@ -43,6 +50,12 @@ void ACTGVisualCharacter::SetHealth(float NewHealth)
         }
 
         PlayAnimMontage(DamageAnimMontage);
+
+        if (DamageSounds.Num() > 0)
+        {
+            USoundCue* RandomSound = DamageSounds[FMath::RandRange(0, DamageSounds.Num() - 1)];
+            UGameplayStatics::PlaySound2D(GetWorld(), RandomSound);
+        }
     }
 
     if (IsDead())
@@ -57,10 +70,18 @@ void ACTGVisualCharacter::PlayDanceAnimation()
 {
     if (IsDead()) return;
 
+    int8 CurrentIndex = 0;
+
+
     if (DanceAnimations.Num() > 0)
     {
-        int8 CurrentIndex = FMath::RandRange(0, DanceAnimations.Num() - 1);
+        do
+        {
+            CurrentIndex = FMath::RandRange(0, DanceAnimations.Num() - 1);
+        } while (CurrentIndex == LastAnimationIndex);
+
         CurrentDanceAnimMontage = DanceAnimations[CurrentIndex];
+        LastAnimationIndex = CurrentIndex;
     }
 
     if (CurrentDanceAnimMontage)
