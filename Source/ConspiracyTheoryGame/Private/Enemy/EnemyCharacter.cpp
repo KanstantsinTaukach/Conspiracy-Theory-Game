@@ -90,6 +90,12 @@ void AEnemyCharacter::OnSeePawn(APawn* Pawn)
 
     bIsChasing = true;
 
+    ACTGCharacter* CTGCharacter = Cast<ACTGCharacter>(Pawn);
+    if (CTGCharacter)
+    {
+        CurrentTargetPlayer = CTGCharacter;
+        CTGCharacter->SetIsChased(true);
+    }
     AEnemyAIController* AIController = Cast<AEnemyAIController>(GetController());
     if (AIController)
     {
@@ -105,7 +111,7 @@ void AEnemyCharacter::OnSeePawn(APawn* Pawn)
     }
 
     // Уведомляем игрока
-    ACTGCharacter* CTGCharacter = Cast<ACTGCharacter>(Pawn);
+
     if (CTGCharacter)
     {
         CTGCharacter->SetIsChased(true);
@@ -236,6 +242,8 @@ void AEnemyCharacter::StopChaseSound()
     if (ChaseAudio && ChaseAudio->IsPlaying())
     {
         ChaseAudio->Stop();
+
+
     }
 }
 

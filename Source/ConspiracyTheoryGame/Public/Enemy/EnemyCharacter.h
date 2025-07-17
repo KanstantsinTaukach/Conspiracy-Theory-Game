@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Sound/SoundBase.h"
+#include "CTGCharacter.h"
 #include "Components/AudioComponent.h"
 #include "EnemyCharacter.generated.h"
 
@@ -20,6 +21,12 @@ protected:
     virtual void Tick(float DeltaTime) override;
 
 public:
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+    USoundBase* LostTargetSound;
+
+    UPROPERTY()
+    ACTGCharacter* CurrentTargetPlayer = nullptr;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
     USoundBase* AttackSound;

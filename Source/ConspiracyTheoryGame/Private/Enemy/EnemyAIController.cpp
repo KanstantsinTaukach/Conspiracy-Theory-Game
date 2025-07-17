@@ -152,6 +152,23 @@ void AEnemyAIController::LoseTarget()
 
 void AEnemyAIController::ResumePatrol()
 {
+    StopMovement();
+    bIsChasing = false;
+
+    if (AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(GetPawn()))
+    {
+        Enemy->bIsChasing = false;
+
+        if (Enemy->CurrentTargetPlayer)
+        {
+            Enemy->CurrentTargetPlayer->SetIsChased(false);
+            Enemy->CurrentTargetPlayer = nullptr;
+        }
+        if (Enemy->LostTargetSound)
+        {
+            UGameplayStatics::PlaySoundAtLocation(Enemy, Enemy->LostTargetSound, Enemy->GetActorLocation());
+        }
+    }
 
     MoveToNextPatrolPoint();
 }

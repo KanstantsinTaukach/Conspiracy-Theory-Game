@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "NiagaraSystem.h"
 #include "CTGCharacter.generated.h"
 
 class USpringArmComponent;
@@ -20,7 +21,14 @@ class CONSPIRACYTHEORYGAME_API ACTGCharacter : public ACharacter
     GENERATED_BODY()
 
 public:
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flash")
+    UNiagaraSystem* FlashEffect;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flash")
+    float FlashCooldown = 3.0f;
     ACTGCharacter(const FObjectInitializer& OfjInit);
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Flash", Transient)
+    bool bIsFlashOnCooldown = false;
 
     virtual void Tick(float DeltaTime) override;
     UFUNCTION(BlueprintCallable, Category = "Chase")
@@ -113,6 +121,7 @@ protected:
     virtual FVector GetPawnViewLocation() const override;
 
 private:
+    FTimerHandle FlashCooldownTimerHandle;
     bool WantsToSprint = false;
     bool IsMoving = false;
 

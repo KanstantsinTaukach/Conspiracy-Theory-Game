@@ -42,7 +42,10 @@ ACTGCharacter::ACTGCharacter(const FObjectInitializer& OfjInit)
 void ACTGCharacter::BeginPlay()
 {
     Super::BeginPlay();
-
+    if (!Tags.Contains("Player"))
+    {
+        Tags.Add("Player");
+    }
     if (const auto PC = Cast<APlayerController>(Controller))
     {
         if (const auto InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
