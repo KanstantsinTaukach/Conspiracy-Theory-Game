@@ -41,12 +41,12 @@ public:
     void OnMissed();
 
     UFUNCTION()
-    void DestroyFallingKey();
+    void DestroyFallingKey(bool bIsPlayerHit);
 
     UFUNCTION()
     bool GetZoneDamage(float& Damage);
 
-    void Explode();
+    void Explode(bool bIsPlayerHit);
 
 protected:
     UPROPERTY(VisibleAnywhere)
@@ -78,7 +78,8 @@ private:
     float Delta = 0.0f;
     float TimeSinceLastMove = 0.0f;
 
-    FLinearColor ExplodeColor;
+    FLinearColor GoodExplodeColor;
+    FLinearColor BadExplodeColor;
 
     FVector ActorPositionToVector(FPosition& InPosition, uint32 InCellSize);
 

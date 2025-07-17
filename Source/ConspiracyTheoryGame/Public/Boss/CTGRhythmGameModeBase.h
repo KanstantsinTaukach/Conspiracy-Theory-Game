@@ -122,5 +122,5 @@ private:
     UFUNCTION()
     void RemoveFallingKey(AActor* DestroyedActor);
 
-    void DestroyAllFallingKeys();
+    void DestroyAllFallingKeys(bool bIsPlayerWin);
 };

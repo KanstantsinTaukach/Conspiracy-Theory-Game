@@ -75,7 +75,10 @@ struct FGridColors : public FTableRowBase
     FLinearColor SkyAtmosphereColor = FLinearColor::Black;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-    FLinearColor FallingKeyColor = FLinearColor::Black;
+    FLinearColor GoodFallingKeyColor = FLinearColor::Black;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+    FLinearColor BadFallingKeyColor = FLinearColor::Black;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
     FLinearColor GridFailColor = FLinearColor::Black;

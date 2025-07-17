@@ -188,7 +188,7 @@ void ACTGRhythmGameModeBase::CheckPlayerInput(ECTGKeyType InputKey)
 
         LowestKey->OnGetZoneDamage.Broadcast(bIsDamageToBoss, Damage);
         RemoveFallingKey(LowestKey);
-        LowestKey->DestroyFallingKey();
+        LowestKey->DestroyFallingKey(bIsDamageToBoss);
     }
 }
 
@@ -209,7 +209,7 @@ void ACTGRhythmGameModeBase::OnPlayerCharacterDeath()
             BossCharacter->StopAllCharacterAnimations();
         }
 
-        DestroyAllFallingKeys();
+        DestroyAllFallingKeys(false);
         SetMatchState(ECTGMatchState::GameOver);
     }
 }
@@ -223,7 +223,7 @@ void ACTGRhythmGameModeBase::OnBossCharacterDeath()
             PlayerCharacter->StopAllCharacterAnimations();
         }
 
-        DestroyAllFallingKeys();
+        DestroyAllFallingKeys(true);
         SetMatchState(ECTGMatchState::PlayerWin);
     }
 }
@@ -256,7 +256,7 @@ bool ACTGRhythmGameModeBase::ClearPause()
     return PauseCleared;
 }
 
-void ACTGRhythmGameModeBase::DestroyAllFallingKeys()
+void ACTGRhythmGameModeBase::DestroyAllFallingKeys(bool bIsPlayerWin)
 {
     TArray<ACTGFallingKey*> KeysToDestroy = ActiveFallingKeys;
     ActiveFallingKeys.Empty();
@@ -265,7 +265,7 @@ void ACTGRhythmGameModeBase::DestroyAllFallingKeys()
     {
         if (IsValid(Key))
         {
-            Key->DestroyFallingKey();
+            Key->DestroyFallingKey(bIsPlayerWin);
         }
     }
 
