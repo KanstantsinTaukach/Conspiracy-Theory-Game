@@ -290,6 +290,7 @@ void ACTGCharacter::PrimaryInteract()
                 if (APlayerController* PC = Cast<APlayerController>(GetController()))
                 {
                     PC->DisableInput(PC);
+                    GetCharacterMovement()->StopMovementImmediately();
                 }
 
                 FOnMontageEnded EndDelegate;
@@ -318,7 +319,8 @@ void ACTGCharacter::TryStunEnemies()
 
             if (APlayerController* PC = Cast<APlayerController>(GetController()))
             {
-            PC->DisableInput(PC);
+                PC->DisableInput(PC);
+                GetCharacterMovement()->StopMovementImmediately();
             }
 
             FAnimMontageInstance* MontageInstance = AnimInstance->GetActiveInstanceForMontage(StunMontage.Get());
@@ -391,7 +393,8 @@ void ACTGCharacter::OnInteractMontageEnded(UAnimMontage* Montage, bool bInterrup
     GetCharacterMovement()->SetMovementMode(MOVE_Walking);
     if (APlayerController* PC = Cast<APlayerController>(GetController()))
     {
-        PC->EnableInput(PC);
+        PC->DisableInput(PC);
+        GetCharacterMovement()->StopMovementImmediately();
     }
 }
 FVector ACTGCharacter::GetPawnViewLocation() const
