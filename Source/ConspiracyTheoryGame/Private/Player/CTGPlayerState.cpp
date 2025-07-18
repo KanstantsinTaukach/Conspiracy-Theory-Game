@@ -33,7 +33,7 @@ void ACTGPlayerState::AddPoints(int32 Delta)
 
 bool ACTGPlayerState::RemovePoints(int32 Delta)
 {
-    if (!ensure(Delta > 0)) return false;
+    if (!ensure(Delta >= 0)) return false;
 
     PreviousPoints = Points;
     Points -= Delta;

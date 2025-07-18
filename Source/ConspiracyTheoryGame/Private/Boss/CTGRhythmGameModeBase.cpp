@@ -13,6 +13,8 @@
 #include "Boss/RhythmMechanics/CTGVisualCharacter.h"
 #include "Sound/SoundCue.h"
 #include "Components/AudioComponent.h"
+#include "Player/CTGPlayerState.h"
+#include "CTGGameInstance.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogCTGRhythmGameModeBase, All, All);
 
@@ -74,6 +76,18 @@ void ACTGRhythmGameModeBase::StartPlay()
     {
         GameMusicComponent = UGameplayStatics::SpawnSound2D(GetWorld(), StartGameSound);
     }
+
+    const auto CTGGameInstance = GetWorld()->GetGameInstance<UCTGGameInstance>();
+    if (CTGGameInstance)
+    {
+        ACTGPlayerState* PS = Cast<ACTGPlayerState>(PC->PlayerState);
+        if (PS)
+        {
+            PS->RemovePoints(PS->GetPoints());
+            CTGGameInstance->SetPlayerScore(PS->GetPoints());
+        }
+    }
+
     // Spawn Falling Keys
     GetWorld()->GetTimerManager().SetTimer(
         SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true, TimerDelay);
