@@ -15,6 +15,8 @@ class CONSPIRACYTHEORYGAME_API ADialogueTriggerZone : public AActor
 
 public:
     ADialogueTriggerZone();
+    UPROPERTY(EditAnywhere, Category = "Audio")
+    USoundBase* TriggerSound;
 
 protected:
     virtual void BeginPlay() override;

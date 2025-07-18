@@ -34,6 +34,12 @@ void ADialogueTriggerZone::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, A
     APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
     if (OtherActor != PlayerPawn) return;
 
+    // ѕроигрываем звук при наступлении на зону
+    if (TriggerSound)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, TriggerSound, GetActorLocation());
+    }
+
     APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
     if (!PC || !DialogueWidgetClass) return;
 

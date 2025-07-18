@@ -9,6 +9,7 @@
 #include "Perception/PawnSensingComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerController.h"
+#include "Perception/AISense_Hearing.h"
 
 #include "DrawDebugHelpers.h"
 #include "TimerManager.h"
@@ -89,7 +90,7 @@ void AEnemyCharacter::OnSeePawn(APawn* Pawn)
     if (bIsChasing || bIsStunned) return;
 
     bIsChasing = true;
-
+    bIsRunning = true;
     ACTGCharacter* CTGCharacter = Cast<ACTGCharacter>(Pawn);
     if (CTGCharacter)
     {
@@ -147,6 +148,7 @@ void AEnemyCharacter::OnHearNoise(APawn* InstigatorPawn, const FVector& Location
     if (bIsChasing || bIsStunned) return;
 
     bIsChasing = true;
+    bIsRunning = true;
     ACTGCharacter* PlayerCharacter = Cast<ACTGCharacter>(InstigatorPawn);
     if (PlayerCharacter)
     {
@@ -205,7 +207,7 @@ void AEnemyCharacter::Stun()
             }
         }
         StopChaseSound();
-
+        bIsRunning = false;
         bIsChasing = false;
 
         AIController->StopMovement();
@@ -242,7 +244,7 @@ void AEnemyCharacter::StopChaseSound()
     if (ChaseAudio && ChaseAudio->IsPlaying())
     {
         ChaseAudio->Stop();
-
+        bIsRunning = false;
 
     }
 }
@@ -346,5 +348,24 @@ void AEnemyCharacter::HandlePlayerCaught()
                 UGameplayStatics::OpenLevel(this, LevelToOpen);
             },
             CatchWidgetDisplayTime, false);
+    }
+}
+
+void AEnemyCharacter::PlayFootstep(bool bRunning)
+{
+    const TArray<USoundBase*>& FootstepSounds = bRunning ? RunFootstepSounds : WalkFootstepSounds;
+
+    if (FootstepSounds.Num() > 0)
+    {
+        int32 Index = FMath::RandRange(0, FootstepSounds.Num() - 1);
+        USoundBase* SelectedSound = FootstepSounds[Index];
+
+        if (SelectedSound)
+        {
+            UGameplayStatics::PlaySoundAtLocation(this, SelectedSound, GetActorLocation());
+
+            // Шум для AI (если враги тоже реагируют друг на друга или игрок)
+            UAISense_Hearing::ReportNoiseEvent(GetWorld(), GetActorLocation(), bIsRunning ? 1.0f : 0.4f, this);
+        }
     }
 }

@@ -23,6 +23,7 @@ ARoomSpawner::ARoomSpawner()
 void ARoomSpawner::BeginPlay()
 {
     Super::BeginPlay();
+
     GenerateDungeon();
 
 }
@@ -65,13 +66,15 @@ void ARoomSpawner::RebuildNavigation()
 void ARoomSpawner::SpawnEnemies()
 {
     if (!EnemyClass) return;
-    if (SpawnedRooms.Num() <= 1) return;  
+    if (SpawnedRooms.Num() <= 2) return;  // чтобы были комнаты кроме старта и босса
 
     TArray<ARoomBase*> RoomsToSpawnIn = SpawnedRooms;
 
-
+    // Удаляем стартовую комнату (индекс 0)
     RoomsToSpawnIn.RemoveAt(0);
 
+    // Удаляем боссовую комнату (последний элемент)
+    RoomsToSpawnIn.RemoveAt(RoomsToSpawnIn.Num() - 1);
 
     RoomsToSpawnIn.Sort([](const ARoomBase& A, const ARoomBase& B) { return FMath::RandBool(); });
 
@@ -84,7 +87,6 @@ void ARoomSpawner::SpawnEnemies()
 
         FVector RoomLocation = Room->GetActorLocation();
         FVector SpawnLocation = RoomLocation + FVector(150, 0, 500);
-        
 
         FActorSpawnParameters Params;
         Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
@@ -104,9 +106,8 @@ void ARoomSpawner::GenerateDungeon()
     SpawnedRooms.Add(StartRoom);
     UE_LOG(LogTemp, Warning, TEXT("Start room has %d exits"), StartRoom->RoomExits.Num());
 
-TArray<TSubclassOf<ARoomBase>> ShuffledRoomTypes = RoomTypes;
-
-    // Самодельный перемешивающий цикл
+    TArray<TSubclassOf<ARoomBase>> ShuffledRoomTypes = RoomTypes;
+    // Перемешивание комнат (shuffle)
     for (int32 i = 0; i < ShuffledRoomTypes.Num(); ++i)
     {
         int32 SwapIndex = FMath::RandRange(i, ShuffledRoomTypes.Num() - 1);
@@ -121,13 +122,14 @@ TArray<TSubclassOf<ARoomBase>> ShuffledRoomTypes = RoomTypes;
 
     int32 RoomTypeIndex = 0;
 
-    // Спавним все обычные комнаты
+    // Спавним обычные комнаты
     while (SpawnedRooms.Num() < TotalRooms - 1 && Frontier.Num() > 0)
     {
         ARoomBase* CurrentRoom = Frontier.Pop();
         for (FRoomExit& Exit : CurrentRoom->RoomExits)
         {
             if (Exit.bIsConnected) continue;
+
             FVector SpawnLocation = CurrentRoom->GetExitLocation(Exit.Direction);
             FRotator SpawnRotation = CurrentRoom->GetExitRotation(Exit.Direction);
 
@@ -156,8 +158,8 @@ TArray<TSubclassOf<ARoomBase>> ShuffledRoomTypes = RoomTypes;
         }
     }
 
-
     bool bBossSpawned = false;
+    ARoomBase* BossRoom = nullptr;
 
     if (SpawnedRooms.Num() > 0)
     {
@@ -172,7 +174,7 @@ TArray<TSubclassOf<ARoomBase>> ShuffledRoomTypes = RoomTypes;
 
             if (!IsLocationFree(SpawnLocation)) continue;
 
-            ARoomBase* BossRoom = GetWorld()->SpawnActor<ARoomBase>(BossRoomClass, SpawnLocation, SpawnRotation, Params);
+            BossRoom = GetWorld()->SpawnActor<ARoomBase>(BossRoomClass, SpawnLocation, SpawnRotation, Params);
             if (BossRoom)
             {
                 Exit.bIsConnected = true;
@@ -192,8 +194,21 @@ TArray<TSubclassOf<ARoomBase>> ShuffledRoomTypes = RoomTypes;
     CloseUnconnectedExits();
     SpawnPickups();
     SpawnEnemies();
+
     GetWorldTimerManager().SetTimerForNextTick(this, &ARoomSpawner::RebuildNavigation);
+
+    // Передача локации босса игроку
+    APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+    if (PC)
+    {
+        ACTGCharacter* PlayerCharacter = Cast<ACTGCharacter>(PC->GetPawn());
+        if (PlayerCharacter && BossRoom)
+        {
+            PlayerCharacter->SetBossRoomLocation(BossRoom->GetActorLocation());
+        }
+    }
 }
+
 void ARoomSpawner::CloseUnconnectedExits()
 {
     if (!ExitBlockerMesh) return;
