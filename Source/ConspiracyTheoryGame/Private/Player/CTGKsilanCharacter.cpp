@@ -3,6 +3,10 @@
 #include "Player/CTGKsilanCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Character.h"
+#include "Kismet/Gameplaystatics.h"
+#include "Sound/SoundCue.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 ACTGKsilanCharacter::ACTGKsilanCharacter()
 {
@@ -20,18 +24,6 @@ void ACTGKsilanCharacter::Tick(float DeltaTime)
         return;
     }
 
-    // FVector TargetLocation = OwnerActor->GetActorLocation() + OwnerActor->GetActorForwardVector() * FollowDistance + FVector(0.0f, 0.0f,
-    // FollowHeight); FVector CurrentLocation = GetActorLocation();
-
-    // float DistanceToTarget = FVector::Distance(CurrentLocation, TargetLocation);
-
-    // FVector NewLocation = FMath::VInterpTo(CurrentLocation, TargetLocation, DeltaTime, 100.0f);
-
-    // GetCharacterMovement()->MoveSmooth(NewLocation - CurrentLocation, DeltaTime);
-
-    // FRotator TargetRotation = OwnerActor->GetActorRotation() - FRotator(0.0f, 90.0f, 0.0f);
-    // SetActorRotation(FMath::RInterpTo(GetActorRotation(), TargetRotation, DeltaTime, 20.0f));
-
     const auto Character = Cast<ACharacter>(OwnerActor);
     if (Character)
     {
@@ -47,5 +39,23 @@ void ACTGKsilanCharacter::Tick(float DeltaTime)
 
         FRotator TargetRotation = OwnerActor->GetActorRotation() - FRotator(0.0f, 90.0f, 0.0f);
         SetActorRotation(FMath::RInterpTo(GetActorRotation(), TargetRotation, DeltaTime, 20.0f));
+
+        float Distance = MoveDirection.Size();
+        if (Distance > TeleportDistance)
+        {
+            if (TeleportSound)
+            {
+                UGameplayStatics::PlaySound2D(GetWorld(), TeleportSound);
+            }
+
+            if (TeleportEffect)
+            {
+                UNiagaraComponent* NS = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), TeleportEffect, TargetLocation);
+            }
+
+            SetActorLocation(TargetLocation);
+
+            return;
+        }
     }
 }
