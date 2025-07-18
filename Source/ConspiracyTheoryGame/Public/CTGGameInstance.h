@@ -22,6 +22,9 @@ public:
     FName GetMenuLevelName() const { return MenuLevelName; };
 
     UFUNCTION(BlueprintCallable)
+    FName GetBossIntroLevelName() const { return BossIntroLevelName; };
+
+    UFUNCTION(BlueprintCallable)
     FName GetBossLevelName() const { return BossLevelName; };
 
     int32 GetPlayerScore() const { return PlayerScore; };
@@ -36,6 +39,9 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "Game")
     FName MenuLevelName = NAME_None;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Game")
+    FName BossIntroLevelName = NAME_None;
 
     UPROPERTY(EditDefaultsOnly, Category = "Game")
     FName BossLevelName = NAME_None;

@@ -104,9 +104,6 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     float CatchWidgetDisplayTime = 2.0f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy|Level")
-    FName LevelToOpen;
-
     UFUNCTION()
     void OnWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
         bool bFromSweep, const FHitResult& SweepResult);

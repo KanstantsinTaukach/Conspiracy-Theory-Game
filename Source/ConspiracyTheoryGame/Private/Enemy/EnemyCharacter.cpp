@@ -316,20 +316,18 @@ void AEnemyCharacter::HandlePlayerCaught()
     PC->SetIgnoreMoveInput(true);
     PC->SetIgnoreLookInput(true);
 
-    ACTGPlayerState* PS = Cast<ACTGPlayerState>(PC->PlayerState);
-    if (PS)
+    const auto CTGGameInstance = GetWorld()->GetGameInstance<UCTGGameInstance>();
+    if (CTGGameInstance)
     {
-        PS->RemovePoints(PS->GetPoints() / 2);
-
-        const auto CTGGameInstance = GetWorld()->GetGameInstance<UCTGGameInstance>();
-        if (CTGGameInstance)
+        ACTGPlayerState* PS = Cast<ACTGPlayerState>(PC->PlayerState);
+        if (PS)
         {
+            PS->RemovePoints(PS->GetPoints() / 2);
             CTGGameInstance->SetPlayerScore(PS->GetPoints());
         }
-    }
 
-    if (!LevelToOpen.IsNone())
-    {
+        FName LevelToOpen = CTGGameInstance->GetStartupLevelName();
+
         FTimerHandle DelayHandle;
         FTimerDelegate Delegate;
         Delegate.BindUFunction(this, FName("OpenLevelAfterDelay"), PC, LevelToOpen);
@@ -345,7 +343,7 @@ void AEnemyCharacter::OpenLevelAfterDelay(APlayerController* PC, FName LevelName
         PC->SetIgnoreLookInput(false);
     }
 
-    UGameplayStatics::OpenLevel(this, LevelToOpen);
+    UGameplayStatics::OpenLevel(this, LevelName);
 }
 
 void AEnemyCharacter::PlayFootstep(bool bRunning)
