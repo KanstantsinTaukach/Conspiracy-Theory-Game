@@ -16,6 +16,9 @@ class CONSPIRACYTHEORYGAME_API AEnemyCharacter : public ACharacter
 private:
     FTimerHandle OverlapCatchTimerHandle;
 
+    UFUNCTION()
+    void OpenLevelAfterDelay(APlayerController* PC, FName LevelName);
+
 protected:
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override;

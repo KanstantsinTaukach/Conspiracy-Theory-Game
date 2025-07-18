@@ -331,20 +331,21 @@ void AEnemyCharacter::HandlePlayerCaught()
     if (!LevelToOpen.IsNone())
     {
         FTimerHandle DelayHandle;
-        GetWorldTimerManager().SetTimer(
-            DelayHandle,
-            [this, PC]()
-            {
-                if (PC)
-                {
-                    PC->SetIgnoreMoveInput(false);
-                    PC->SetIgnoreLookInput(false);
-                }
-
-                UGameplayStatics::OpenLevel(this, LevelToOpen);
-            },
-            CatchWidgetDisplayTime, false);
+        FTimerDelegate Delegate;
+        Delegate.BindUFunction(this, FName("OpenLevelAfterDelay"), PC, LevelToOpen);
+        GetWorldTimerManager().SetTimer(DelayHandle, Delegate, CatchWidgetDisplayTime, false);
     }
+}
+
+void AEnemyCharacter::OpenLevelAfterDelay(APlayerController* PC, FName LevelName)
+{
+    if (PC)
+    {
+        PC->SetIgnoreMoveInput(false);
+        PC->SetIgnoreLookInput(false);
+    }
+
+    UGameplayStatics::OpenLevel(this, LevelToOpen);
 }
 
 void AEnemyCharacter::PlayFootstep(bool bRunning)
