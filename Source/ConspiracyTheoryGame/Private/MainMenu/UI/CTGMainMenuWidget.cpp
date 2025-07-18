@@ -31,9 +31,9 @@ void UCTGMainMenuWidget::OnStartGame()
     const auto CTGGameInstance = GetWorld()->GetGameInstance<UCTGGameInstance>();
     if (!CTGGameInstance) return;
 
-    if (CTGGameInstance->GetStartupLevelName().IsNone())
+    if (CTGGameInstance->GetIntroLevelName().IsNone())
     {
-        UE_LOG(LogCTGMainMenuWidget, Error, TEXT("Level name is NONE"));
+        UE_LOG(LogCTGMainMenuWidget, Error, TEXT("Intro level name is NONE"));
         return;
     }
     if (StartGameSound)
@@ -41,7 +41,7 @@ void UCTGMainMenuWidget::OnStartGame()
         UGameplayStatics::PlaySound2D(GetWorld(), StartGameSound);
     }
 
-    UGameplayStatics::OpenLevel(this, CTGGameInstance->GetStartupLevelName());
+    UGameplayStatics::OpenLevel(this, CTGGameInstance->GetIntroLevelName());
 }
 
 void UCTGMainMenuWidget::OnQuitGame()

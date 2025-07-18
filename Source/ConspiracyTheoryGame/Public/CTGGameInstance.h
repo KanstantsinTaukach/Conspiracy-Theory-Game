@@ -12,7 +12,13 @@ class CONSPIRACYTHEORYGAME_API UCTGGameInstance : public UGameInstance
     GENERATED_BODY()
 
 public:
+    UFUNCTION(BlueprintCallable)
+    FName GetIntroLevelName() const { return IntroLevelName; };
+
+    UFUNCTION(BlueprintCallable)
     FName GetStartupLevelName() const { return StartupLevelName; };
+
+    UFUNCTION(BlueprintCallable)
     FName GetMenuLevelName() const { return MenuLevelName; };
 
     UFUNCTION(BlueprintCallable)
@@ -22,6 +28,9 @@ public:
     void SetPlayerScore(int32 NewScore) { PlayerScore = NewScore; };
 
 protected:
+    UPROPERTY(EditDefaultsOnly, Category = "Game")
+    FName IntroLevelName = NAME_None;
+
     UPROPERTY(EditDefaultsOnly, Category = "Game")
     FName StartupLevelName = NAME_None;
 

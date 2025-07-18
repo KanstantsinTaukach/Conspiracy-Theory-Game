@@ -9,6 +9,7 @@ UENUM(BlueprintType)
 enum class ECTGMatchState : uint8
 {
 	WaitingToStart = 0,
+    Intro,
 	InProgress,
 	FightingWithBoss,
 	Pause,
