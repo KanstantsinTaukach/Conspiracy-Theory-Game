@@ -4,12 +4,12 @@
 #include "Enemy/EnemyAIController.h"
 #include "Player/CTGPlayerState.h"
 #include "Player/CTGCharacter.h"
-#include "CTGSaveGame.h"
 #include "Blueprint/UserWidget.h"
 #include "Perception/PawnSensingComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerController.h"
 #include "Perception/AISense_Hearing.h"
+#include "CTGGameInstance.h"
 
 #include "DrawDebugHelpers.h"
 #include "TimerManager.h"
@@ -245,7 +245,6 @@ void AEnemyCharacter::StopChaseSound()
     {
         ChaseAudio->Stop();
         bIsRunning = false;
-
     }
 }
 
@@ -262,7 +261,6 @@ void AEnemyCharacter::OnWeaponOverlap(UPrimitiveComponent* OverlappedComponent, 
             bIsOverlappingPlayer = true;
 
             StartAttack();
-
 
             GetWorldTimerManager().SetTimer(
                 OverlapCatchTimerHandle, this, &AEnemyCharacter::OnInitialCatchTimerExpired, OverlapTimeToCatch, false);
@@ -315,21 +313,20 @@ void AEnemyCharacter::HandlePlayerCaught()
         }
     }
 
-
     PC->SetIgnoreMoveInput(true);
     PC->SetIgnoreLookInput(true);
 
     ACTGPlayerState* PS = Cast<ACTGPlayerState>(PC->PlayerState);
     if (PS)
     {
-        UCTGSaveGame* SaveGame = Cast<UCTGSaveGame>(UGameplayStatics::CreateSaveGameObject(UCTGSaveGame::StaticClass()));
-        if (SaveGame)
+        PS->RemovePoints(PS->GetPoints() / 2);
+
+        const auto CTGGameInstance = GetWorld()->GetGameInstance<UCTGGameInstance>();
+        if (CTGGameInstance)
         {
-            SaveGame->SavedPoints = PS->GetPoints() / 2;
-            UGameplayStatics::SaveGameToSlot(SaveGame, "CTGSlot", 0);
+            CTGGameInstance->SetPlayerScore(PS->GetPoints());
         }
     }
-
 
     if (!LevelToOpen.IsNone())
     {
@@ -338,7 +335,6 @@ void AEnemyCharacter::HandlePlayerCaught()
             DelayHandle,
             [this, PC]()
             {
-
                 if (PC)
                 {
                     PC->SetIgnoreMoveInput(false);

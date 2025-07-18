@@ -46,18 +46,6 @@ public:
 
     virtual void BeginPlay() override;
 
-    UFUNCTION(BlueprintCallable, Category = "Save")
-    void SavePoints();
-
-    UFUNCTION(BlueprintCallable, Category = "Save")
-    void LoadPoints();
-
-    void LoadProgress();
-
-    UFUNCTION(BlueprintCallable)
-    void SetPoints(int32 NewPoints) { Points = NewPoints; }
-
 private:
     int32 PreviousPoints;
-
 };

@@ -10,7 +10,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 #include "CollisionQueryParams.h"
-#include "Kismet/GameplayStatics.h"
 #include "CollisionShape.h"
 #include "PhysicsEngine/BodyInstance.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
@@ -106,7 +105,6 @@ void ACTGCharacter::BeginPlay()
         if (KsilanCharacter)
         {
             KsilanCharacter->SetOwnerActor(this);
-            ;
         }
     }
 }
