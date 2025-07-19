@@ -39,7 +39,6 @@ void AEnemyAIController::Tick(float DeltaTime)
 
     if (!ChaseTarget)
     {
-
         if (PatrolPoints.Num() > 0 && GetPathFollowingComponent()->GetStatus() != EPathFollowingStatus::Moving &&
             !GetWorld()->GetTimerManager().IsTimerActive(ReturnToPatrolTimerHandle))
         {
@@ -49,9 +48,13 @@ void AEnemyAIController::Tick(float DeltaTime)
     }
 
     MoveToActor(ChaseTarget);
-    float DistanceToTarget = FVector::Dist(ChaseTarget->GetActorLocation(), GetPawn()->GetActorLocation());
 
-    if (DistanceToTarget < 150.0f)
+    // ”брано повторное объ€вление переменной DistanceToTarget
+    const FVector TargetLocation = ChaseTarget->GetActorLocation();
+    const FVector MyLocation = GetPawn()->GetActorLocation();
+    float DistanceToTarget = FVector::Distance(TargetLocation, MyLocation);
+
+    if (DistanceToTarget < 50.0f)
     {
         AEnemyCharacter* EnemyChar = Cast<AEnemyCharacter>(GetPawn());
         if (EnemyChar)
@@ -59,10 +62,6 @@ void AEnemyAIController::Tick(float DeltaTime)
             EnemyChar->StartAttack();
         }
     }
-
-    const FVector TargetLocation = ChaseTarget->GetActorLocation();
-    const FVector MyLocation = GetPawn()->GetActorLocation();
-    DistanceToTarget = FVector::Distance(TargetLocation, MyLocation);
 
     const bool bCanSee = LineOfSightTo(ChaseTarget);
     const bool bCanHear = DistanceToTarget < HearingRadius;
@@ -103,7 +102,6 @@ void AEnemyAIController::MoveToNextPatrolPoint()
         MoveToActor(NextPoint);
     }
 }
-
 void AEnemyAIController::StartChasing(APawn* Target)
 {
     if (!Target || ChaseTarget == Target) return;
@@ -111,13 +109,18 @@ void AEnemyAIController::StartChasing(APawn* Target)
     ChaseTarget = Target;
     bIsChasing = true;
 
+    if (AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(GetPawn()))
+    {
+        if (ACTGCharacter* Player = Cast<ACTGCharacter>(Target))
+        {
+            Player->SetIsChased(true);
+            Enemy->CurrentTargetPlayer = Player;
+        }
+    }
 
     GetWorld()->GetTimerManager().ClearTimer(LoseTargetTimerHandle);
-
-
     GetWorld()->GetTimerManager().SetTimer(LoseTargetTimerHandle, this, &AEnemyAIController::LoseTarget, TimeToLoseTarget, false);
 }
-
 void AEnemyAIController::LoseTarget()
 {
     if (!ChaseTarget) return;
