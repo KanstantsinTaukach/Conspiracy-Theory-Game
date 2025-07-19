@@ -30,6 +30,9 @@ public:
     UFUNCTION(BlueprintCallable)
     FName GetGoodEndLevelName() const { return GoodEndLevelName; };
 
+    UFUNCTION(BlueprintCallable)
+    FName GetBadEndLevelName() const { return BadEndLevelName; };
+
     int32 GetPlayerScore() const { return PlayerScore; };
     void SetPlayerScore(int32 NewScore) { PlayerScore = NewScore; };
 
@@ -51,6 +54,9 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "Game")
     FName GoodEndLevelName = NAME_None;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Game")
+    FName BadEndLevelName = NAME_None;
 
 private:
     int32 PlayerScore = 0;
