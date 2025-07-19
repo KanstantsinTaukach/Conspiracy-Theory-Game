@@ -198,7 +198,10 @@ void AEnemyCharacter::OnSeePawn(APawn* Pawn)
 
     bIsChasing = true;
     bIsRunning = true;
-
+    if (bCanPlayChaseSound)
+    {
+        PlayRandomChaseStartSound();
+    }
 
     // Устанавливаем скорость погони
     if (GetCharacterMovement())
@@ -259,7 +262,10 @@ void AEnemyCharacter::OnHearNoise(APawn* InstigatorPawn, const FVector& Location
 
     ACTGCharacter* CTGCharacter = Cast<ACTGCharacter>(InstigatorPawn);
     if (!CTGCharacter) return;
-
+    if (bCanPlayChaseSound)
+    {
+        PlayRandomChaseStartSound();
+    }
 
     CurrentTargetPlayer = CTGCharacter;
     CTGCharacter->SetIsChased(true);  
@@ -316,23 +322,26 @@ void AEnemyCharacter::Stun()
 {
     if (bIsStunned || !bCanStun) return;
 
-
+    // Clear chase state from current target
     if (CurrentTargetPlayer)
     {
         CurrentTargetPlayer->SetIsChased(false);
     }
 
+    // Set stunned state
     bIsStunned = true;
     bCanStun = false;
     CurrentStunCooldown = 0.0f;
     StunCooldownProgress = 0.0f;
 
+    // Handle AI controller behavior
     AEnemyAIController* AIController = Cast<AEnemyAIController>(GetController());
     if (AIController)
     {
         AIController->ChaseTarget = nullptr;
         AIController->bIsChasing = false;
 
+        // Clear focus from any target
         APawn* TargetPawn = Cast<APawn>(AIController->GetFocusActor());
         if (TargetPawn)
         {
@@ -343,6 +352,7 @@ void AEnemyCharacter::Stun()
             }
         }
 
+        // Stop chase behavior
         StopChaseSound();
         bIsRunning = false;
         bIsChasing = false;
@@ -350,15 +360,24 @@ void AEnemyCharacter::Stun()
         AIController->StopMovement();
         AIController->ClearFocus(EAIFocusPriority::Gameplay);
 
+        // Clear any active timers
         AIController->GetWorldTimerManager().ClearTimer(AIController->LoseTargetTimerHandle);
         AIController->GetWorldTimerManager().ClearTimer(AIController->ReturnToPatrolTimerHandle);
     }
 
+    // Play stun sound (removed VirtualizeWhenSilent check)
+    if (LostTargetSound && LostTargetSound->IsValidLowLevel())
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, LostTargetSound, GetActorLocation());
+    }
+
+    // Reset movement speed
     if (GetCharacterMovement())
     {
         GetCharacterMovement()->MaxWalkSpeed = PatrolSpeed;
     }
 
+    // Play stun animation
     if (StunMontage)
     {
         UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -368,6 +387,7 @@ void AEnemyCharacter::Stun()
         }
     }
 
+    // Set up resume patrol after stun duration
     if (AIController)
     {
         FTimerDelegate ResumePatrolDelegate;
@@ -390,6 +410,7 @@ void AEnemyCharacter::Stun()
 
         AIController->GetWorldTimerManager().SetTimer(AIController->ReturnToPatrolTimerHandle, ResumePatrolDelegate, StunDuration, false);
     }
+
 
     StartStunCooldown();
 }
@@ -534,4 +555,34 @@ void AEnemyCharacter::PlayFootstep(bool bRunning)
             UAISense_Hearing::ReportNoiseEvent(GetWorld(), GetActorLocation(), bIsRunning ? 1.0f : 0.4f, this);
         }
     }
+}
+
+void AEnemyCharacter::PlayRandomChaseStartSound()
+{
+    if (!bCanPlayChaseSound || ChaseStartSounds.Num() == 0) return;
+
+    int32 RandomIndex = FMath::RandRange(0, ChaseStartSounds.Num() - 1);
+    USoundBase* SelectedSound = ChaseStartSounds[RandomIndex];
+
+    if (SelectedSound && SelectedSound->IsValidLowLevel())
+    {
+        bCanPlayChaseSound = false;
+
+        // Play the sound regardless of virtualization settings
+        float SoundDuration = SelectedSound->GetDuration();
+
+        UGameplayStatics::SpawnSoundAtLocation(
+            this, SelectedSound, GetActorLocation(), FRotator::ZeroRotator, 1.0f, 1.0f, 0.0f, nullptr, nullptr, false);
+
+        GetWorld()->GetTimerManager().SetTimer(
+            ChaseSoundTimerHandle, this, &AEnemyCharacter::ResetChaseSound, FMath::Max(0.1f, SoundDuration), false);
+    }
+    else
+    {
+        bCanPlayChaseSound = true;
+    }
+}
+void AEnemyCharacter::ResetChaseSound()
+{
+    bCanPlayChaseSound = true;
 }
