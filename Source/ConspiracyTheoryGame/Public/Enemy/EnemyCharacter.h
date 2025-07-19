@@ -24,6 +24,29 @@ protected:
     virtual void Tick(float DeltaTime) override;
 
 public:
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stun")
+    float StunCooldown = 5.0f;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stun")
+    bool bCanStun = true;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stun")
+    bool bIsStunned = false;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Stun")
+    float CurrentStunCooldown = 0.0f;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Stun")
+    float StunCooldownProgress = 0.0f;  // <- эту ты будешь брать в UMG
+
+    FTimerHandle StunCooldownTimerHandle;
+
+    UFUNCTION(BlueprintImplementableEvent, Category = "Stun")
+    void OnStunCooldownProgress(float Progress);
+
+    // Функции
+    void StartStunCooldown();
+    void UpdateStunCooldown();
 
     UPROPERTY(EditDefaultsOnly, Category = "Movement")
     float PatrolSpeed = 200.f;
@@ -82,8 +105,6 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
     UAudioComponent* PatrolLoopAudio;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy|State")
-    bool bIsStunned = false;
 
     /** Sound used for patrol loop */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
