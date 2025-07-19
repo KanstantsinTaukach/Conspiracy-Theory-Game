@@ -400,16 +400,9 @@ void AEnemyCharacter::HandlePlayerCaught()
         }
     }
 
-    const auto CTGGameInstance = GetWorld()->GetGameInstance<UCTGGameInstance>();
+    const auto* CTGGameInstance = GetWorld()->GetGameInstance<UCTGGameInstance>();
     if (CTGGameInstance)
     {
-        ACTGPlayerState* PS = Cast<ACTGPlayerState>(PC->PlayerState);
-        if (PS)
-        {
-            PS->RemovePoints(PS->GetPoints() / 2);
-            CTGGameInstance->SetPlayerScore(PS->GetPoints());
-        }
-
         FName LevelToOpen = CTGGameInstance->GetStartupLevelName();
 
         FTimerHandle DelayHandle;
@@ -425,6 +418,17 @@ void AEnemyCharacter::OpenLevelAfterDelay(APlayerController* PC, FName LevelName
     {
         PC->SetIgnoreMoveInput(false);
         PC->SetIgnoreLookInput(false);
+    }
+
+    auto* CTGGameInstance = GetWorld()->GetGameInstance<UCTGGameInstance>();
+    if (CTGGameInstance)
+    {
+        ACTGPlayerState* PS = Cast<ACTGPlayerState>(PC->PlayerState);
+        if (PS)
+        {
+            PS->RemovePoints(PS->GetPoints() / 2);
+            CTGGameInstance->SetPlayerScore(PS->GetPoints());
+        }
     }
 
     UGameplayStatics::OpenLevel(this, LevelName);
