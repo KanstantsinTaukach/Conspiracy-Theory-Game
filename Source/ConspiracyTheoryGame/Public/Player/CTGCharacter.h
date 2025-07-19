@@ -111,7 +111,23 @@ public:
     bool IsCharacterRunning() const;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
     TArray<USoundBase*> CrouchFootstepSounds;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Footsteps")
+    float CrouchFootstepLoudness = 0.4f;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Footsteps")
+    float WalkFootstepLoudness = 0.8f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Footsteps")
+    float RunFootstepLoudness = 1.5f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Footsteps")
+    float CrouchFootstepRange = 1000.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Footsteps")
+    float WalkFootstepRange = 2000.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Footsteps")
+    float RunFootstepRange = 3000.f;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
     TArray<USoundBase*> WalkFootstepSounds;
 

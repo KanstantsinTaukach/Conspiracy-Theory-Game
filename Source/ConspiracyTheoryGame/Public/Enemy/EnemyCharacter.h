@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "Sound/SoundBase.h"
 #include "CTGCharacter.h"
+#include "Perception/AIPerceptionComponent.h"
+#include "Perception/AISenseConfig_Hearing.h"
 #include "Components/AudioComponent.h"
 #include "EnemyCharacter.generated.h"
 
@@ -24,6 +26,17 @@ protected:
     virtual void Tick(float DeltaTime) override;
 
 public:
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Perception")
+    float HearingRadius = 3000.f;
+    UPROPERTY(BlueprintReadOnly, Category = "Player State")
+    bool bIsChased;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Perception")
+    float HearingThreshold = 0.5f;  // Минимальная громкость для реакции
+    UAIPerceptionComponent* AIPerceptionComp;
+    UAISenseConfig_Hearing* HearingConfig;
+
+    UFUNCTION()
+    void OnPerceptionUpdated(const TArray<AActor*>& UpdatedActors);
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stun")
     float StunCooldown = 5.0f;
 

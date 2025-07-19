@@ -42,7 +42,7 @@ ACTGCharacter::ACTGCharacter(const FObjectInitializer& OfjInit)
     : Super(OfjInit.SetDefaultSubobjectClass<UCTGCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
     PrimaryActorTick.bCanEverTick = true;
-
+    bIsChased = false ;
 
     SpringArm = CreateDefaultSubobject<USpringArmComponent>("SpringArm");
     SpringArm->SetupAttachment(GetRootComponent());
@@ -170,10 +170,7 @@ void ACTGCharacter::Tick(float DeltaTime)
     }
 }
 
-void ACTGCharacter::SetIsChased(bool bChased)
-{
-    bIsChased = bChased;
-}
+
 
 void ACTGCharacter::OnPointsChanged(ACTGPlayerState* PS, int32 NewPoints, int32 Delta)
 {
@@ -484,55 +481,57 @@ void ACTGCharacter::UpdateCompass()
 
     CompassArrow->SetWorldRotation(NewRotation);
 }
+void ACTGCharacter::SetIsChased(bool bChased)
+{
+    if (bIsChased != bChased)
+    {
+        bIsChased = bChased;
+        UE_LOG(LogTemp, Warning, TEXT("Player chase state changed to: %s"), bIsChased ? TEXT("Chased") : TEXT("Not Chased"));
+
+        // Здесь можно добавить дополнительные эффекты при изменении состояния
+        if (bIsChased)
+        {
+            // Включить эффекты преследования
+        }
+        else
+        {
+            // Выключить эффекты преследования
+        }
+    }
+}
 void ACTGCharacter::PlayFootstep()
 {
     UE_LOG(LogTemp, Warning, TEXT("Player played footstep, crouched: %d, velocity: %f"), bIsCrouched, GetVelocity().Size());
 
-    // Проверяем, что персонаж движется по земле
-    if (!GetCharacterMovement()->IsMovingOnGround())
-    {
-        return;
-    }
+    if (!GetCharacterMovement()->IsMovingOnGround()) return;
 
     USoundBase* SelectedSound = nullptr;
-
+    float Loudness = 0.0f;
+    float MaxRange = 0.0f;
 
     if (bIsCrouched && CrouchFootstepSounds.Num() > 0)
     {
         SelectedSound = CrouchFootstepSounds[FMath::RandRange(0, CrouchFootstepSounds.Num() - 1)];
+        Loudness = CrouchFootstepLoudness;
+        MaxRange = CrouchFootstepRange;
     }
     else if (GetVelocity().Size() < 300.f && WalkFootstepSounds.Num() > 0)
     {
         SelectedSound = WalkFootstepSounds[FMath::RandRange(0, WalkFootstepSounds.Num() - 1)];
+        Loudness = WalkFootstepLoudness;
+        MaxRange = WalkFootstepRange;
     }
     else if (RunFootstepSounds.Num() > 0)
     {
         SelectedSound = RunFootstepSounds[FMath::RandRange(0, RunFootstepSounds.Num() - 1)];
+        Loudness = RunFootstepLoudness;
+        MaxRange = RunFootstepRange;
     }
 
     if (SelectedSound)
     {
-
         UGameplayStatics::PlaySoundAtLocation(this, SelectedSound, GetActorLocation());
 
-        float Loudness = 1.0f;  
-
-        if (bIsCrouched)
-        {
-            Loudness = 5.3f;
-        }
-        else if (GetVelocity().Size() < 300.f)
-        {
-            Loudness = 5.6f;
-        }
-        else
-        {
-            Loudness = 5.0f;
-        }
-
-UAISense_Hearing::ReportNoiseEvent(GetWorld(), GetActorLocation(), Loudness,
-            this,  // <= обязательно this, если ты вызываешь из игрока
-            0.f, FName("Footstep"));
-        UE_LOG(LogTemp, Warning, TEXT("Noise reported at: %s with Loudness %.2f"), *GetActorLocation().ToString(), Loudness);
+        UAISense_Hearing::ReportNoiseEvent(GetWorld(), GetActorLocation(), Loudness, this, MaxRange, FName("Footstep"));
     }
 }
