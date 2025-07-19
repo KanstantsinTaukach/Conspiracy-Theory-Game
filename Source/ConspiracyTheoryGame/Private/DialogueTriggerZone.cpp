@@ -5,6 +5,7 @@
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
+#include "Components/AudioComponent.h"
 #include "GameFramework/PlayerController.h"
 
 ADialogueTriggerZone::ADialogueTriggerZone()
@@ -20,6 +21,8 @@ ADialogueTriggerZone::ADialogueTriggerZone()
     TriggerZone->OnComponentBeginOverlap.AddDynamic(this, &ADialogueTriggerZone::OnOverlapBegin);
 }
 
+
+
 void ADialogueTriggerZone::BeginPlay()
 {
     Super::BeginPlay();
@@ -34,10 +37,35 @@ void ADialogueTriggerZone::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, A
     APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
     if (OtherActor != PlayerPawn) return;
 
-    // ѕроигрываем звук при наступлении на зону
     if (TriggerSound)
     {
-        UGameplayStatics::PlaySoundAtLocation(this, TriggerSound, GetActorLocation());
+
+        if (!ActiveAudioComponent || !ActiveAudioComponent->IsPlaying())
+        {
+            ActiveAudioComponent = UGameplayStatics::SpawnSoundAttached(
+                TriggerSound, RootComponent, NAME_None, FVector::ZeroVector, EAttachLocation::KeepRelativeOffset,
+                true,     
+                1.0f,    
+                1.0f,     
+                0.0f,     
+                nullptr,  
+                nullptr, 
+                true      
+            );
+
+
+            if (ActiveAudioComponent)
+            {
+
+                float Duration = TriggerSound->GetDuration();
+                if (Duration > 0.f)
+                {
+                    FTimerHandle TempHandle;
+                    GetWorldTimerManager().SetTimer(
+                        TempHandle, [this]() { ActiveAudioComponent = nullptr; }, Duration, false);
+                }
+            }
+        }
     }
 
     APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
@@ -47,12 +75,10 @@ void ADialogueTriggerZone::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, A
     if (!Widget) return;
 
     Widget->AddToViewport();
-
     ActiveWidget = Widget;
 
     FTimerDelegate TimerDel;
     TimerDel.BindUFunction(this, FName("HideWidget"));
-
     GetWorldTimerManager().SetTimer(HideWidgetTimerHandle, TimerDel, WidgetDisplayTime, false);
 
     TriggerZone->SetCollisionEnabled(ECollisionEnabled::NoCollision);

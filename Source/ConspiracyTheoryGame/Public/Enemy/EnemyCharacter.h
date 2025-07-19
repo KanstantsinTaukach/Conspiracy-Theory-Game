@@ -24,6 +24,16 @@ protected:
     virtual void Tick(float DeltaTime) override;
 
 public:
+
+    UPROPERTY(EditDefaultsOnly, Category = "Movement")
+    float PatrolSpeed = 200.f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Movement")
+    float ChaseSpeed = 600.f;
+
+    UPROPERTY()
+    UAudioComponent* AttackAudioComponent;
+
     bool bIsRunning;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Footstep")
     TArray<USoundBase*> WalkFootstepSounds;
@@ -47,7 +57,7 @@ public:
     TSubclassOf<UUserWidget> CatchWidgetClass;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Capture")
-    float OverlapTimeToCatch = 2.0f;
+    float OverlapTimeToCatch = 0.5f;
 
     float CurrentOverlapTime = 0.0f;
 

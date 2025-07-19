@@ -17,6 +17,10 @@ public:
     ADialogueTriggerZone();
     UPROPERTY(EditAnywhere, Category = "Audio")
     USoundBase* TriggerSound;
+    UPROPERTY()
+    UAudioComponent* ActiveAudioComponent;
+
+
 
 protected:
     virtual void BeginPlay() override;

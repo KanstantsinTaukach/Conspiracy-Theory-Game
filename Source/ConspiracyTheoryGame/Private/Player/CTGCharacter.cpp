@@ -9,6 +9,8 @@
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
+#include "Components/PointLightComponent.h"
+#include "TimerManager.h"
 #include "CollisionQueryParams.h"
 #include "CollisionShape.h"
 #include "PhysicsEngine/BodyInstance.h"
@@ -28,9 +30,9 @@ void ACTGCharacter::SetBossRoomLocation(const FVector& Location)
 {
     BossRoomLocation = Location;
     bShowCompassArrow = true;
-    if (CompassArrow)
+    if (CompassArrowMesh)
     {
-        CompassArrow->SetHiddenInGame(false);
+        CompassArrowMesh->SetVisibility(true);  
     }
     UE_LOG(LogTemp, Warning, TEXT("BossRoomLocation set to: %s"), *BossRoomLocation.ToString());
 }
@@ -60,6 +62,10 @@ ACTGCharacter::ACTGCharacter(const FObjectInitializer& OfjInit)
     CompassArrow->SetRelativeLocation(FVector(0.f, 0.f, 120.f));
     CompassArrow->SetArrowColor(FColor::Red);
     CompassArrow->SetHiddenInGame(true);
+
+    CompassArrowMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CompassArrowMesh"));
+    CompassArrowMesh->SetupAttachment(CompassArrow);
+    CompassArrowMesh->SetRelativeLocation(FVector::ZeroVector);
 }
 
 void ACTGCharacter::BeginPlay()
@@ -86,10 +92,14 @@ void ACTGCharacter::BeginPlay()
             CompassScoreThreshold = CachedPlayerState->GetPointsToUnlockBoss();
         }
     }
-
     if (CompassArrow)
     {
-        CompassArrow->SetHiddenInGame(true);
+        CompassArrow->SetHiddenInGame(true); 
+    }
+
+    if (CompassArrowMesh)
+    {
+        CompassArrowMesh->SetVisibility(false);  
     }
     if (GetWorld() && KsilanClass)
     {
@@ -143,7 +153,7 @@ void ACTGCharacter::Tick(float DeltaTime)
 
     if (Score >= CompassScoreThreshold && !BossRoomLocation.IsZero())
     {
-        if (CompassArrow->bHiddenInGame) CompassArrow->SetHiddenInGame(false);
+
         UpdateCompass();
     }
     else
@@ -159,24 +169,33 @@ void ACTGCharacter::SetIsChased(bool bChased)
 
 void ACTGCharacter::OnPointsChanged(ACTGPlayerState* PS, int32 NewPoints, int32 Delta)
 {
-    Score = NewPoints;  // Обновляем локальный Score
+    Score = NewPoints;
 
     UE_LOG(LogTemp, Warning, TEXT("Points changed: %d"), NewPoints);
 
     if (NewPoints >= CompassScoreThreshold)
     {
         bShowCompassArrow = true;
-        if (CompassArrow)
+
+
+
+        if (CompassArrowMesh)
         {
-            CompassArrow->SetHiddenInGame(false);
+            CompassArrowMesh->SetVisibility(true);  
         }
     }
     else
     {
         bShowCompassArrow = false;
+
         if (CompassArrow)
         {
             CompassArrow->SetHiddenInGame(true);
+        }
+
+        if (CompassArrowMesh)
+        {
+            CompassArrowMesh->SetVisibility(false);  
         }
     }
 }
@@ -301,26 +320,25 @@ void ACTGCharacter::PrimaryInteract()
 
 void ACTGCharacter::TryStunEnemies()
 {
-    if (!bCanStun)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Stun on cooldown"));
-        return;
-    }
+    if (!bCanStun) return;
+
+
+    FRotator NewRotation = CameraComponent->GetComponentRotation();
+    NewRotation.Pitch = 0.f;
+    NewRotation.Roll = 0.f;
+    SetActorRotation(NewRotation);
+
 
     if (StunMontage)
     {
-        UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-        if (AnimInstance)
+        if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
         {
-
             AnimInstance->Montage_Play(StunMontage.Get());
-
             if (APlayerController* PC = Cast<APlayerController>(GetController()))
             {
                 PC->DisableInput(PC);
                 GetCharacterMovement()->StopMovementImmediately();
             }
-
             FAnimMontageInstance* MontageInstance = AnimInstance->GetActiveInstanceForMontage(StunMontage.Get());
             if (MontageInstance)
             {
@@ -331,54 +349,80 @@ void ACTGCharacter::TryStunEnemies()
         }
     }
 
-    FVector Start = CameraComponent->GetComponentLocation();
-    FVector ForwardVector = CameraComponent->GetForwardVector();
+    SpawnStunFlash();
+
+
+    FVector Start = GetActorLocation() + FVector(0, 0, 50.f);
+    FVector ForwardVector = GetActorForwardVector();
     FVector End = Start + ForwardVector * StunDistance;
 
     FCollisionQueryParams QueryParams;
     QueryParams.AddIgnoredActor(this);
 
-    float SphereRadius = 50.f;
-
+    float SphereRadius = 100.f;
     TArray<FHitResult> HitResults;
 
-    bool bHit = GetWorld()->SweepMultiByChannel(
-        HitResults, Start, End, FQuat::Identity, ECC_Pawn, FCollisionShape::MakeSphere(SphereRadius), QueryParams);
-
-    if (bHit)
+    if (GetWorld()->SweepMultiByChannel(
+            HitResults, Start, End, FQuat::Identity, ECC_Pawn, FCollisionShape::MakeSphere(SphereRadius), QueryParams))
     {
+        float CosConeAngle = FMath::Cos(FMath::DegreesToRadians(StunConeAngle));
         for (const FHitResult& Hit : HitResults)
         {
             AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(Hit.GetActor());
             if (!Enemy) continue;
 
-            FVector ToTarget = (Enemy->GetActorLocation() - Start);
-            float Distance = ToTarget.Size();
+            FVector ToTarget = Enemy->GetActorLocation() - Start;
+            ToTarget.Z = 0;
             ToTarget.Normalize();
 
             float DotProduct = FVector::DotProduct(ForwardVector, ToTarget);
-            float Degrees = FMath::Acos(DotProduct) * (180.f / PI);
-
-            if (Degrees <= StunConeAngle)
+            if (DotProduct >= CosConeAngle)
             {
                 if (!Enemy->bIsStunned)
                 {
                     Enemy->Stun();
-                    UE_LOG(LogTemp, Log, TEXT("Stunned enemy %s, angle %.1f, distance %.1f"), *Enemy->GetName(), Degrees, Distance);
+                    UE_LOG(LogTemp, Log, TEXT("Stunned enemy %s"), *Enemy->GetName());
                 }
             }
         }
     }
 
     DrawDebugSphere(GetWorld(), End, SphereRadius, 16, FColor::Green, false, 2.0f);
-
     FVector RightCone = ForwardVector.RotateAngleAxis(StunConeAngle, FVector::UpVector) * StunDistance;
     FVector LeftCone = ForwardVector.RotateAngleAxis(-StunConeAngle, FVector::UpVector) * StunDistance;
-
     DrawDebugLine(GetWorld(), Start, Start + RightCone, FColor::Yellow, false, 2.0f, 0, 1.5f);
     DrawDebugLine(GetWorld(), Start, Start + LeftCone, FColor::Yellow, false, 2.0f, 0, 1.5f);
 }
 
+void ACTGCharacter::SpawnStunFlash()
+{
+    FVector FlashLocation = GetActorLocation() + GetActorForwardVector() * 100.f + FVector(0, 0, 50.f);
+
+    UPointLightComponent* StunFlash = NewObject<UPointLightComponent>(this);
+    if (StunFlash)
+    {
+        StunFlash->RegisterComponent();
+        StunFlash->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform);
+        StunFlash->SetWorldLocation(FlashLocation);
+        StunFlash->SetIntensity(10000.f);
+        StunFlash->SetAttenuationRadius(400.f);
+        StunFlash->SetLightColor(FLinearColor::White);
+        StunFlash->SetVisibility(true);
+
+        // Отключить и уничтожить через 0.1 сек
+        FTimerHandle FlashTimer;
+        GetWorld()->GetTimerManager().SetTimer(FlashTimer,
+            FTimerDelegate::CreateLambda(
+                [StunFlash]()
+                {
+                    if (StunFlash)
+                    {
+                        StunFlash->DestroyComponent();
+                    }
+                }),
+            0.1f, false);
+    }
+}
 void ACTGCharacter::ResetStun()
 {
     bCanStun = true;
@@ -409,7 +453,7 @@ void ACTGCharacter::UpdateCompass()
 
     FRotator TargetRotation = Direction.Rotation();
 
-    // Плавное вращение стрелки (интерполяция)
+
     FRotator CurrentRotation = CompassArrow->GetComponentRotation();
     FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, GetWorld()->GetDeltaSeconds(), 5.0f);
 
@@ -417,9 +461,16 @@ void ACTGCharacter::UpdateCompass()
 }
 void ACTGCharacter::PlayFootstep()
 {
-    if (!GetCharacterMovement()->IsMovingOnGround()) return;
+    UE_LOG(LogTemp, Warning, TEXT("Player played footstep, crouched: %d, velocity: %f"), bIsCrouched, GetVelocity().Size());
+
+    // Проверяем, что персонаж движется по земле
+    if (!GetCharacterMovement()->IsMovingOnGround())
+    {
+        return;
+    }
 
     USoundBase* SelectedSound = nullptr;
+
 
     if (bIsCrouched && CrouchFootstepSounds.Num() > 0)
     {
@@ -436,10 +487,27 @@ void ACTGCharacter::PlayFootstep()
 
     if (SelectedSound)
     {
+
         UGameplayStatics::PlaySoundAtLocation(this, SelectedSound, GetActorLocation());
 
-        float Loudness = bIsCrouched ? 0.3f : (GetVelocity().Size() < 300.f ? 0.6f : 1.0f);
+        float Loudness = 1.0f;  
 
-        UAISense_Hearing::ReportNoiseEvent(GetWorld(), GetActorLocation(), Loudness, this, 0.f, FName("Step"));
+        if (bIsCrouched)
+        {
+            Loudness = 5.3f;
+        }
+        else if (GetVelocity().Size() < 300.f)
+        {
+            Loudness = 5.6f;
+        }
+        else
+        {
+            Loudness = 5.0f;
+        }
+
+UAISense_Hearing::ReportNoiseEvent(GetWorld(), GetActorLocation(), Loudness,
+            this,  // <= обязательно this, если ты вызываешь из игрока
+            0.f, FName("Footstep"));
+        UE_LOG(LogTemp, Warning, TEXT("Noise reported at: %s with Loudness %.2f"), *GetActorLocation().ToString(), Loudness);
     }
 }

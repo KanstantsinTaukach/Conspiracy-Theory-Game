@@ -6,6 +6,7 @@
 #include "Player/CTGCharacter.h"
 #include "Blueprint/UserWidget.h"
 #include "Perception/PawnSensingComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerController.h"
 #include "Perception/AISense_Hearing.h"
@@ -29,7 +30,7 @@ AEnemyCharacter::AEnemyCharacter()
     PawnSensing = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensing"));
     PawnSensing->SightRadius = 350.f;
     PawnSensing->SetPeripheralVisionAngle(60.f);
-    PawnSensing->HearingThreshold = 150.f;
+    PawnSensing->HearingThreshold = 400.f;
     PawnSensing->bSeePawns = true;
     PawnSensing->bHearNoises = true;
 
@@ -40,6 +41,8 @@ AEnemyCharacter::AEnemyCharacter()
     ChaseAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("ChaseAudio"));
     ChaseAudio->SetupAttachment(RootComponent);
     ChaseAudio->bAutoActivate = false;
+
+
 }
 
 void AEnemyCharacter::Tick(float DeltaTime)
@@ -62,10 +65,12 @@ void AEnemyCharacter::Tick(float DeltaTime)
 void AEnemyCharacter::BeginPlay()
 {
     Super::BeginPlay();
+
     if (WeaponMesh && WeaponComponent)
     {
         WeaponComponent->SetStaticMesh(WeaponMesh);
     }
+
     if (PawnSensing)
     {
         PawnSensing->OnSeePawn.AddDynamic(this, &AEnemyCharacter::OnSeePawn);
@@ -83,14 +88,25 @@ void AEnemyCharacter::BeginPlay()
         WeaponComponent->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnWeaponOverlap);
         WeaponComponent->OnComponentEndOverlap.AddDynamic(this, &AEnemyCharacter::OnWeaponEndOverlap);
     }
-}
 
+    if (GetCharacterMovement())
+    {
+        GetCharacterMovement()->MaxWalkSpeed = PatrolSpeed;
+    }
+}
 void AEnemyCharacter::OnSeePawn(APawn* Pawn)
 {
     if (bIsChasing || bIsStunned) return;
 
     bIsChasing = true;
     bIsRunning = true;
+
+    // Устанавливаем скорость погони
+    if (GetCharacterMovement())
+    {
+        GetCharacterMovement()->MaxWalkSpeed = ChaseSpeed;
+    }
+
     ACTGCharacter* CTGCharacter = Cast<ACTGCharacter>(Pawn);
     if (CTGCharacter)
     {
@@ -110,8 +126,6 @@ void AEnemyCharacter::OnSeePawn(APawn* Pawn)
 
         StopPatrolSound();
     }
-
-    // Уведомляем игрока
 
     if (CTGCharacter)
     {
@@ -139,34 +153,52 @@ void AEnemyCharacter::StartAttack()
 
     if (AttackSound)
     {
-        UGameplayStatics::PlaySoundAtLocation(this, AttackSound, GetActorLocation());
+
+        if (!AttackAudioComponent || !AttackAudioComponent->IsPlaying())
+        {
+            AttackAudioComponent = UGameplayStatics::SpawnSoundAttached(AttackSound, GetRootComponent());
+        }
     }
 }
 
 void AEnemyCharacter::OnHearNoise(APawn* InstigatorPawn, const FVector& Location, float Volume)
 {
-    if (bIsChasing || bIsStunned) return;
+    UE_LOG(LogTemp, Error, TEXT("ENEMY HEARD NOISE"));
+    if (!InstigatorPawn || InstigatorPawn == this || bIsChasing || bIsStunned)
+    {
+        return;
+    }
 
+    UE_LOG(LogTemp, Warning, TEXT("Enemy heard noise from %s at location %s with volume %.2f"), *GetNameSafe(InstigatorPawn),
+        *Location.ToString(), Volume);
+
+    AEnemyAIController* AIController = Cast<AEnemyAIController>(GetController());
+    if (!AIController) return;
+
+    // Начинаем погоню
     bIsChasing = true;
     bIsRunning = true;
-    ACTGCharacter* PlayerCharacter = Cast<ACTGCharacter>(InstigatorPawn);
-    if (PlayerCharacter)
-    {
-        PlayerCharacter->SetIsChased(true);
-    }
-    AEnemyAIController* AIController = Cast<AEnemyAIController>(GetController());
-    if (AIController && InstigatorPawn)
-    {
-        AIController->StartChasing(InstigatorPawn);
 
-        if (ChaseSound && ChaseAudio && !ChaseAudio->IsPlaying())
-        {
-            ChaseAudio->SetSound(ChaseSound);
-            ChaseAudio->Play();
-        }
-
-        StopPatrolSound();
+    if (GetCharacterMovement())
+    {
+        GetCharacterMovement()->MaxWalkSpeed = ChaseSpeed;
     }
+
+    CurrentTargetPlayer = Cast<ACTGCharacter>(InstigatorPawn);
+    if (CurrentTargetPlayer)
+    {
+        CurrentTargetPlayer->SetIsChased(true);
+    }
+
+    AIController->StartChasing(InstigatorPawn);
+
+    if (ChaseSound && ChaseAudio && !ChaseAudio->IsPlaying())
+    {
+        ChaseAudio->SetSound(ChaseSound);
+        ChaseAudio->Play();
+    }
+
+    StopPatrolSound();
 }
 void AEnemyCharacter::StopPatrolSound()
 {
@@ -194,9 +226,9 @@ void AEnemyCharacter::Stun()
     AEnemyAIController* AIController = Cast<AEnemyAIController>(GetController());
     if (AIController)
     {
-
         AIController->ChaseTarget = nullptr;
         AIController->bIsChasing = false;
+
         APawn* TargetPawn = AIController ? Cast<APawn>(AIController->GetFocusActor()) : nullptr;
         if (TargetPawn)
         {
@@ -206,6 +238,7 @@ void AEnemyCharacter::Stun()
                 PlayerCharacter->SetIsChased(false);
             }
         }
+
         StopChaseSound();
         bIsRunning = false;
         bIsChasing = false;
@@ -215,6 +248,13 @@ void AEnemyCharacter::Stun()
 
         AIController->GetWorldTimerManager().ClearTimer(AIController->LoseTargetTimerHandle);
         AIController->GetWorldTimerManager().ClearTimer(AIController->ReturnToPatrolTimerHandle);
+
+    }
+
+
+    if (GetCharacterMovement())
+    {
+        GetCharacterMovement()->MaxWalkSpeed = PatrolSpeed;
     }
 
     if (StunMontage)
@@ -234,6 +274,12 @@ void AEnemyCharacter::Stun()
             {
                 bIsStunned = false;
                 AIController->ResumePatrol();
+
+
+                if (GetCharacterMovement())
+                {
+                    GetCharacterMovement()->MaxWalkSpeed = PatrolSpeed;
+                }
             },
             StunDuration, false);
     }
@@ -282,7 +328,7 @@ void AEnemyCharacter::OnWeaponEndOverlap(
 void AEnemyCharacter::OnInitialCatchTimerExpired()
 {
 
-    GetWorldTimerManager().SetTimer(OverlapCatchTimerHandle, this, &AEnemyCharacter::HandlePlayerCaught, 2.0f, false);
+    GetWorldTimerManager().SetTimer(OverlapCatchTimerHandle, this, &AEnemyCharacter::HandlePlayerCaught, 0.5f, false);
 }
 
 void AEnemyCharacter::HandlePlayerCaught()
@@ -303,6 +349,7 @@ void AEnemyCharacter::HandlePlayerCaught()
     {
         return;
     }
+
     UUserWidget* CatchWidget = nullptr;
     if (CatchWidgetClass)
     {
@@ -315,6 +362,18 @@ void AEnemyCharacter::HandlePlayerCaught()
 
     PC->SetIgnoreMoveInput(true);
     PC->SetIgnoreLookInput(true);
+
+    ACTGCharacter* CTGCharacter = Cast<ACTGCharacter>(PlayerPawn);
+    if (CTGCharacter)
+    {
+        CTGCharacter->GetCharacterMovement()->DisableMovement();
+
+        UAnimInstance* AnimInstance = CTGCharacter->GetMesh()->GetAnimInstance();
+        if (AnimInstance && CTGCharacter->LoseMontage)
+        {
+            AnimInstance->Montage_Play(CTGCharacter->LoseMontage);
+        }
+    }
 
     const auto CTGGameInstance = GetWorld()->GetGameInstance<UCTGGameInstance>();
     if (CTGGameInstance)
@@ -359,7 +418,6 @@ void AEnemyCharacter::PlayFootstep(bool bRunning)
         {
             UGameplayStatics::PlaySoundAtLocation(this, SelectedSound, GetActorLocation());
 
-            // Шум для AI (если враги тоже реагируют друг на друга или игрок)
             UAISense_Hearing::ReportNoiseEvent(GetWorld(), GetActorLocation(), bIsRunning ? 1.0f : 0.4f, this);
         }
     }

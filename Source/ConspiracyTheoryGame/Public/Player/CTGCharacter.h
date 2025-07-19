@@ -23,14 +23,16 @@ class CONSPIRACYTHEORYGAME_API ACTGCharacter : public ACharacter
 
 public:
 
-
+    void SpawnStunFlash();
     void ScheduleNextXylanShout();
-
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animations")
+    UAnimMontage* LoseMontage;
 
     void PerformXylanShout();
     FTimerHandle XylanShoutTimerHandle;
 
-
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Compass")
+    UStaticMeshComponent* CompassArrowMesh;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Xylan|Shout")
     float MinShoutInterval = 30.f;
 
