@@ -305,7 +305,7 @@ void ACTGCharacter::PrimaryInteract()
         UE_LOG(LogTemp, Warning, TEXT("Already interacting, ignoring input"));
         return;
     }
-
+    SpawnStunFlash();
     // Звук
     if (InteractSound)
     {

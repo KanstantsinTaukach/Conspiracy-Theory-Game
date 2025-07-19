@@ -26,6 +26,17 @@ protected:
     virtual void Tick(float DeltaTime) override;
 
 public:
+    FTimerHandle ChaseSoundTimerHandle;
+    bool bCanPlayChaseSound = true;
+
+    UFUNCTION()
+    void ResetChaseSound();
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+    TArray<USoundBase*> ChaseStartSounds;  
+
+    UFUNCTION(BlueprintCallable)
+    void PlayRandomChaseStartSound(); 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Perception")
     float HearingRadius = 3000.f;
     UPROPERTY(BlueprintReadOnly, Category = "Player State")
