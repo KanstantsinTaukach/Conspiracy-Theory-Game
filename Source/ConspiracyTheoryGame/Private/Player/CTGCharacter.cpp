@@ -435,7 +435,7 @@ void ACTGCharacter::OnInteractMontageEnded(UAnimMontage* Montage, bool bInterrup
     GetCharacterMovement()->SetMovementMode(MOVE_Walking);
     if (APlayerController* PC = Cast<APlayerController>(GetController()))
     {
-        PC->DisableInput(PC);
+        PC->EnableInput(PC);
         GetCharacterMovement()->StopMovementImmediately();
     }
 }
