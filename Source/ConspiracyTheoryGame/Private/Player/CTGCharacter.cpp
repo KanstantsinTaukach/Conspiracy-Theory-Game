@@ -306,7 +306,7 @@ void ACTGCharacter::PrimaryInteract()
         return;
     }
     SpawnStunFlash();
-    // Звук
+
     if (InteractSound)
     {
         UGameplayStatics::PlaySoundAtLocation(this, InteractSound, GetActorLocation());

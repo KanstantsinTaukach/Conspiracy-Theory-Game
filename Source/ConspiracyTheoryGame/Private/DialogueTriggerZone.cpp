@@ -23,6 +23,7 @@ ADialogueTriggerZone::ADialogueTriggerZone()
 
 
 
+
 void ADialogueTriggerZone::BeginPlay()
 {
     Super::BeginPlay();
@@ -39,30 +40,19 @@ void ADialogueTriggerZone::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, A
 
     if (TriggerSound)
     {
-
         if (!ActiveAudioComponent || !ActiveAudioComponent->IsPlaying())
         {
-            ActiveAudioComponent = UGameplayStatics::SpawnSoundAttached(
-                TriggerSound, RootComponent, NAME_None, FVector::ZeroVector, EAttachLocation::KeepRelativeOffset,
-                true,     
-                1.0f,    
-                1.0f,     
-                0.0f,     
-                nullptr,  
-                nullptr, 
-                true      
-            );
-
+            ActiveAudioComponent = UGameplayStatics::SpawnSoundAttached(TriggerSound, RootComponent, NAME_None, FVector::ZeroVector,
+                EAttachLocation::KeepRelativeOffset, true, 1.0f, 1.0f, 0.0f, nullptr, nullptr, true);
 
             if (ActiveAudioComponent)
             {
-
                 float Duration = TriggerSound->GetDuration();
                 if (Duration > 0.f)
                 {
-                    FTimerHandle TempHandle;
-                    GetWorldTimerManager().SetTimer(
-                        TempHandle, [this]() { ActiveAudioComponent = nullptr; }, Duration, false);
+                    // Set timer to destroy actor after sound finishes playing
+                    FTimerHandle DestroyTimerHandle;
+                    GetWorldTimerManager().SetTimer(DestroyTimerHandle, this, &ADialogueTriggerZone::DestroyAfterPlayback, Duration, false);
                 }
             }
         }
@@ -91,4 +81,17 @@ void ADialogueTriggerZone::HideWidget()
         ActiveWidget->RemoveFromParent();
         ActiveWidget = nullptr;
     }
+}
+
+void ADialogueTriggerZone::DestroyAfterPlayback()
+{
+    // Clean up before destruction
+    if (ActiveWidget)
+    {
+        ActiveWidget->RemoveFromParent();
+        ActiveWidget = nullptr;
+    }
+
+    // Destroy the actor
+    Destroy();
 }

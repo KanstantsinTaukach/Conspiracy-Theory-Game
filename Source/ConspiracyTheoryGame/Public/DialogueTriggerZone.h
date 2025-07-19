@@ -46,4 +46,5 @@ protected:
         bool bFromSweep, const FHitResult& SweepResult);
 
     void HideWidget();
+    void DestroyAfterPlayback();
 };
