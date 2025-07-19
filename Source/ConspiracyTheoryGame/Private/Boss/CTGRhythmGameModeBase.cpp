@@ -238,7 +238,16 @@ void ACTGRhythmGameModeBase::OnBossCharacterDeath()
         }
 
         DestroyAllFallingKeys(true);
-        SetMatchState(ECTGMatchState::PlayerWin);
+        //SetMatchState(ECTGMatchState::PlayerWin);
+
+        const auto* CTGGameInstance = GetWorld()->GetGameInstance<UCTGGameInstance>();
+        if (CTGGameInstance)
+        {
+            if (!CTGGameInstance->GetGoodEndLevelName().IsNone())
+            {
+                UGameplayStatics::OpenLevel(this, CTGGameInstance->GetGoodEndLevelName());
+            }
+        }
     }
 }
 

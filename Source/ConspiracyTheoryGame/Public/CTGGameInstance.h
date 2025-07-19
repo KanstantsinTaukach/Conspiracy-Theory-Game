@@ -27,6 +27,9 @@ public:
     UFUNCTION(BlueprintCallable)
     FName GetBossLevelName() const { return BossLevelName; };
 
+    UFUNCTION(BlueprintCallable)
+    FName GetGoodEndLevelName() const { return GoodEndLevelName; };
+
     int32 GetPlayerScore() const { return PlayerScore; };
     void SetPlayerScore(int32 NewScore) { PlayerScore = NewScore; };
 
@@ -45,6 +48,9 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "Game")
     FName BossLevelName = NAME_None;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Game")
+    FName GoodEndLevelName = NAME_None;
 
 private:
     int32 PlayerScore = 0;
