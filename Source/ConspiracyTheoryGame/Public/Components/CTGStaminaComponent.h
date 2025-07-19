@@ -20,6 +20,8 @@ public:
     float GetStamina() const { return Stamina; };
     bool CanSprinting() const { return Stamina > MinStaminaToSprint; };
     void ChangeSpamina(bool IsSprinting);
+
+    UFUNCTION(BlueprintCallable)
     float GetStaminaPercent() const { return Stamina / MaxStamina; };
 
     void StopStaminaRegeneration();
