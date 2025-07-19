@@ -15,6 +15,7 @@ class UInputMappingContext;
 class UInputAction;
 class UCTGInteractionComponent;
 class ACTGKsilanCharacter;
+class UCTGStaminaComponent;
 
 UCLASS()
 class CONSPIRACYTHEORYGAME_API ACTGCharacter : public ACharacter
@@ -22,8 +23,6 @@ class CONSPIRACYTHEORYGAME_API ACTGCharacter : public ACharacter
     GENERATED_BODY()
 
 public:
-
-
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stun")
     bool bCanStun = true;
 
@@ -52,14 +51,11 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Xylan|Shout")
     float MaxShoutInterval = 60.f;
 
-
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Xylan|Shout")
     float ShoutAggroRadius = 2000.f;
 
-
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Xylan|Shout")
     float ShoutLoudness = 1.0f;
-
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Xylan|Shout")
     TArray<USoundBase*> XylanShoutSounds;
@@ -149,6 +145,9 @@ protected:
     UPROPERTY(VisibleAnywhere, Category = "Components")
     TObjectPtr<UCTGInteractionComponent> InteractionComponent;
 
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+    TObjectPtr<UCTGStaminaComponent> StaminaComponent;
+
     UPROPERTY(EditDefaultsOnly, Category = "Input")
     TObjectPtr<UInputMappingContext> MappingContext;
 
@@ -197,4 +196,6 @@ private:
 
     void OnStartSprinting();
     void OnStopSprinting();
+
+    void OnStaminaEmpty();
 };

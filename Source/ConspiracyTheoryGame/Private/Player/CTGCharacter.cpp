@@ -25,6 +25,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Player/CTGKsilanCharacter.h"
 #include "Components/CTGCharacterMovementComponent.h"
+#include "Components/CTGStaminaComponent.h"
 
 void ACTGCharacter::SetBossRoomLocation(const FVector& Location)
 {
@@ -54,6 +55,8 @@ ACTGCharacter::ACTGCharacter(const FObjectInitializer& OfjInit)
 
     InteractionComponent = CreateDefaultSubobject<UCTGInteractionComponent>("InteractionComponent");
 
+    StaminaComponent = CreateDefaultSubobject<UCTGStaminaComponent>("StaminaComponent");
+
     GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
     GetCharacterMovement()->MaxWalkSpeedCrouched = 200.f;
 
@@ -71,6 +74,7 @@ ACTGCharacter::ACTGCharacter(const FObjectInitializer& OfjInit)
 void ACTGCharacter::BeginPlay()
 {
     Super::BeginPlay();
+
     if (!Tags.Contains("Player"))
     {
         Tags.Add("Player");
@@ -117,7 +121,11 @@ void ACTGCharacter::BeginPlay()
             KsilanCharacter->SetOwnerActor(this);
         }
     }
+
+    check(StaminaComponent);
+    StaminaComponent->OnStaminaEmpty.AddUObject(this, &ACTGCharacter::OnStaminaEmpty);
 }
+
 void ACTGCharacter::PerformXylanShout()
 {
     if (XylanShoutSounds.Num() == 0)
@@ -263,17 +271,34 @@ void ACTGCharacter::StopCrouch(const FInputActionValue& Value)
 
 void ACTGCharacter::OnStartSprinting()
 {
-    WantsToSprint = true;
+    if (StaminaComponent->CanSprinting())
+    {
+        WantsToSprint = true;
+        if (!GetVelocity().IsZero() && IsMoving)
+        {
+            StaminaComponent->ChangeSpamina(WantsToSprint);
+        }
+        else
+        {
+            OnStopSprinting();
+        }
+    }
 }
 
 void ACTGCharacter::OnStopSprinting()
 {
     WantsToSprint = false;
+    StaminaComponent->ChangeSpamina(WantsToSprint);
 }
 
 bool ACTGCharacter::IsCharacterRunning() const
 {
     return WantsToSprint && IsMoving && !GetVelocity().IsZero();
+}
+
+void ACTGCharacter::OnStaminaEmpty()
+{
+    OnStopSprinting();
 }
 
 void ACTGCharacter::PrimaryInteract()
