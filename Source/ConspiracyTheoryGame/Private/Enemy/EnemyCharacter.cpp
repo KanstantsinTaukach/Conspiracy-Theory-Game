@@ -62,6 +62,30 @@ void AEnemyCharacter::Tick(float DeltaTime)
     }
 }
 
+void AEnemyCharacter::StartStunCooldown()
+{
+    CurrentStunCooldown = 0.0f;
+    StunCooldownProgress = 0.0f;
+
+    GetWorldTimerManager().SetTimer(StunCooldownTimerHandle, this, &AEnemyCharacter::UpdateStunCooldown, 0.05f, true);
+}
+
+void AEnemyCharacter::UpdateStunCooldown()
+{
+    CurrentStunCooldown += 0.05f;
+
+    float Progress = FMath::Clamp(CurrentStunCooldown / StunCooldown, 0.0f, 1.0f);
+    StunCooldownProgress = Progress;
+
+    OnStunCooldownProgress(Progress); 
+
+    if (CurrentStunCooldown >= StunCooldown)
+    {
+        bCanStun = true;
+        GetWorldTimerManager().ClearTimer(StunCooldownTimerHandle);
+    }
+}
+
 void AEnemyCharacter::BeginPlay()
 {
     Super::BeginPlay();
@@ -219,9 +243,12 @@ void AEnemyCharacter::StartPatrolSound()
 
 void AEnemyCharacter::Stun()
 {
-    if (bIsStunned) return;
+    if (bIsStunned || !bCanStun) return;
 
     bIsStunned = true;
+    bCanStun = false;
+    CurrentStunCooldown = 0.0f;
+    StunCooldownProgress = 0.0f;
 
     AEnemyAIController* AIController = Cast<AEnemyAIController>(GetController());
     if (AIController)
@@ -229,7 +256,7 @@ void AEnemyCharacter::Stun()
         AIController->ChaseTarget = nullptr;
         AIController->bIsChasing = false;
 
-        APawn* TargetPawn = AIController ? Cast<APawn>(AIController->GetFocusActor()) : nullptr;
+        APawn* TargetPawn = Cast<APawn>(AIController->GetFocusActor());
         if (TargetPawn)
         {
             ACTGCharacter* PlayerCharacter = Cast<ACTGCharacter>(TargetPawn);
@@ -248,9 +275,7 @@ void AEnemyCharacter::Stun()
 
         AIController->GetWorldTimerManager().ClearTimer(AIController->LoseTargetTimerHandle);
         AIController->GetWorldTimerManager().ClearTimer(AIController->ReturnToPatrolTimerHandle);
-
     }
-
 
     if (GetCharacterMovement())
     {
@@ -268,21 +293,28 @@ void AEnemyCharacter::Stun()
 
     if (AIController)
     {
-        AIController->GetWorldTimerManager().SetTimer(
-            AIController->ReturnToPatrolTimerHandle,
-            [this, AIController]()
+        FTimerDelegate ResumePatrolDelegate;
+        ResumePatrolDelegate.BindLambda(
+            [this]()
             {
                 bIsStunned = false;
-                AIController->ResumePatrol();
 
+                AEnemyAIController* RefreshedController = Cast<AEnemyAIController>(GetController());
+                if (RefreshedController)
+                {
+                    RefreshedController->ResumePatrol();
+                }
 
                 if (GetCharacterMovement())
                 {
                     GetCharacterMovement()->MaxWalkSpeed = PatrolSpeed;
                 }
-            },
-            StunDuration, false);
+            });
+
+        AIController->GetWorldTimerManager().SetTimer(AIController->ReturnToPatrolTimerHandle, ResumePatrolDelegate, StunDuration, false);
     }
+
+    StartStunCooldown();
 }
 
 void AEnemyCharacter::StopChaseSound()

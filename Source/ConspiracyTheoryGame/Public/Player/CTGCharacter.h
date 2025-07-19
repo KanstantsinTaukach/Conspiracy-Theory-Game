@@ -23,6 +23,19 @@ class CONSPIRACYTHEORYGAME_API ACTGCharacter : public ACharacter
 
 public:
 
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stun")
+    bool bCanStun = true;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stun")
+    bool bIsStunned = false;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Stun")
+    float CurrentStunCooldown = 0.0f;
+
+    UFUNCTION(BlueprintImplementableEvent, Category = "Stun")
+    void OnStunCooldownProgress(float Progress);
+
     void SpawnStunFlash();
     void ScheduleNextXylanShout();
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animations")
@@ -59,6 +72,7 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flash")
     float FlashCooldown = 3.0f;
     ACTGCharacter(const FObjectInitializer& OfjInit);
+
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Flash", Transient)
     bool bIsFlashOnCooldown = false;
 
@@ -82,8 +96,7 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stun")
     float StunCooldown = 3.0f;
 
-    bool bCanStun = true;
-
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stun")
     FTimerHandle StunCooldownTimer;
 
     void ResetStun();
