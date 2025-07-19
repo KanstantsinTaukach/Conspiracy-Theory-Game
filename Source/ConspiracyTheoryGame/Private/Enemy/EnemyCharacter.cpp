@@ -159,28 +159,21 @@ void AEnemyCharacter::OnSeePawn(APawn* Pawn)
 
 void AEnemyCharacter::StartAttack()
 {
-    if (!AttackMontage)
-    {
-        UE_LOG(LogTemp, Error, TEXT("AttackMontage is NULL!"));
-        return;
-    }
+    if (bIsStunned ) return;
 
     UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-    if (!AnimInstance)
-    {
-        UE_LOG(LogTemp, Error, TEXT("AnimInstance is NULL!"));
-        return;
-    }
 
-    UE_LOG(LogTemp, Warning, TEXT("Playing AttackMontage"));
-    AnimInstance->Montage_Play(AttackMontage);
-
-    if (AttackSound)
+    if (AnimInstance && AttackMontage)
     {
 
-        if (!AttackAudioComponent || !AttackAudioComponent->IsPlaying())
+        if (!AnimInstance->Montage_IsPlaying(AttackMontage))
         {
-            AttackAudioComponent = UGameplayStatics::SpawnSoundAttached(AttackSound, GetRootComponent());
+            AnimInstance->Montage_Play(AttackMontage);
+
+            if (AttackSound)
+            {
+                UGameplayStatics::SpawnSoundAttached(AttackSound, GetRootComponent());
+            }
         }
     }
 }
