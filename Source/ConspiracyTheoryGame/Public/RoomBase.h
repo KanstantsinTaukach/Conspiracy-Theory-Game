@@ -21,13 +21,13 @@ struct FRoomExit
     GENERATED_BODY()
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    ERoomDirection Direction;
+    ERoomDirection Direction = ERoomDirection::North;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FVector Location;
+    FVector Location = FVector::ZeroVector;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FRotator Rotation;
+    FRotator Rotation = FRotator::ZeroRotator;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
     bool bIsConnected = false;
