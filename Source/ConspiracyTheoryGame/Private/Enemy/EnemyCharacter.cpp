@@ -388,7 +388,7 @@ void AEnemyCharacter::Stun()
     }
 
     // Set up resume patrol after stun duration
-    if (AIController)
+    /*if (AIController)
     {
         FTimerDelegate ResumePatrolDelegate;
         ResumePatrolDelegate.BindLambda(
@@ -409,7 +409,7 @@ void AEnemyCharacter::Stun()
             });
 
         AIController->GetWorldTimerManager().SetTimer(AIController->ReturnToPatrolTimerHandle, ResumePatrolDelegate, StunDuration, false);
-    }
+    }*/
 
 
     StartStunCooldown();
