@@ -9,7 +9,6 @@
 
 class ACTGGrid;
 class ACTGFallingKey;
-class AExponentialHeightFog;
 class ACTGBossHUD;
 class ACTGVisualCharacter;
 class USoundCue;
@@ -91,9 +90,6 @@ private:
     TObjectPtr<ACTGFallingKey> FallingKeyVisual;
 
     UPROPERTY()
-    TObjectPtr<AExponentialHeightFog> Fog;
-
-    UPROPERTY()
     TObjectPtr<ACTGVisualCharacter> PlayerCharacter;
 
     UPROPERTY()
@@ -109,8 +105,6 @@ private:
     uint32 LastActorPositionX{0};
 
     FTimerHandle SpawnTimerHandle;
-
-    void FindFog();
 
     void UpdateColors();
 

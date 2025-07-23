@@ -5,7 +5,6 @@
 #include "Boss/RhythmMechanics/CTGGrid.h"
 #include "Boss/RhythmMechanics/CTGRhythmPawn.h"
 #include "CTGCoreTypes.h"
-#include "Engine/ExponentialHeightFog.h"
 #include "Components/ExponentialHeightFogComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Boss/CTGRhythmPlayerController.h"
@@ -51,9 +50,6 @@ void ACTGRhythmGameModeBase::StartPlay()
     check(RhythmPawn);
     RhythmPawn->UpdateLocation(RhythmSettings.GridDims, CellSize, GridOrigin);
 
-    //
-    FindFog();
-
     // Update colors
     check(ColorsTable);
     const auto RowsCount = ColorsTable->GetRowNames().Num();
@@ -93,16 +89,6 @@ void ACTGRhythmGameModeBase::StartPlay()
         SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true, TimerDelay);
 }
 
-void ACTGRhythmGameModeBase::FindFog()
-{
-    TArray<AActor*> Fogs;
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AExponentialHeightFog::StaticClass(), Fogs);
-    if (Fogs.Num() > 0)
-    {
-        Fog = Cast<AExponentialHeightFog>(Fogs[0]);
-    }
-}
-
 void ACTGRhythmGameModeBase::UpdateColors()
 {
     const auto RowName = ColorsTable->GetRowNames()[ColorTableIndex];
@@ -111,13 +97,6 @@ void ACTGRhythmGameModeBase::UpdateColors()
     {
         // Update grid
         GridVisual->UpdateColors(*ColorSet);
-
-        // Update scene ambient color via fog
-        if (Fog && Fog->GetComponent())
-        {
-            Fog->GetComponent()->SkyAtmosphereAmbientContributionColorScale = ColorSet->SkyAtmosphereColor;
-            Fog->MarkComponentsRenderStateDirty();
-        }
     }
 }
 
