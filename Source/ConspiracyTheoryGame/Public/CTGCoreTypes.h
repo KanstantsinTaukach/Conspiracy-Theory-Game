@@ -11,6 +11,7 @@ enum class ECTGMatchState : uint8
 	WaitingToStart = 0,
     Intro,
 	InProgress,
+    RhythmGameRules,
 	FightingWithBoss,
 	Pause,
 	GameOver,

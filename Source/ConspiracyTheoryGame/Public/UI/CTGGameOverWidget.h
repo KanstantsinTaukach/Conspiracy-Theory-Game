@@ -15,7 +15,7 @@ class CONSPIRACYTHEORYGAME_API UCTGGameOverWidget : public UUserWidget
 
 protected:
     UPROPERTY(meta = (BindWidget))
-    UButton* RestartLevelButton;
+    TObjectPtr<UButton> RestartLevelButton;
 
     virtual void NativeOnInitialized() override;
 

@@ -28,7 +28,7 @@ void ACTGRhythmGameModeBase::StartPlay()
 {
     Super::StartPlay();
 
-    SetMatchState(ECTGMatchState::FightingWithBoss);
+    SetMatchState(ECTGMatchState::RhythmGameRules);
 
     // FSettings RhythmSettings;
     RhythmSettings.GridDims = FDim{GridDims.X, GridDims.Y};
@@ -55,7 +55,7 @@ void ACTGRhythmGameModeBase::StartPlay()
     const auto RowsCount = ColorsTable->GetRowNames().Num();
     check(RowsCount >= 1);
     ColorTableIndex = FMath::RandRange(0, RowsCount - 1);
-    UpdateColors();
+    // UpdateColors();
 
     // Spawn Player and Boss
     int32 TargetOffset = (RhythmSettings.GridDims.Width * 0.5 + VisualCharacterOffset) * CellSize;
@@ -81,46 +81,37 @@ void ACTGRhythmGameModeBase::StartPlay()
         }
     }
 
-    if (StartGameSound && !GameMusicComponent)
-    {
-        GameMusicComponent = UGameplayStatics::SpawnSound2D(GetWorld(), StartGameSound);
-    }
-
-    if (FirstDialogSound)
-    {
-        UGameplayStatics::PlaySound2D(GetWorld(), FirstDialogSound);
-    }
-
-    GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true, TimerDelay);
+    CurrentDialogSound = FirstDialogSound;
 }
 
-void ACTGRhythmGameModeBase::UpdateColors()
+// void ACTGRhythmGameModeBase::UpdateColors()
+//{
+//     const auto RowName = ColorsTable->GetRowNames()[ColorTableIndex];
+//     const auto* ColorSet = ColorsTable->FindRow<FGridColors>(RowName, {});
+//     if (ColorSet)
+//     {
+//         GridVisual->UpdateColors(*ColorSet);
+//     }
+// }
+
+void ACTGRhythmGameModeBase::StartBattleWithBoss()
 {
-    const auto RowName = ColorsTable->GetRowNames()[ColorTableIndex];
-    const auto* ColorSet = ColorsTable->FindRow<FGridColors>(RowName, {});
-    if (ColorSet)
-    {
-        GridVisual->UpdateColors(*ColorSet);
-    }
+    SetMatchState(ECTGMatchState::FightingWithBoss);
+    PrepareForTheNextStage();
 }
 
 void ACTGRhythmGameModeBase::GetBattleStageLevel(float Health, float HealthDelta)
 {
     if (BossCharacter && !BossCharacter->IsDead())
-    { 
+    {
         if (!IsMiddleStage && (Health < (BossCharacter->GetMaxHealth() / 2.0f)))
         {
             SpawnInterval = 1.0f;
             RhythmSettings.GameSpeed = 0.25f;
             IsMiddleStage = true;
+            CurrentDialogSound = SecondDialogSound;
 
-            if (SecondDialogSound)
-            {
-                UGameplayStatics::PlaySound2D(GetWorld(), SecondDialogSound);
-            }
-
-            GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
-            GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true);
+            PrepareForTheNextStage();
         }
 
         if (!IsFinalStage && IsMiddleStage && (Health < (BossCharacter->GetMaxHealth() / 4.0f)))
@@ -128,16 +119,45 @@ void ACTGRhythmGameModeBase::GetBattleStageLevel(float Health, float HealthDelta
             SpawnInterval = 0.5f;
             RhythmSettings.GameSpeed = 0.125f;
             IsFinalStage = true;
+            CurrentDialogSound = ThirdDialogSound;
 
-            if (ThirdDialogSound)
-            {
-                UGameplayStatics::PlaySound2D(GetWorld(), ThirdDialogSound);
-            }
-
-            GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
-            GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true);
+            PrepareForTheNextStage();
         }
     }
+}
+
+void ACTGRhythmGameModeBase::PrepareForTheNextStage()
+{
+    if (!GetWorld()) return;
+
+    GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
+    DestroyAllFallingKeys(true);
+
+    PlayerCharacter->StopAllCharacterAnimations();
+    BossCharacter->StopAllCharacterAnimations();
+
+    if (CurrentDialogSound)
+    {
+        UGameplayStatics::PlaySound2D(GetWorld(), CurrentDialogSound);
+    }
+
+    GetWorld()->GetTimerManager().SetTimer(PrepareTimerHanlde, this, &ACTGRhythmGameModeBase::StartNewStage, 5.0, false);
+}
+
+void ACTGRhythmGameModeBase::StartNewStage()
+{
+    if (!GetWorld()) return;
+
+    GetWorld()->GetTimerManager().ClearTimer(PrepareTimerHanlde);
+    if (StartGameSound && !GameMusicComponent)
+    {
+        GameMusicComponent = UGameplayStatics::SpawnSound2D(GetWorld(), StartGameSound);
+    }
+
+    PlayerCharacter->PlayDanceAnimation();
+    BossCharacter->PlayDanceAnimation();
+
+    GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true);
 }
 
 void ACTGRhythmGameModeBase::SpawnRandomFallingKey()
@@ -296,8 +316,6 @@ bool ACTGRhythmGameModeBase::ClearPause()
     const bool PauseCleared = Super::ClearPause();
     if (PauseCleared)
     {
-        SetMatchState(ECTGMatchState::FightingWithBoss);
-
         if (GameMusicComponent)
         {
             GameMusicComponent->SetPaused(false);

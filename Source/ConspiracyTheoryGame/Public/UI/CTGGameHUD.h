@@ -26,7 +26,7 @@ private:
     TMap<ECTGMatchState, UUserWidget*> GameWidgets;
 
     UPROPERTY()
-    UUserWidget* CurrentWidget = nullptr;
+    TObjectPtr<UUserWidget> CurrentWidget = nullptr;
 
     void OnMatchStateChanged(ECTGMatchState State);
 };

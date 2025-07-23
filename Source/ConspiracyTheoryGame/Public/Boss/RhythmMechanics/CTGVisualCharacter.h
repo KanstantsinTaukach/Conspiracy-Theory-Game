@@ -42,7 +42,10 @@ public:
     void StopAllCharacterAnimations();
 
     UFUNCTION()
-    UAudioComponent* GetVoiceComponent() const { return VoiceComponent; };
+    void PlayDanceAnimation();
+
+    //UFUNCTION()
+    //UAudioComponent* GetVoiceComponent() const { return VoiceComponent; };
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health")
@@ -70,10 +73,8 @@ private:
     UPROPERTY()
     TObjectPtr<UAnimMontage> CurrentDanceAnimMontage;
 
-    UPROPERTY()
-    TObjectPtr<UAudioComponent> VoiceComponent;
-
-    void PlayDanceAnimation();
+    //UPROPERTY()
+    //TObjectPtr<UAudioComponent> VoiceComponent;
 
     UFUNCTION()
     void OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted);

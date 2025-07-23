@@ -4,22 +4,22 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "CTGGoToMenuWidget.generated.h"
+#include "STGBossRulesWidget.generated.h"
 
 class UButton;
 
 UCLASS()
-class CONSPIRACYTHEORYGAME_API UCTGGoToMenuWidget : public UUserWidget
+class CONSPIRACYTHEORYGAME_API USTGBossRulesWidget : public UUserWidget
 {
     GENERATED_BODY()
 
 protected:
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UButton> GoToMenuButton;
+    TObjectPtr<UButton> StartBattleButton;
 
     void NativeOnInitialized() override;
 
 private:
     UFUNCTION()
-    void OnGoToMenu();
+    void OnStartBattle();
 };

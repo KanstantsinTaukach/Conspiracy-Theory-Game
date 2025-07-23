@@ -36,6 +36,8 @@ public:
     virtual bool SetPause(APlayerController* PC, FCanUnpause CanUnpauseDelegate = FCanUnpause()) override;
     virtual bool ClearPause() override;
 
+    void StartBattleWithBoss();
+
 protected:
     UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "5", cCampMax = "100"), Category = "RhythmGameSettings")
     FUintPoint GridDims{15, 30};
@@ -69,9 +71,6 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "1", clampMax = "20"), Category = "Characters")
     int32 VisualCharacterOffset = 3;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (ClampMin = "0.0", ClampMax = "5.0"), Category = "RhythmGameSettings")
-    float TimerDelay = 0.0f;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
     TObjectPtr<USoundCue> StartGameSound;
@@ -107,6 +106,9 @@ private:
     UPROPERTY()
     TObjectPtr<UAudioComponent> GameMusicComponent;
 
+    UPROPERTY()
+    TObjectPtr<USoundCue> CurrentDialogSound;
+
     FSettings RhythmSettings;
 
     uint32 ColorTableIndex{0};
@@ -114,11 +116,12 @@ private:
     uint32 LastActorPositionX{0};
 
     FTimerHandle SpawnTimerHandle;
+    FTimerHandle PrepareTimerHanlde;
 
     bool IsMiddleStage = false;
     bool IsFinalStage = false;
 
-    void UpdateColors();
+   /* void UpdateColors();*/
 
     void SpawnRandomFallingKey();
 
@@ -131,4 +134,7 @@ private:
     void DestroyAllFallingKeys(bool bIsPlayerWin);
 
     void GetBattleStageLevel(float Health, float HealthDelta);
+
+    void PrepareForTheNextStage();
+    void StartNewStage();
 };

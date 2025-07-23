@@ -24,6 +24,10 @@ public:
 
 protected:
     ECTGMatchState MatchState = ECTGMatchState::WaitingToStart;
+    ECTGMatchState PreviousMatchState = ECTGMatchState::WaitingToStart;
 
     void SetMatchState(ECTGMatchState State);
+
+    void SetPreviousMatchState(ECTGMatchState State) { PreviousMatchState = State; };
+    ECTGMatchState GetPreviousMatchState() const { return PreviousMatchState; };
 };

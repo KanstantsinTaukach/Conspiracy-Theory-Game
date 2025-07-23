@@ -29,6 +29,7 @@ bool ACTGGameModeBase::SetPause(APlayerController* PC, FCanUnpause CanUnpauseDel
     const bool PauseSet = Super::SetPause(PC, CanUnpauseDelegate);
     if (PauseSet)
     {
+        SetPreviousMatchState(MatchState);
         SetMatchState(ECTGMatchState::Pause);
     }
 
@@ -40,7 +41,7 @@ bool ACTGGameModeBase::ClearPause()
     const bool PauseCleared = Super::ClearPause();
     if (PauseCleared)
     {
-        SetMatchState(ECTGMatchState::InProgress);
+        SetMatchState(GetPreviousMatchState());
     }
 
     return PauseCleared;

@@ -21,10 +21,10 @@ public:
 
 protected:
     UPROPERTY(meta = (Bindwidget))
-    USizeBox* ParentSizeBox;
+    TObjectPtr <USizeBox> ParentSizeBox;
 
     UPROPERTY(meta = (Bindwidget))
-    UVerticalBox* InteractionInfoBox;
+    TObjectPtr <UVerticalBox> InteractionInfoBox;
 
     UPROPERTY(EditAnywhere, Category = "UI")
     FVector WorldOffset;
@@ -33,7 +33,7 @@ protected:
     TSubclassOf<UUserWidget> InteractionInfoWidgetClass;
 
     UPROPERTY()
-    UCTGInteractionWidget* InteractionInfoWidget;
+    TObjectPtr <UCTGInteractionWidget> InteractionInfoWidget;
 
     virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 

@@ -13,9 +13,9 @@ ACTGVisualCharacter::ACTGVisualCharacter()
 
     CharacterHealth = CharacterMaxHealth;
 
-    VoiceComponent = CreateDefaultSubobject<UAudioComponent>("VoiceComponent");
-    VoiceComponent->SetupAttachment(RootComponent);
-    VoiceComponent->bAutoActivate = false;
+    // VoiceComponent = CreateDefaultSubobject<UAudioComponent>("VoiceComponent");
+    // VoiceComponent->SetupAttachment(RootComponent);
+    // VoiceComponent->bAutoActivate = false;
 }
 
 void ACTGVisualCharacter::BeginPlay()
@@ -29,7 +29,7 @@ void ACTGVisualCharacter::BeginPlay()
         AnimInstance->OnMontageEnded.AddDynamic(this, &ACTGVisualCharacter::OnAnimationEnded);
     }
 
-    PlayDanceAnimation();
+    // PlayDanceAnimation();
 }
 
 void ACTGVisualCharacter::SetHealth(float NewHealth)
@@ -39,8 +39,6 @@ void ACTGVisualCharacter::SetHealth(float NewHealth)
     const auto NextHealth = FMath::Clamp(NewHealth, 0.0f, CharacterMaxHealth);
     const auto HealthDelta = NextHealth - CharacterHealth;
     CharacterHealth = NextHealth;
-
-    OnHealthChanged.Broadcast(CharacterHealth, HealthDelta);
 
     if (HealthDelta < 0.0f && DamageAnimMontage)
     {
@@ -57,6 +55,8 @@ void ACTGVisualCharacter::SetHealth(float NewHealth)
             UGameplayStatics::PlaySound2D(GetWorld(), RandomSound);
         }
     }
+
+    OnHealthChanged.Broadcast(CharacterHealth, HealthDelta);
 
     if (IsDead())
     {
@@ -103,7 +103,7 @@ void ACTGVisualCharacter::OnAnimationEnded(UAnimMontage* Montage, bool bInterrup
     }
 }
 
-void ACTGVisualCharacter::StopAllCharacterAnimations() 
+void ACTGVisualCharacter::StopAllCharacterAnimations()
 {
     StopAnimMontage(CurrentDanceAnimMontage);
     StopAnimMontage(DamageAnimMontage);

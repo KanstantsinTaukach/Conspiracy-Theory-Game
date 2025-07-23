@@ -20,11 +20,11 @@ public:
 
 protected:
     UPROPERTY(meta = (BindWidget))
-    UTextBlock* NameText;
+    TObjectPtr<UTextBlock> NameText;
 
     UPROPERTY(meta = (BindWidget))
-    UTextBlock* DescriptionText;
+    TObjectPtr <UTextBlock> DescriptionText;
 
     UPROPERTY(meta = (BindWidget))
-    UTextBlock* PointsText;
+    TObjectPtr <UTextBlock> PointsText;
 };

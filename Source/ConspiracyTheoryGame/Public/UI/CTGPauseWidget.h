@@ -15,7 +15,7 @@ class CONSPIRACYTHEORYGAME_API UCTGPauseWidget : public UUserWidget
 
 protected:
     UPROPERTY(meta = (BindWidget))
-    UButton* ClearPauseButton;
+    TObjectPtr <UButton> ClearPauseButton;
 
     virtual void NativeOnInitialized() override;
 

@@ -16,9 +16,9 @@ void UCTGPlayerWinWidget::NativeOnInitialized()
         RestartGameButton->OnClicked.AddDynamic(this, &UCTGPlayerWinWidget::OnRestartGame);
     }
 
-        if (RestartLevelButton)
+    if (RestartLevelButton)
     {
-            RestartLevelButton->OnClicked.AddDynamic(this, &UCTGPlayerWinWidget::OnRestartLevel);
+        RestartLevelButton->OnClicked.AddDynamic(this, &UCTGPlayerWinWidget::OnRestartLevel);
     }
 }
 
