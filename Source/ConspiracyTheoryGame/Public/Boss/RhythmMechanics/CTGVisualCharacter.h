@@ -46,7 +46,7 @@ public:
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health")
-    float CharacterMaxHealth = 2000.0f;
+    float CharacterMaxHealth = 1500.0f;
 
     UPROPERTY(EditDefaultsOnly, Category = "Animation")
     TArray<UAnimMontage*> DanceAnimations;

@@ -26,7 +26,7 @@ void UCTGGameOverWidget::OnRestartLevel()
 
     if (CTGGameInstance->GetBossLevelName().IsNone())
     {
-        UE_LOG(LogCTGGameOverWidget, Error, TEXT("Level name is NONE"));
+        UE_LOG(LogCTGGameOverWidget, Error, TEXT("Boss level name is NONE"));
         return;
     }
 
