@@ -50,10 +50,10 @@ protected:
     UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "10", ClampMax = "100"), Category = "RhythmGameSettings")
     uint32 CellSize{10};
 
-    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.1", ClampMax = "5"), Category = "RhythmGameSettings")
+    UPROPERTY(VisibleAnywhere, Category = "RhythmGameSettings")
     float GameSpeed{0.5f};
 
-    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.5", ClampMax = "5"), Category = "RhythmGameSettings")
+    UPROPERTY(VisibleAnywhere, Category = "RhythmGameSettings")
     float SpawnInterval = 2.0;
 
     UPROPERTY(EditDefaultsOnly)

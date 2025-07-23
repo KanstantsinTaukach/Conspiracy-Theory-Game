@@ -104,7 +104,7 @@ void ACTGRhythmGameModeBase::GetBattleStageLevel(float Health, float HealthDelta
 {
     if (BossCharacter && !BossCharacter->IsDead())
     {
-        if (!IsMiddleStage && (Health < (BossCharacter->GetMaxHealth() / 2.0f)))
+        if (!IsMiddleStage && (Health < (BossCharacter->GetMaxHealth() / 1.5f)))
         {
             SpawnInterval = 1.0f;
             RhythmSettings.GameSpeed = 0.25f;
@@ -114,7 +114,7 @@ void ACTGRhythmGameModeBase::GetBattleStageLevel(float Health, float HealthDelta
             PrepareForTheNextStage();
         }
 
-        if (!IsFinalStage && IsMiddleStage && (Health < (BossCharacter->GetMaxHealth() / 4.0f)))
+        if (!IsFinalStage && IsMiddleStage && (Health < (BossCharacter->GetMaxHealth() / 3.0f)))
         {
             SpawnInterval = 0.5f;
             RhythmSettings.GameSpeed = 0.125f;
@@ -130,8 +130,15 @@ void ACTGRhythmGameModeBase::PrepareForTheNextStage()
 {
     if (!GetWorld()) return;
 
-    PlayerCharacter->StopAllCharacterAnimations();
-    BossCharacter->StopAllCharacterAnimations();
+    if (PlayerCharacter)
+    {
+        PlayerCharacter->StopAllCharacterAnimations();
+    }
+
+    if (BossCharacter)
+    {
+        BossCharacter->StopAllCharacterAnimations();
+    }
 
     GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
     DestroyAllFallingKeys(true);
@@ -156,8 +163,15 @@ void ACTGRhythmGameModeBase::StartNewStage()
         GameMusicComponent = UGameplayStatics::SpawnSound2D(GetWorld(), StartGameSound);
     }
 
-    PlayerCharacter->PlayDanceAnimation();
-    BossCharacter->PlayDanceAnimation();
+    if (PlayerCharacter)
+    {
+        PlayerCharacter->PlayDanceAnimation();
+    }
+
+    if (BossCharacter)
+    {
+        BossCharacter->PlayDanceAnimation();
+    }
 
     GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true);
 }
