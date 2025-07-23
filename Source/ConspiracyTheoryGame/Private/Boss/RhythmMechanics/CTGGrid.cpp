@@ -62,8 +62,6 @@ void ACTGGrid::UpdateColors(const FGridColors& Colors)
 void ACTGGrid::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
-
-    //DrawGrid();
 }
 
 void ACTGGrid::DrawGrid()

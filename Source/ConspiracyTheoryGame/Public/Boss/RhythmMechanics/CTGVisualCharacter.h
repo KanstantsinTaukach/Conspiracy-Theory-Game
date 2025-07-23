@@ -7,7 +7,6 @@
 #include "CTGVisualCharacter.generated.h"
 
 class USoundCue;
-class UAudioComponent;
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnHealthChangedSignature, float, float);
 DECLARE_MULTICAST_DELEGATE(FOnDeathSignature);
@@ -44,9 +43,6 @@ public:
     UFUNCTION()
     void PlayDanceAnimation();
 
-    //UFUNCTION()
-    //UAudioComponent* GetVoiceComponent() const { return VoiceComponent; };
-
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health")
     float CharacterMaxHealth = 1500.0f;
@@ -72,9 +68,6 @@ private:
 
     UPROPERTY()
     TObjectPtr<UAnimMontage> CurrentDanceAnimMontage;
-
-    //UPROPERTY()
-    //TObjectPtr<UAudioComponent> VoiceComponent;
 
     UFUNCTION()
     void OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted);

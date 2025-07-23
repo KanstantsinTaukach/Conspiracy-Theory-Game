@@ -5,17 +5,13 @@
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
-#include "Components/AudioComponent.h"
+#include "CTGRhythmGameModeBase.h"
 
 ACTGVisualCharacter::ACTGVisualCharacter()
 {
     PrimaryActorTick.bCanEverTick = false;
 
     CharacterHealth = CharacterMaxHealth;
-
-    // VoiceComponent = CreateDefaultSubobject<UAudioComponent>("VoiceComponent");
-    // VoiceComponent->SetupAttachment(RootComponent);
-    // VoiceComponent->bAutoActivate = false;
 }
 
 void ACTGVisualCharacter::BeginPlay()
@@ -28,8 +24,6 @@ void ACTGVisualCharacter::BeginPlay()
     {
         AnimInstance->OnMontageEnded.AddDynamic(this, &ACTGVisualCharacter::OnAnimationEnded);
     }
-
-    // PlayDanceAnimation();
 }
 
 void ACTGVisualCharacter::SetHealth(float NewHealth)
@@ -49,14 +43,14 @@ void ACTGVisualCharacter::SetHealth(float NewHealth)
 
         PlayAnimMontage(DamageAnimMontage);
 
+        OnHealthChanged.Broadcast(CharacterHealth, HealthDelta);
+
         if (DamageSounds.Num() > 0)
         {
             USoundCue* RandomSound = DamageSounds[FMath::RandRange(0, DamageSounds.Num() - 1)];
             UGameplayStatics::PlaySound2D(GetWorld(), RandomSound);
         }
     }
-
-    OnHealthChanged.Broadcast(CharacterHealth, HealthDelta);
 
     if (IsDead())
     {

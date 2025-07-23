@@ -14,6 +14,8 @@ class ACTGVisualCharacter;
 class USoundCue;
 class UAudioComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPrepareForNextStageSignature, float, SecondsToPrepare);
+
 UCLASS()
 class CONSPIRACYTHEORYGAME_API ACTGRhythmGameModeBase : public ACTGGameModeBase
 {
@@ -23,6 +25,9 @@ public:
     ACTGRhythmGameModeBase();
 
     virtual void StartPlay() override;
+
+    UPROPERTY(BlueprintAssignable)
+    FOnPrepareForNextStageSignature OnPrepareForNextStage;
 
     UFUNCTION()
     void CheckPlayerInput(ECTGKeyType InputKey);
@@ -121,7 +126,7 @@ private:
     bool IsMiddleStage = false;
     bool IsFinalStage = false;
 
-   /* void UpdateColors();*/
+    void UpdateColors();
 
     void SpawnRandomFallingKey();
 

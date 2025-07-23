@@ -84,15 +84,15 @@ void ACTGRhythmGameModeBase::StartPlay()
     CurrentDialogSound = FirstDialogSound;
 }
 
-// void ACTGRhythmGameModeBase::UpdateColors()
-//{
-//     const auto RowName = ColorsTable->GetRowNames()[ColorTableIndex];
-//     const auto* ColorSet = ColorsTable->FindRow<FGridColors>(RowName, {});
-//     if (ColorSet)
-//     {
-//         GridVisual->UpdateColors(*ColorSet);
-//     }
-// }
+void ACTGRhythmGameModeBase::UpdateColors()
+{
+    const auto RowName = ColorsTable->GetRowNames()[ColorTableIndex];
+    const auto* ColorSet = ColorsTable->FindRow<FGridColors>(RowName, {});
+    if (ColorSet)
+    {
+        GridVisual->UpdateColors(*ColorSet);
+    }
+}
 
 void ACTGRhythmGameModeBase::StartBattleWithBoss()
 {
@@ -130,18 +130,20 @@ void ACTGRhythmGameModeBase::PrepareForTheNextStage()
 {
     if (!GetWorld()) return;
 
-    GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
-    DestroyAllFallingKeys(true);
-
     PlayerCharacter->StopAllCharacterAnimations();
     BossCharacter->StopAllCharacterAnimations();
+
+    GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
+    DestroyAllFallingKeys(true);
 
     if (CurrentDialogSound)
     {
         UGameplayStatics::PlaySound2D(GetWorld(), CurrentDialogSound);
     }
 
-    GetWorld()->GetTimerManager().SetTimer(PrepareTimerHanlde, this, &ACTGRhythmGameModeBase::StartNewStage, 5.0, false);
+    float SecondsToPrepare = 5.0f;
+    OnPrepareForNextStage.Broadcast(SecondsToPrepare);
+    GetWorld()->GetTimerManager().SetTimer(PrepareTimerHanlde, this, &ACTGRhythmGameModeBase::StartNewStage, SecondsToPrepare, false);
 }
 
 void ACTGRhythmGameModeBase::StartNewStage()
@@ -263,7 +265,6 @@ void ACTGRhythmGameModeBase::OnPlayerCharacterDeath()
         }
 
         DestroyAllFallingKeys(false);
-        // SetMatchState(ECTGMatchState::GameOver);
 
         const auto* CTGGameInstance = GetWorld()->GetGameInstance<UCTGGameInstance>();
         if (CTGGameInstance)
@@ -286,7 +287,6 @@ void ACTGRhythmGameModeBase::OnBossCharacterDeath()
         }
 
         DestroyAllFallingKeys(true);
-        // SetMatchState(ECTGMatchState::PlayerWin);
 
         const auto* CTGGameInstance = GetWorld()->GetGameInstance<UCTGGameInstance>();
         if (CTGGameInstance)
