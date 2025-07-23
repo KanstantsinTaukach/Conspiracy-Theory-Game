@@ -9,7 +9,7 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogCTGMainMenuWidget, All, All)
 
-void UCTGMainMenuWidget::NativeOnInitialized() 
+void UCTGMainMenuWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
 
@@ -24,23 +24,27 @@ void UCTGMainMenuWidget::NativeOnInitialized()
     }
 }
 
-void UCTGMainMenuWidget::OnStartGame() 
+void UCTGMainMenuWidget::OnStartGame()
 {
     if (!GetWorld()) return;
 
     const auto CTGGameInstance = GetWorld()->GetGameInstance<UCTGGameInstance>();
     if (!CTGGameInstance) return;
 
-    if (CTGGameInstance->GetStartupLevelName().IsNone())
+    if (CTGGameInstance->GetIntroLevelName().IsNone())
     {
-        UE_LOG(LogCTGMainMenuWidget, Error, TEXT("Level name is NONE"));
+        UE_LOG(LogCTGMainMenuWidget, Error, TEXT("Intro level name is NONE"));
         return;
     }
-    UGameplayStatics::PlaySound2D(GetWorld(), StartGameSound);
-    UGameplayStatics::OpenLevel(this, CTGGameInstance->GetStartupLevelName());
+    if (StartGameSound)
+    {
+        UGameplayStatics::PlaySound2D(GetWorld(), StartGameSound);
+    }
+
+    UGameplayStatics::OpenLevel(this, CTGGameInstance->GetIntroLevelName());
 }
 
-void UCTGMainMenuWidget::OnQuitGame() 
+void UCTGMainMenuWidget::OnQuitGame()
 {
     UKismetSystemLibrary::QuitGame(this, GetOwningPlayer(), EQuitPreference::Quit, true);
 }

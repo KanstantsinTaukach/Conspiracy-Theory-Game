@@ -15,6 +15,27 @@ void UCTGPlayerWinWidget::NativeOnInitialized()
     {
         RestartGameButton->OnClicked.AddDynamic(this, &UCTGPlayerWinWidget::OnRestartGame);
     }
+
+        if (RestartLevelButton)
+    {
+            RestartLevelButton->OnClicked.AddDynamic(this, &UCTGPlayerWinWidget::OnRestartLevel);
+    }
+}
+
+void UCTGPlayerWinWidget::OnRestartLevel()
+{
+    if (!GetWorld()) return;
+
+    const auto CTGGameInstance = GetWorld()->GetGameInstance<UCTGGameInstance>();
+    if (!CTGGameInstance) return;
+
+    if (CTGGameInstance->GetBossLevelName().IsNone())
+    {
+        UE_LOG(LogCTGPlayerWinWidget, Error, TEXT("Boss level name is NONE"));
+        return;
+    }
+
+    UGameplayStatics::OpenLevel(this, CTGGameInstance->GetBossLevelName());
 }
 
 void UCTGPlayerWinWidget::OnRestartGame()

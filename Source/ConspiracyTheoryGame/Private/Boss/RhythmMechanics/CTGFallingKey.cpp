@@ -23,7 +23,7 @@ ACTGFallingKey::ACTGFallingKey()
 void ACTGFallingKey::SetModel(const FSettings& InSettings, uint32 InCellSize)
 {
     Settings = InSettings;
-    Delta = Settings.GameSpeed / 50;
+    //Delta = Settings.GameSpeed / 10;
     Settings.GameSpeed = FMath::RandRange(Settings.GameSpeed - Delta, Settings.GameSpeed + Delta);
     CellSize = InCellSize;
 }
@@ -54,10 +54,11 @@ void ACTGFallingKey::UpdateColors(const FGridColors& Colors)
 {
     if (auto* MeshMaterial = FallingKeyMesh->CreateAndSetMaterialInstanceDynamic(0))
     {
-        MeshMaterial->SetVectorParameterValue("FallingKeyColor", Colors.FallingKeyColor);
+        MeshMaterial->SetVectorParameterValue("FallingKeyColor", Colors.GoodFallingKeyColor);
     }
 
-    ExplodeColor = Colors.FallingKeyColor;
+    BadExplodeColor = Colors.BadFallingKeyColor;
+    GoodExplodeColor = Colors.GoodFallingKeyColor;
 }
 
 void ACTGFallingKey::UpdateScale(uint32 InCellSize)
@@ -137,21 +138,28 @@ void ACTGFallingKey::OnMissed()
         }
     }
 
-    DestroyFallingKey();
+    DestroyFallingKey(false);
 }
 
-void ACTGFallingKey::DestroyFallingKey()
+void ACTGFallingKey::DestroyFallingKey(bool bIsPlayerHit)
 {
-    Explode();
+    Explode(bIsPlayerHit);
 
     Destroy();
 }
 
-void ACTGFallingKey::Explode()
+void ACTGFallingKey::Explode(bool bIsPlayerHit)
 {
     if (UNiagaraComponent* NS = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ExplosionEffect, Origin->GetComponentLocation()))
     {
-        NS->SetNiagaraVariableLinearColor("ExplodeColor", ExplodeColor);
+        if (bIsPlayerHit)
+        {
+            NS->SetNiagaraVariableLinearColor("ExplodeColor", GoodExplodeColor);
+        }
+        else
+        {
+            NS->SetNiagaraVariableLinearColor("ExplodeColor", BadExplodeColor);
+        }
     }
 }
 

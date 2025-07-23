@@ -5,6 +5,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Sound/SoundBase.h"
+#include "CTGCharacter.h"
+#include "Perception/AIPerceptionComponent.h"
+#include "Perception/AISenseConfig_Hearing.h"
 #include "Components/AudioComponent.h"
 #include "EnemyCharacter.generated.h"
 
@@ -15,22 +18,98 @@ class CONSPIRACYTHEORYGAME_API AEnemyCharacter : public ACharacter
 private:
     FTimerHandle OverlapCatchTimerHandle;
 
+    UFUNCTION()
+    void OpenLevelAfterDelay(APlayerController* PC, FName LevelName);
+
 protected:
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override;
 
 public:
+    FTimerHandle ChaseSoundTimerHandle;
+    bool bCanPlayChaseSound = true;
+
+    UFUNCTION()
+    void ResetChaseSound();
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+    TArray<USoundBase*> ChaseStartSounds;  
+
+    UFUNCTION(BlueprintCallable)
+    void PlayRandomChaseStartSound(); 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Perception")
+    float HearingRadius = 3000.f;
+    UPROPERTY(BlueprintReadOnly, Category = "Player State")
+    bool bIsChased;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Perception")
+    float HearingThreshold = 0.5f;  // Минимальная громкость для реакции
+    UAIPerceptionComponent* AIPerceptionComp;
+    UAISenseConfig_Hearing* HearingConfig;
+
+    UFUNCTION()
+    void OnPerceptionUpdated(const TArray<AActor*>& UpdatedActors);
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stun")
+    float StunCooldown = 5.0f;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stun")
+    bool bCanStun = true;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stun")
+    bool bIsStunned = false;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Stun")
+    float CurrentStunCooldown = 0.0f;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Stun")
+    float StunCooldownProgress = 0.0f;  // <- эту ты будешь брать в UMG
+
+    FTimerHandle StunCooldownTimerHandle;
+
+    UFUNCTION(BlueprintImplementableEvent, Category = "Stun")
+    void OnStunCooldownProgress(float Progress);
+
+    // Функции
+    void StartStunCooldown();
+    void UpdateStunCooldown();
+
+    UPROPERTY(EditDefaultsOnly, Category = "Movement")
+    float PatrolSpeed = 200.f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Movement")
+    float ChaseSpeed = 600.f;
+
+    UPROPERTY()
+    UAudioComponent* AttackAudioComponent;
+
+    bool bIsRunning;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Footstep")
+    TArray<USoundBase*> WalkFootstepSounds;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Footstep")
+    TArray<USoundBase*> RunFootstepSounds;
+
+    UFUNCTION(BlueprintCallable)
+    void PlayFootstep(bool bIsRunning);
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+    USoundBase* LostTargetSound;
+
+    UPROPERTY()
+    ACTGCharacter* CurrentTargetPlayer = nullptr;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+    USoundBase* AttackSound;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UUserWidget> CatchWidgetClass;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Capture")
-    float OverlapTimeToCatch = 2.0f;
+    float OverlapTimeToCatch = 0.5f;
 
     float CurrentOverlapTime = 0.0f;
 
     bool bIsOverlappingPlayer = false;
-
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     bool bIsChasing = false;
     AEnemyCharacter();
 
@@ -50,8 +129,6 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
     UAudioComponent* PatrolLoopAudio;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy|State")
-    bool bIsStunned = false;
 
     /** Sound used for patrol loop */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
@@ -82,14 +159,13 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     float CatchWidgetDisplayTime = 2.0f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy|Level")
-    FName LevelToOpen;
     UFUNCTION()
     void OnWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
         bool bFromSweep, const FHitResult& SweepResult);
 
     void OnInitialCatchTimerExpired();
 
+    UFUNCTION()
     void OnWeaponEndOverlap(
         UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 

@@ -15,11 +15,17 @@ class CONSPIRACYTHEORYGAME_API UCTGPlayerWinWidget : public UUserWidget
 
 protected:
     UPROPERTY(meta = (BindWidget))
+    UButton* RestartLevelButton;
+
+    UPROPERTY(meta = (BindWidget))
     UButton* RestartGameButton;
 
     virtual void NativeOnInitialized() override;
 
 private:
+    UFUNCTION()
+    void OnRestartLevel();
+
     UFUNCTION()
     void OnRestartGame();
 };

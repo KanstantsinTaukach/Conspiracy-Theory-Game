@@ -24,6 +24,8 @@ void ACTGGameModeBase::StartPlay()
 
 bool ACTGGameModeBase::SetPause(APlayerController* PC, FCanUnpause CanUnpauseDelegate)
 {
+    if (MatchState == ECTGMatchState::PlayerWin || MatchState == ECTGMatchState::GameOver || MatchState == ECTGMatchState::WaitingToStart) return false;
+
     const bool PauseSet = Super::SetPause(PC, CanUnpauseDelegate);
     if (PauseSet)
     {

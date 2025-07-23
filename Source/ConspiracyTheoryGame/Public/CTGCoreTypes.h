@@ -9,6 +9,7 @@ UENUM(BlueprintType)
 enum class ECTGMatchState : uint8
 {
 	WaitingToStart = 0,
+    Intro,
 	InProgress,
 	FightingWithBoss,
 	Pause,
@@ -72,10 +73,10 @@ struct FGridColors : public FTableRowBase
     FLinearColor GridLineColor = FLinearColor::Black;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-    FLinearColor SkyAtmosphereColor = FLinearColor::Black;
+    FLinearColor GoodFallingKeyColor = FLinearColor::Black;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-    FLinearColor FallingKeyColor = FLinearColor::Black;
+    FLinearColor BadFallingKeyColor = FLinearColor::Black;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
     FLinearColor GridFailColor = FLinearColor::Black;

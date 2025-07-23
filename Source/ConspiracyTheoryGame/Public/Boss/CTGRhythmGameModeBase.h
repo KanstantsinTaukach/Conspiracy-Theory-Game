@@ -9,9 +9,10 @@
 
 class ACTGGrid;
 class ACTGFallingKey;
-class AExponentialHeightFog;
 class ACTGBossHUD;
 class ACTGVisualCharacter;
+class USoundCue;
+class UAudioComponent;
 
 UCLASS()
 class CONSPIRACYTHEORYGAME_API ACTGRhythmGameModeBase : public ACTGGameModeBase
@@ -32,20 +33,21 @@ public:
     UFUNCTION(BlueprintCallable)
     ACTGVisualCharacter* GetVisualBossCharacter() const { return BossCharacter; };
 
+    virtual bool SetPause(APlayerController* PC, FCanUnpause CanUnpauseDelegate = FCanUnpause()) override;
     virtual bool ClearPause() override;
 
 protected:
-    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "5", clampMax = "100"), Category = "RhythmGameSettings")
+    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "5", cCampMax = "100"), Category = "RhythmGameSettings")
     FUintPoint GridDims{15, 30};
 
-    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "10", clampMax = "100"), Category = "RhythmGameSettings")
+    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "10", ClampMax = "100"), Category = "RhythmGameSettings")
     uint32 CellSize{10};
 
-    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.01", clampMax = "5"), Category = "RhythmGameSettings")
-    float GameSpeed{0.15f};
+    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.1", ClampMax = "5"), Category = "RhythmGameSettings")
+    float GameSpeed{0.5f};
 
-    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.5", clampMax = "5"), Category = "RhythmGameSettings")
-    float SpawnInterval = 2.5f;
+    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.5", ClampMax = "5"), Category = "RhythmGameSettings")
+    float SpawnInterval = 2.0;
 
     UPROPERTY(EditDefaultsOnly)
     TSubclassOf<ACTGGrid> GridVisualClass;
@@ -68,6 +70,21 @@ protected:
     UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "1", clampMax = "20"), Category = "Characters")
     int32 VisualCharacterOffset = 3;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (ClampMin = "0.0", ClampMax = "5.0"), Category = "RhythmGameSettings")
+    float TimerDelay = 0.0f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
+    TObjectPtr<USoundCue> StartGameSound;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
+    TObjectPtr<USoundCue> FirstDialogSound;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
+    TObjectPtr<USoundCue> SecondDialogSound;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
+    TObjectPtr<USoundCue> ThirdDialogSound;
+
     UPROPERTY()
     TArray<ACTGFallingKey*> ActiveFallingKeys;
 
@@ -82,13 +99,13 @@ private:
     TObjectPtr<ACTGFallingKey> FallingKeyVisual;
 
     UPROPERTY()
-    TObjectPtr<AExponentialHeightFog> Fog;
-
-    UPROPERTY()
     TObjectPtr<ACTGVisualCharacter> PlayerCharacter;
 
     UPROPERTY()
     TObjectPtr<ACTGVisualCharacter> BossCharacter;
+
+    UPROPERTY()
+    TObjectPtr<UAudioComponent> GameMusicComponent;
 
     FSettings RhythmSettings;
 
@@ -98,7 +115,8 @@ private:
 
     FTimerHandle SpawnTimerHandle;
 
-    void FindFog();
+    bool IsMiddleStage = false;
+    bool IsFinalStage = false;
 
     void UpdateColors();
 
@@ -109,4 +127,8 @@ private:
 
     UFUNCTION()
     void RemoveFallingKey(AActor* DestroyedActor);
+
+    void DestroyAllFallingKeys(bool bIsPlayerWin);
+
+    void GetBattleStageLevel(float Health, float HealthDelta);
 };

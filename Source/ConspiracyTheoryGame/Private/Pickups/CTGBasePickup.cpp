@@ -34,7 +34,10 @@ void ACTGBasePickup::ShowPickup()
 
 void ACTGBasePickup::HidePickup()
 {
-    UGameplayStatics::PlaySound2D(GetWorld(), PickupSound);
+    if (PickupSound)
+    {
+        UGameplayStatics::PlaySound2D(GetWorld(), PickupSound);
+    }
 
     SetPickupState(false);
 }
@@ -46,10 +49,7 @@ void ACTGBasePickup::SetPickupState(bool bIsActive)
     RootComponent->SetVisibility(bIsActive, true);
 }
 
-void ACTGBasePickup::Interact_Implementation(APawn* InstigatorPawn) 
-{
-
-}
+void ACTGBasePickup::Interact_Implementation(APawn* InstigatorPawn) {}
 
 FText ACTGBasePickup::GetInteractName_Implementation() const
 {

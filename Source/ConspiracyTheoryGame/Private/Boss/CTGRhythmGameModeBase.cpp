@@ -5,12 +5,15 @@
 #include "Boss/RhythmMechanics/CTGGrid.h"
 #include "Boss/RhythmMechanics/CTGRhythmPawn.h"
 #include "CTGCoreTypes.h"
-#include "Engine/ExponentialHeightFog.h"
 #include "Components/ExponentialHeightFogComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Boss/CTGRhythmPlayerController.h"
 #include "Boss/UI/CTGBossHUD.h"
 #include "Boss/RhythmMechanics/CTGVisualCharacter.h"
+#include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
+#include "Player/CTGPlayerState.h"
+#include "CTGGameInstance.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogCTGRhythmGameModeBase, All, All);
 
@@ -47,9 +50,6 @@ void ACTGRhythmGameModeBase::StartPlay()
     check(RhythmPawn);
     RhythmPawn->UpdateLocation(RhythmSettings.GridDims, CellSize, GridOrigin);
 
-    //
-    FindFog();
-
     // Update colors
     check(ColorsTable);
     const auto RowsCount = ColorsTable->GetRowNames().Num();
@@ -68,18 +68,30 @@ void ACTGRhythmGameModeBase::StartPlay()
     PlayerCharacter->OnDeath.AddUObject(this, &ACTGRhythmGameModeBase::OnPlayerCharacterDeath);
     BossCharacter->OnDeath.AddUObject(this, &ACTGRhythmGameModeBase::OnBossCharacterDeath);
 
-    // Spawn Falling Keys
-    GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true);
-}
+    BossCharacter->OnHealthChanged.AddUObject(this, &ACTGRhythmGameModeBase::GetBattleStageLevel);
 
-void ACTGRhythmGameModeBase::FindFog()
-{
-    TArray<AActor*> Fogs;
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AExponentialHeightFog::StaticClass(), Fogs);
-    if (Fogs.Num() > 0)
+    const auto CTGGameInstance = GetWorld()->GetGameInstance<UCTGGameInstance>();
+    if (CTGGameInstance)
     {
-        Fog = Cast<AExponentialHeightFog>(Fogs[0]);
+        ACTGPlayerState* PS = Cast<ACTGPlayerState>(PC->PlayerState);
+        if (PS)
+        {
+            PS->RemovePoints(PS->GetPoints());
+            CTGGameInstance->SetPlayerScore(PS->GetPoints());
+        }
     }
+
+    if (StartGameSound && !GameMusicComponent)
+    {
+        GameMusicComponent = UGameplayStatics::SpawnSound2D(GetWorld(), StartGameSound);
+    }
+
+    if (FirstDialogSound)
+    {
+        UGameplayStatics::PlaySound2D(GetWorld(), FirstDialogSound);
+    }
+
+    GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true, TimerDelay);
 }
 
 void ACTGRhythmGameModeBase::UpdateColors()
@@ -88,14 +100,42 @@ void ACTGRhythmGameModeBase::UpdateColors()
     const auto* ColorSet = ColorsTable->FindRow<FGridColors>(RowName, {});
     if (ColorSet)
     {
-        // Update grid
         GridVisual->UpdateColors(*ColorSet);
+    }
+}
 
-        // Update scene ambient color via fog
-        if (Fog && Fog->GetComponent())
+void ACTGRhythmGameModeBase::GetBattleStageLevel(float Health, float HealthDelta)
+{
+    if (BossCharacter && !BossCharacter->IsDead())
+    { 
+        if (!IsMiddleStage && (Health < (BossCharacter->GetMaxHealth() / 2.0f)))
         {
-            Fog->GetComponent()->SkyAtmosphereAmbientContributionColorScale = ColorSet->SkyAtmosphereColor;
-            Fog->MarkComponentsRenderStateDirty();
+            SpawnInterval = 1.0f;
+            RhythmSettings.GameSpeed = 0.25f;
+            IsMiddleStage = true;
+
+            if (SecondDialogSound)
+            {
+                UGameplayStatics::PlaySound2D(GetWorld(), SecondDialogSound);
+            }
+
+            GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
+            GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true);
+        }
+
+        if (!IsFinalStage && IsMiddleStage && (Health < (BossCharacter->GetMaxHealth() / 4.0f)))
+        {
+            SpawnInterval = 0.5f;
+            RhythmSettings.GameSpeed = 0.125f;
+            IsFinalStage = true;
+
+            if (ThirdDialogSound)
+            {
+                UGameplayStatics::PlaySound2D(GetWorld(), ThirdDialogSound);
+            }
+
+            GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
+            GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true);
         }
     }
 }
@@ -181,7 +221,7 @@ void ACTGRhythmGameModeBase::CheckPlayerInput(ECTGKeyType InputKey)
 
         LowestKey->OnGetZoneDamage.Broadcast(bIsDamageToBoss, Damage);
         RemoveFallingKey(LowestKey);
-        LowestKey->DestroyFallingKey();
+        LowestKey->DestroyFallingKey(bIsDamageToBoss);
     }
 }
 
@@ -197,7 +237,22 @@ void ACTGRhythmGameModeBase::OnPlayerCharacterDeath()
 {
     if (PlayerCharacter && PlayerCharacter->IsDead())
     {
-        SetMatchState(ECTGMatchState::GameOver);
+        if (BossCharacter)
+        {
+            BossCharacter->StopAllCharacterAnimations();
+        }
+
+        DestroyAllFallingKeys(false);
+        // SetMatchState(ECTGMatchState::GameOver);
+
+        const auto* CTGGameInstance = GetWorld()->GetGameInstance<UCTGGameInstance>();
+        if (CTGGameInstance)
+        {
+            if (!CTGGameInstance->GetBadEndLevelName().IsNone())
+            {
+                UGameplayStatics::OpenLevel(this, CTGGameInstance->GetBadEndLevelName());
+            }
+        }
     }
 }
 
@@ -205,8 +260,35 @@ void ACTGRhythmGameModeBase::OnBossCharacterDeath()
 {
     if (BossCharacter && BossCharacter->IsDead())
     {
-        SetMatchState(ECTGMatchState::PlayerWin);
+        if (PlayerCharacter)
+        {
+            PlayerCharacter->StopAllCharacterAnimations();
+        }
+
+        DestroyAllFallingKeys(true);
+        // SetMatchState(ECTGMatchState::PlayerWin);
+
+        const auto* CTGGameInstance = GetWorld()->GetGameInstance<UCTGGameInstance>();
+        if (CTGGameInstance)
+        {
+            if (!CTGGameInstance->GetGoodEndLevelName().IsNone())
+            {
+                UGameplayStatics::OpenLevel(this, CTGGameInstance->GetGoodEndLevelName());
+            }
+        }
     }
+}
+
+bool ACTGRhythmGameModeBase::SetPause(APlayerController* PC, FCanUnpause CanUnpauseDelegate)
+{
+    const bool PauseSet = Super::SetPause(PC, CanUnpauseDelegate);
+
+    if (PauseSet && GameMusicComponent)
+    {
+        GameMusicComponent->SetPaused(true);
+    }
+
+    return PauseSet;
 }
 
 bool ACTGRhythmGameModeBase::ClearPause()
@@ -215,7 +297,28 @@ bool ACTGRhythmGameModeBase::ClearPause()
     if (PauseCleared)
     {
         SetMatchState(ECTGMatchState::FightingWithBoss);
+
+        if (GameMusicComponent)
+        {
+            GameMusicComponent->SetPaused(false);
+        }
     }
 
     return PauseCleared;
+}
+
+void ACTGRhythmGameModeBase::DestroyAllFallingKeys(bool bIsPlayerWin)
+{
+    TArray<ACTGFallingKey*> KeysToDestroy = ActiveFallingKeys;
+    ActiveFallingKeys.Empty();
+
+    for (auto* Key : KeysToDestroy)
+    {
+        if (IsValid(Key))
+        {
+            Key->DestroyFallingKey(bIsPlayerWin);
+        }
+    }
+
+    GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
 }

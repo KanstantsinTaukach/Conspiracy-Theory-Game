@@ -6,6 +6,9 @@
 #include "GameFramework/Character.h"
 #include "CTGVisualCharacter.generated.h"
 
+class USoundCue;
+class UAudioComponent;
+
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnHealthChangedSignature, float, float);
 DECLARE_MULTICAST_DELEGATE(FOnDeathSignature);
 
@@ -29,15 +32,21 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Health")
     float GetHealthPercent() const { return CharacterHealth / CharacterMaxHealth; };
 
+    UFUNCTION()
+    float GetMaxHealth() const { return CharacterMaxHealth; };
+
     UFUNCTION(BlueprintCallable)
     bool IsDead() const { return CharacterHealth <= 0.0f; };
 
-protected:
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-    float CharacterHealth = 1000;
+    UFUNCTION()
+    void StopAllCharacterAnimations();
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-    float CharacterMaxHealth = 1000;
+    UFUNCTION()
+    UAudioComponent* GetVoiceComponent() const { return VoiceComponent; };
+
+protected:
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health")
+    float CharacterMaxHealth = 1500.0f;
 
     UPROPERTY(EditDefaultsOnly, Category = "Animation")
     TArray<UAnimMontage*> DanceAnimations;
@@ -45,10 +54,24 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Animation")
     TObjectPtr<UAnimMontage> DamageAnimMontage;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Sound")
+    TArray<USoundCue*> DanceSounds;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Sound")
+    TArray<USoundCue*> DamageSounds;
+
     virtual void BeginPlay() override;
 
 private:
+    float CharacterHealth = 0.0f;
+
+    int8 LastAnimationIndex = 0;
+
+    UPROPERTY()
     TObjectPtr<UAnimMontage> CurrentDanceAnimMontage;
+
+    UPROPERTY()
+    TObjectPtr<UAudioComponent> VoiceComponent;
 
     void PlayDanceAnimation();
 
