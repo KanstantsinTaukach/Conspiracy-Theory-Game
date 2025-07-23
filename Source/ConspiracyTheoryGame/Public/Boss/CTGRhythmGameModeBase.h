@@ -76,6 +76,15 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
     TObjectPtr<USoundCue> StartGameSound;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
+    TObjectPtr<USoundCue> FirstDialogSound;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
+    TObjectPtr<USoundCue> SecondDialogSound;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
+    TObjectPtr<USoundCue> ThirdDialogSound;
+
     UPROPERTY()
     TArray<ACTGFallingKey*> ActiveFallingKeys;
 

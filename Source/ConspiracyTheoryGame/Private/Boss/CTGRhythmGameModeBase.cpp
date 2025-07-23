@@ -86,6 +86,11 @@ void ACTGRhythmGameModeBase::StartPlay()
         GameMusicComponent = UGameplayStatics::SpawnSound2D(GetWorld(), StartGameSound);
     }
 
+    if (FirstDialogSound)
+    {
+        UGameplayStatics::PlaySound2D(GetWorld(), FirstDialogSound);
+    }
+
     GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true, TimerDelay);
 }
 
@@ -109,6 +114,11 @@ void ACTGRhythmGameModeBase::GetBattleStageLevel(float Health, float HealthDelta
             RhythmSettings.GameSpeed = 0.25f;
             IsMiddleStage = true;
 
+            if (SecondDialogSound)
+            {
+                UGameplayStatics::PlaySound2D(GetWorld(), SecondDialogSound);
+            }
+
             GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
             GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true);
         }
@@ -118,6 +128,11 @@ void ACTGRhythmGameModeBase::GetBattleStageLevel(float Health, float HealthDelta
             SpawnInterval = 0.5f;
             RhythmSettings.GameSpeed = 0.125f;
             IsFinalStage = true;
+
+            if (ThirdDialogSound)
+            {
+                UGameplayStatics::PlaySound2D(GetWorld(), ThirdDialogSound);
+            }
 
             GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
             GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true);
