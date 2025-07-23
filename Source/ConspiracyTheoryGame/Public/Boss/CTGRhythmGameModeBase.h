@@ -43,11 +43,11 @@ protected:
     UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "10", ClampMax = "100"), Category = "RhythmGameSettings")
     uint32 CellSize{10};
 
-    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.01", ClampMax = "5"), Category = "RhythmGameSettings")
-    float GameSpeed{0.15f};
+    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.1", ClampMax = "5"), Category = "RhythmGameSettings")
+    float GameSpeed{0.5f};
 
     UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0.5", ClampMax = "5"), Category = "RhythmGameSettings")
-    float SpawnInterval = 2.5f;
+    float SpawnInterval = 2.0;
 
     UPROPERTY(EditDefaultsOnly)
     TSubclassOf<ACTGGrid> GridVisualClass;
@@ -70,7 +70,7 @@ protected:
     UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "1", clampMax = "20"), Category = "Characters")
     int32 VisualCharacterOffset = 3;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (ClampMin = "0.01", ClampMax = "1.0"), Category = "RhythmGameSettings")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (ClampMin = "0.0", ClampMax = "5.0"), Category = "RhythmGameSettings")
     float TimerDelay = 0.0f;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
@@ -106,6 +106,9 @@ private:
 
     FTimerHandle SpawnTimerHandle;
 
+    bool IsMiddleStage = false;
+    bool IsFinalStage = false;
+
     void UpdateColors();
 
     void SpawnRandomFallingKey();
@@ -117,4 +120,6 @@ private:
     void RemoveFallingKey(AActor* DestroyedActor);
 
     void DestroyAllFallingKeys(bool bIsPlayerWin);
+
+    void GetBattleStageLevel(float Health, float HealthDelta);
 };

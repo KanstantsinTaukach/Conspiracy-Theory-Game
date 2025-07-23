@@ -68,10 +68,7 @@ void ACTGRhythmGameModeBase::StartPlay()
     PlayerCharacter->OnDeath.AddUObject(this, &ACTGRhythmGameModeBase::OnPlayerCharacterDeath);
     BossCharacter->OnDeath.AddUObject(this, &ACTGRhythmGameModeBase::OnBossCharacterDeath);
 
-    if (StartGameSound && !GameMusicComponent)
-    {
-        GameMusicComponent = UGameplayStatics::SpawnSound2D(GetWorld(), StartGameSound);
-    }
+    BossCharacter->OnHealthChanged.AddUObject(this, &ACTGRhythmGameModeBase::GetBattleStageLevel);
 
     const auto CTGGameInstance = GetWorld()->GetGameInstance<UCTGGameInstance>();
     if (CTGGameInstance)
@@ -84,9 +81,12 @@ void ACTGRhythmGameModeBase::StartPlay()
         }
     }
 
-    // Spawn Falling Keys
-    GetWorld()->GetTimerManager().SetTimer(
-        SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true, TimerDelay);
+    if (StartGameSound && !GameMusicComponent)
+    {
+        GameMusicComponent = UGameplayStatics::SpawnSound2D(GetWorld(), StartGameSound);
+    }
+
+    GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true, TimerDelay);
 }
 
 void ACTGRhythmGameModeBase::UpdateColors()
@@ -95,8 +95,33 @@ void ACTGRhythmGameModeBase::UpdateColors()
     const auto* ColorSet = ColorsTable->FindRow<FGridColors>(RowName, {});
     if (ColorSet)
     {
-        // Update grid
         GridVisual->UpdateColors(*ColorSet);
+    }
+}
+
+void ACTGRhythmGameModeBase::GetBattleStageLevel(float Health, float HealthDelta)
+{
+    if (BossCharacter && !BossCharacter->IsDead())
+    { 
+        if (!IsMiddleStage && (Health < (BossCharacter->GetMaxHealth() / 2.0f)))
+        {
+            SpawnInterval = 1.0f;
+            RhythmSettings.GameSpeed = 0.25f;
+            IsMiddleStage = true;
+
+            GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
+            GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true);
+        }
+
+        if (!IsFinalStage && IsMiddleStage && (Health < (BossCharacter->GetMaxHealth() / 4.0f)))
+        {
+            SpawnInterval = 0.5f;
+            RhythmSettings.GameSpeed = 0.125f;
+            IsFinalStage = true;
+
+            GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
+            GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ACTGRhythmGameModeBase::SpawnRandomFallingKey, SpawnInterval, true);
+        }
     }
 }
 
@@ -203,7 +228,7 @@ void ACTGRhythmGameModeBase::OnPlayerCharacterDeath()
         }
 
         DestroyAllFallingKeys(false);
-       // SetMatchState(ECTGMatchState::GameOver);
+        // SetMatchState(ECTGMatchState::GameOver);
 
         const auto* CTGGameInstance = GetWorld()->GetGameInstance<UCTGGameInstance>();
         if (CTGGameInstance)
@@ -226,7 +251,7 @@ void ACTGRhythmGameModeBase::OnBossCharacterDeath()
         }
 
         DestroyAllFallingKeys(true);
-        //SetMatchState(ECTGMatchState::PlayerWin);
+        // SetMatchState(ECTGMatchState::PlayerWin);
 
         const auto* CTGGameInstance = GetWorld()->GetGameInstance<UCTGGameInstance>();
         if (CTGGameInstance)

@@ -32,6 +32,9 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Health")
     float GetHealthPercent() const { return CharacterHealth / CharacterMaxHealth; };
 
+    UFUNCTION()
+    float GetMaxHealth() const { return CharacterMaxHealth; };
+
     UFUNCTION(BlueprintCallable)
     bool IsDead() const { return CharacterHealth <= 0.0f; };
 
@@ -42,11 +45,8 @@ public:
     UAudioComponent* GetVoiceComponent() const { return VoiceComponent; };
 
 protected:
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-    float CharacterHealth = 1000;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-    float CharacterMaxHealth = 1000;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health")
+    float CharacterMaxHealth = 2000.0f;
 
     UPROPERTY(EditDefaultsOnly, Category = "Animation")
     TArray<UAnimMontage*> DanceAnimations;
@@ -63,6 +63,8 @@ protected:
     virtual void BeginPlay() override;
 
 private:
+    float CharacterHealth = 0.0f;
+
     int8 LastAnimationIndex = 0;
 
     UPROPERTY()
