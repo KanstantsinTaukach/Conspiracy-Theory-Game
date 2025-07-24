@@ -40,6 +40,7 @@ public class ConspiracyTheoryGame : ModuleRules
             "ConspiracyTheoryGame/Public/Boss/RhythmMechanics",
             "ConspiracyTheoryGame/Public/Boss/UI",
             "ConspiracyTheoryGame/Public/Environment",
+            "ConspiracyTheoryGame/Public/Sound"
         });
 
         // Uncomment if you are using Slate UI
