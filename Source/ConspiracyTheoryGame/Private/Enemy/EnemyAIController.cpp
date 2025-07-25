@@ -4,6 +4,7 @@
 #include "Enemy/EnemyAIController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Enemy/EnemyCharacter.h"
+
 #include "Navigation/PathFollowingComponent.h"
 #include "GameFramework/Character.h"
 #include "TimerManager.h"
@@ -13,6 +14,24 @@ AEnemyAIController::AEnemyAIController()
     PrimaryActorTick.bCanEverTick = true;
     CurrentPatrolIndex = 0;
     ChaseTarget = nullptr;
+}
+
+void AEnemyAIController::MoveTowardsPlayer()
+{
+    if (!ChaseTarget || !GetPawn()) return;
+
+    FVector Direction = (ChaseTarget->GetActorLocation() - GetPawn()->GetActorLocation()).GetSafeNormal();
+
+    FVector NewLocation = GetPawn()->GetActorLocation() + Direction * ManualMoveSpeed * GetWorld()->GetDeltaSeconds();
+
+    FHitResult Hit;
+    GetPawn()->SetActorLocation(NewLocation, true, &Hit);
+
+    // ≈сли столкнулс€ с преп€тствием Ч можно отключить ручное движение
+    if (Hit.bBlockingHit)
+    {
+        GetWorld()->GetTimerManager().ClearTimer(ManualMoveTimerHandle);
+    }
 }
 
 void AEnemyAIController::BeginPlay()
@@ -47,12 +66,26 @@ void AEnemyAIController::Tick(float DeltaTime)
         return;
     }
 
-    MoveToActor(ChaseTarget);
-
-    // ”брано повторное объ€вление переменной DistanceToTarget
     const FVector TargetLocation = ChaseTarget->GetActorLocation();
     const FVector MyLocation = GetPawn()->GetActorLocation();
     float DistanceToTarget = FVector::Distance(TargetLocation, MyLocation);
+
+
+    EPathFollowingRequestResult::Type Result = MoveToActor(ChaseTarget);
+
+    if (Result == EPathFollowingRequestResult::Failed)
+    {
+        if (!GetWorld()->GetTimerManager().IsTimerActive(ManualMoveTimerHandle))
+        {
+            GetWorld()->GetTimerManager().SetTimer(ManualMoveTimerHandle, this, &AEnemyAIController::MoveTowardsPlayer, 0.02f, true);
+        }
+    }
+    else
+    {
+
+        GetWorld()->GetTimerManager().ClearTimer(ManualMoveTimerHandle);
+    }
+
 
     if (DistanceToTarget < 50.0f)
     {
@@ -62,6 +95,7 @@ void AEnemyAIController::Tick(float DeltaTime)
             EnemyChar->StartAttack();
         }
     }
+
 
     const bool bCanSee = LineOfSightTo(ChaseTarget);
     const bool bCanHear = DistanceToTarget < HearingRadius;

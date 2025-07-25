@@ -23,6 +23,10 @@ class CONSPIRACYTHEORYGAME_API ACTGCharacter : public ACharacter
     GENERATED_BODY()
 
 public:
+    UPROPERTY()
+    UUserWidget* XylanShoutWidgetInstance;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<class UUserWidget> XylanShoutWidgetClass;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stun")
     bool bCanStun = true;
 

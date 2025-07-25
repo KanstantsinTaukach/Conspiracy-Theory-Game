@@ -25,6 +25,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Player/CTGKsilanCharacter.h"
 #include "Components/CTGCharacterMovementComponent.h"
+#include "Blueprint/UserWidget.h"
 #include "Components/CTGStaminaComponent.h"
 
 void ACTGCharacter::SetBossRoomLocation(const FVector& Location)
@@ -134,21 +135,32 @@ void ACTGCharacter::PerformXylanShout()
         return;
     }
 
-    // Выбрать случайный звук
+
     int32 Index = FMath::RandRange(0, XylanShoutSounds.Num() - 1);
     USoundBase* SelectedShout = XylanShoutSounds[Index];
 
-    // Проиграть звук
+
     UGameplayStatics::PlaySoundAtLocation(this, SelectedShout, GetActorLocation());
 
-    // Репорт для AISense_Hearing (если используется perception)
+
     UAISense_Hearing::ReportNoiseEvent(GetWorld(), GetActorLocation(), ShoutLoudness, this, ShoutAggroRadius, FName("XylanShout"));
 
     UE_LOG(LogTemp, Log, TEXT("Xylan shout played: %s"), *SelectedShout->GetName());
+    if (XylanShoutWidgetClass && !XylanShoutWidgetInstance)
+    {
+        if (APlayerController* PC = Cast<APlayerController>(GetController()))
+        {
+            XylanShoutWidgetInstance = CreateWidget<UUserWidget>(PC, XylanShoutWidgetClass);
+            if (XylanShoutWidgetInstance)
+            {
+                XylanShoutWidgetInstance->AddToViewport();
+            }
+        }
+    }
 
-    // Спланировать следующую
     ScheduleNextXylanShout();
 }
+
 void ACTGCharacter::ScheduleNextXylanShout()
 {
     float NextInterval = FMath::FRandRange(MinShoutInterval, MaxShoutInterval);
@@ -306,7 +318,7 @@ void ACTGCharacter::PrimaryInteract()
         return;
     }
     SpawnStunFlash();
-
+    TryStunEnemies();
     if (InteractSound)
     {
         UGameplayStatics::PlaySoundAtLocation(this, InteractSound, GetActorLocation());
@@ -351,7 +363,7 @@ void ACTGCharacter::TryStunEnemies()
     SetActorRotation(NewRotation);
 
 
-    if (StunMontage)
+    if (StunMontage || !InteractMontage)
     {
         if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
         {
@@ -488,14 +500,14 @@ void ACTGCharacter::SetIsChased(bool bChased)
         bIsChased = bChased;
         UE_LOG(LogTemp, Warning, TEXT("Player chase state changed to: %s"), bIsChased ? TEXT("Chased") : TEXT("Not Chased"));
 
-        // Здесь можно добавить дополнительные эффекты при изменении состояния
+
         if (bIsChased)
         {
-            // Включить эффекты преследования
+
         }
         else
         {
-            // Выключить эффекты преследования
+
         }
     }
 }

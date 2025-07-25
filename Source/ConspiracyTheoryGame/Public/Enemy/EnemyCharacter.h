@@ -26,6 +26,8 @@ protected:
     virtual void Tick(float DeltaTime) override;
 
 public:
+    UFUNCTION()
+    void ResumeFromStun();
     FTimerHandle ChaseSoundTimerHandle;
     bool bCanPlayChaseSound = true;
 
@@ -61,7 +63,7 @@ public:
     float CurrentStunCooldown = 0.0f;
 
     UPROPERTY(BlueprintReadOnly, Category = "Stun")
-    float StunCooldownProgress = 0.0f;  // <- эту ты будешь брать в UMG
+    float StunCooldownProgress = 0.0f;  
 
     FTimerHandle StunCooldownTimerHandle;
 

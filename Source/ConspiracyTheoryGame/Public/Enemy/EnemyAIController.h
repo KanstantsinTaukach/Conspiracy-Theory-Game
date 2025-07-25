@@ -14,8 +14,10 @@ class CONSPIRACYTHEORYGAME_API AEnemyAIController : public AAIController
 
 public:
     AEnemyAIController();
-
-protected:
+    FTimerHandle ManualMoveTimerHandle;
+    float ManualMoveSpeed = 450.f;
+    void MoveTowardsPlayer();
+    protected:
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override;
 
