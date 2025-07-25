@@ -76,6 +76,26 @@ void AEnemyCharacter::Tick(float DeltaTime)
     }
 }
 
+void AEnemyCharacter::ResumeFromStun()
+{
+    if (!IsValid(this)) return;
+
+    bIsStunned = false;
+
+    AEnemyAIController* RefreshedController = Cast<AEnemyAIController>(GetController());
+    if (RefreshedController)
+    {
+        RefreshedController->ResumePatrol();
+    }
+
+    if (GetCharacterMovement())
+    {
+        GetCharacterMovement()->MaxWalkSpeed = PatrolSpeed;
+    }
+
+    StartPatrolSound();
+}
+
 void AEnemyCharacter::StartStunCooldown()
 {
     CurrentStunCooldown = 0.0f;
@@ -322,26 +342,25 @@ void AEnemyCharacter::Stun()
 {
     if (bIsStunned || !bCanStun) return;
 
-    // Clear chase state from current target
+
     if (CurrentTargetPlayer)
     {
         CurrentTargetPlayer->SetIsChased(false);
     }
 
-    // Set stunned state
+
     bIsStunned = true;
     bCanStun = false;
     CurrentStunCooldown = 0.0f;
     StunCooldownProgress = 0.0f;
 
-    // Handle AI controller behavior
     AEnemyAIController* AIController = Cast<AEnemyAIController>(GetController());
     if (AIController)
     {
         AIController->ChaseTarget = nullptr;
         AIController->bIsChasing = false;
 
-        // Clear focus from any target
+
         APawn* TargetPawn = Cast<APawn>(AIController->GetFocusActor());
         if (TargetPawn)
         {
@@ -352,7 +371,7 @@ void AEnemyCharacter::Stun()
             }
         }
 
-        // Stop chase behavior
+
         StopChaseSound();
         bIsRunning = false;
         bIsChasing = false;
@@ -360,24 +379,23 @@ void AEnemyCharacter::Stun()
         AIController->StopMovement();
         AIController->ClearFocus(EAIFocusPriority::Gameplay);
 
-        // Clear any active timers
+
         AIController->GetWorldTimerManager().ClearTimer(AIController->LoseTargetTimerHandle);
         AIController->GetWorldTimerManager().ClearTimer(AIController->ReturnToPatrolTimerHandle);
     }
 
-    // Play stun sound (removed VirtualizeWhenSilent check)
+
     if (LostTargetSound && LostTargetSound->IsValidLowLevel())
     {
         UGameplayStatics::PlaySoundAtLocation(this, LostTargetSound, GetActorLocation());
     }
 
-    // Reset movement speed
+
     if (GetCharacterMovement())
     {
         GetCharacterMovement()->MaxWalkSpeed = PatrolSpeed;
     }
 
-    // Play stun animation
     if (StunMontage)
     {
         UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -387,30 +405,14 @@ void AEnemyCharacter::Stun()
         }
     }
 
-    // Set up resume patrol after stun duration
-    /*if (AIController)
+
+    if (AIController)
     {
         FTimerDelegate ResumePatrolDelegate;
-        ResumePatrolDelegate.BindLambda(
-            [this]()
-            {
-                bIsStunned = false;
-
-                AEnemyAIController* RefreshedController = Cast<AEnemyAIController>(GetController());
-                if (RefreshedController)
-                {
-                    RefreshedController->ResumePatrol();
-                }
-
-                if (GetCharacterMovement())
-                {
-                    GetCharacterMovement()->MaxWalkSpeed = PatrolSpeed;
-                }
-            });
+        ResumePatrolDelegate.BindUFunction(this, FName("ResumeFromStun"));
 
         AIController->GetWorldTimerManager().SetTimer(AIController->ReturnToPatrolTimerHandle, ResumePatrolDelegate, StunDuration, false);
-    }*/
-
+    }
 
     StartStunCooldown();
 }
