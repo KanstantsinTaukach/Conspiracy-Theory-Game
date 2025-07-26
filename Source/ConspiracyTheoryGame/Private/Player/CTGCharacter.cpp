@@ -226,7 +226,6 @@ void ACTGCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
         EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ACTGCharacter::OnStartSprinting);
         EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ACTGCharacter::OnStopSprinting);
         EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &ACTGCharacter::PrimaryInteract);
-        EnhancedInputComponent->BindAction(StunAction, ETriggerEvent::Triggered, this, &ACTGCharacter::TryStunEnemies);
     }
 }
 
