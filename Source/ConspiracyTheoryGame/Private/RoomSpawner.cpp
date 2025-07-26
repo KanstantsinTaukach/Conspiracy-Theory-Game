@@ -232,7 +232,7 @@ void ARoomSpawner::CloseUnconnectedExits()
             FVector CenterToExitDir = (ExitWorldLocation - RoomCenter).GetSafeNormal();
 
 
-            float DesiredOffset = RoomSize.GetMax() * 0.5f + 80.0;  
+            float DesiredOffset = RoomSize.GetMax() * 0.5f + 50.0;  
             FVector BlockerPosition = ExitWorldLocation - CenterToExitDir * DesiredOffset;
 
 
