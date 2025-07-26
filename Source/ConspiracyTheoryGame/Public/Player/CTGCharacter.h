@@ -16,6 +16,7 @@ class UInputAction;
 class UCTGInteractionComponent;
 class ACTGKsilanCharacter;
 class UCTGStaminaComponent;
+class UPointLightComponent;
 
 UCLASS()
 class CONSPIRACYTHEORYGAME_API ACTGCharacter : public ACharacter
@@ -218,4 +219,6 @@ private:
     void OnStopSprinting();
 
     void OnStaminaEmpty();
+
+    void DestroyStunFlash(UPointLightComponent* Flash);
 };

@@ -443,20 +443,22 @@ void ACTGCharacter::SpawnStunFlash()
         StunFlash->SetLightColor(FLinearColor::White);
         StunFlash->SetVisibility(true);
 
-        // Отключить и уничтожить через 0.1 сек
+        FTimerDelegate TimerDelegate;
+        TimerDelegate.BindUObject(this, &ACTGCharacter::DestroyStunFlash, StunFlash);
+
         FTimerHandle FlashTimer;
-        GetWorld()->GetTimerManager().SetTimer(FlashTimer,
-            FTimerDelegate::CreateLambda(
-                [StunFlash]()
-                {
-                    if (StunFlash)
-                    {
-                        StunFlash->DestroyComponent();
-                    }
-                }),
-            0.1f, false);
+        GetWorld()->GetTimerManager().SetTimer(FlashTimer, TimerDelegate, 0.1f, false);
     }
 }
+
+void ACTGCharacter::DestroyStunFlash(UPointLightComponent* Flash)
+{
+    if (Flash)
+    {
+        Flash->DestroyComponent();
+    }
+}
+
 void ACTGCharacter::ResetStun()
 {
     bCanStun = true;
