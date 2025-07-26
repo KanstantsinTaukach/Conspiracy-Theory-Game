@@ -7,6 +7,9 @@
 #include "Sound/SoundBase.h"
 #include "EnemyAIController.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStartChasingSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLoseTargetSignature);
+
 UCLASS()
 class CONSPIRACYTHEORYGAME_API AEnemyAIController : public AAIController
 {
@@ -17,9 +20,18 @@ public:
     FTimerHandle ManualMoveTimerHandle;
     float ManualMoveSpeed = 450.f;
     void MoveTowardsPlayer();
-    protected:
+
+    UPROPERTY(BlueprintAssignable, Category = "Events")
+    FOnStartChasingSignature OnStartChasing;
+
+    UPROPERTY(BlueprintAssignable, Category = "Events")
+    FOnLoseTargetSignature OnLoseTarget;
+
+protected:
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override;
+
+
 
 private:
     UPROPERTY()
@@ -29,10 +41,7 @@ private:
 
     void MoveToNextPatrolPoint();
 
-
-
     void LoseTarget();
-
 
 public:
     UPROPERTY()
@@ -54,8 +63,6 @@ public:
     /** Radius of visual detection */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception")
     float SightRadius = 1000.f;
-
-
 
     /** Radius of hearing detection */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perception")
