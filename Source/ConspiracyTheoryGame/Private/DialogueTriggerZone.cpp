@@ -1,12 +1,12 @@
 // Team Development of a Conspiracy Theory Game for GameBOX.
 
-
 #include "DialogueTriggerZone.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
 #include "Components/AudioComponent.h"
 #include "GameFramework/PlayerController.h"
+#include "Player/CTGPlayerState.h"
 
 ADialogueTriggerZone::ADialogueTriggerZone()
 {
@@ -20,9 +20,6 @@ ADialogueTriggerZone::ADialogueTriggerZone()
     TriggerZone->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
     TriggerZone->OnComponentBeginOverlap.AddDynamic(this, &ADialogueTriggerZone::OnOverlapBegin);
 }
-
-
-
 
 void ADialogueTriggerZone::BeginPlay()
 {
@@ -38,7 +35,18 @@ void ADialogueTriggerZone::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, A
     APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
     if (OtherActor != PlayerPawn) return;
 
-    if (TriggerSound)
+    int32 PlayerScore = 0;
+    auto* PC = GetWorld()->GetFirstPlayerController();
+    if (PC)
+    {
+        ACTGPlayerState* PS = Cast<ACTGPlayerState>(PC->PlayerState);
+        if (PS)
+        {
+            PlayerScore = PS->GetPoints();
+        }
+    }
+
+    if (TriggerSound && PlayerScore >= ScoreToUnlockDialog)
     {
         if (!ActiveAudioComponent || !ActiveAudioComponent->IsPlaying())
         {
@@ -58,8 +66,7 @@ void ADialogueTriggerZone::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, A
         }
     }
 
-    APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
-    if (!PC || !DialogueWidgetClass) return;
+    if (!DialogueWidgetClass) return;
 
     UUserWidget* Widget = CreateWidget<UUserWidget>(PC, DialogueWidgetClass);
     if (!Widget) return;
