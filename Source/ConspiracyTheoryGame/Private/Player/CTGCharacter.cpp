@@ -27,6 +27,7 @@
 #include "Components/CTGCharacterMovementComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/CTGStaminaComponent.h"
+#include "Animations/CTGInteractionAnimNotify.h"
 
 void ACTGCharacter::SetBossRoomLocation(const FVector& Location)
 {
@@ -34,7 +35,7 @@ void ACTGCharacter::SetBossRoomLocation(const FVector& Location)
     bShowCompassArrow = true;
     if (CompassArrowMesh)
     {
-        CompassArrowMesh->SetVisibility(true);  
+        CompassArrowMesh->SetVisibility(true);
     }
     UE_LOG(LogTemp, Warning, TEXT("BossRoomLocation set to: %s"), *BossRoomLocation.ToString());
 }
@@ -43,7 +44,7 @@ ACTGCharacter::ACTGCharacter(const FObjectInitializer& OfjInit)
     : Super(OfjInit.SetDefaultSubobjectClass<UCTGCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
     PrimaryActorTick.bCanEverTick = true;
-    bIsChased = false ;
+    bIsChased = false;
 
     SpringArm = CreateDefaultSubobject<USpringArmComponent>("SpringArm");
     SpringArm->SetupAttachment(GetRootComponent());
@@ -99,12 +100,12 @@ void ACTGCharacter::BeginPlay()
     }
     if (CompassArrow)
     {
-        CompassArrow->SetHiddenInGame(true); 
+        CompassArrow->SetHiddenInGame(true);
     }
 
     if (CompassArrowMesh)
     {
-        CompassArrowMesh->SetVisibility(false);  
+        CompassArrowMesh->SetVisibility(false);
     }
     if (GetWorld() && KsilanClass)
     {
@@ -125,6 +126,8 @@ void ACTGCharacter::BeginPlay()
 
     check(StaminaComponent);
     StaminaComponent->OnStaminaEmpty.AddUObject(this, &ACTGCharacter::OnStaminaEmpty);
+
+    FindInteractionNotify();
 }
 
 void ACTGCharacter::PerformXylanShout()
@@ -135,13 +138,10 @@ void ACTGCharacter::PerformXylanShout()
         return;
     }
 
-
     int32 Index = FMath::RandRange(0, XylanShoutSounds.Num() - 1);
     USoundBase* SelectedShout = XylanShoutSounds[Index];
 
-
     UGameplayStatics::PlaySoundAtLocation(this, SelectedShout, GetActorLocation());
-
 
     UAISense_Hearing::ReportNoiseEvent(GetWorld(), GetActorLocation(), ShoutLoudness, this, ShoutAggroRadius, FName("XylanShout"));
 
@@ -173,7 +173,6 @@ void ACTGCharacter::Tick(float DeltaTime)
 
     if (Score >= CompassScoreThreshold && !BossRoomLocation.IsZero())
     {
-
         UpdateCompass();
     }
     else
@@ -181,8 +180,6 @@ void ACTGCharacter::Tick(float DeltaTime)
         if (!CompassArrow->bHiddenInGame) CompassArrow->SetHiddenInGame(true);
     }
 }
-
-
 
 void ACTGCharacter::OnPointsChanged(ACTGPlayerState* PS, int32 NewPoints, int32 Delta)
 {
@@ -194,11 +191,9 @@ void ACTGCharacter::OnPointsChanged(ACTGPlayerState* PS, int32 NewPoints, int32 
     {
         bShowCompassArrow = true;
 
-
-
         if (CompassArrowMesh)
         {
-            CompassArrowMesh->SetVisibility(true);  
+            CompassArrowMesh->SetVisibility(true);
         }
     }
     else
@@ -212,7 +207,7 @@ void ACTGCharacter::OnPointsChanged(ACTGPlayerState* PS, int32 NewPoints, int32 
 
         if (CompassArrowMesh)
         {
-            CompassArrowMesh->SetVisibility(false);  
+            CompassArrowMesh->SetVisibility(false);
         }
     }
 }
@@ -232,16 +227,6 @@ void ACTGCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
         EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ACTGCharacter::OnStopSprinting);
         EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &ACTGCharacter::PrimaryInteract);
         EnhancedInputComponent->BindAction(StunAction, ETriggerEvent::Triggered, this, &ACTGCharacter::TryStunEnemies);
-    }
-}
-
-void ACTGCharacter::OnStunMontageEnded(UAnimMontage* Montage, bool bInterrupted)
-{
-
-    GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-    if (APlayerController* PC = Cast<APlayerController>(GetController()))
-    {
-        PC->EnableInput(PC);
     }
 }
 
@@ -312,43 +297,9 @@ void ACTGCharacter::OnStaminaEmpty()
 
 void ACTGCharacter::PrimaryInteract()
 {
-    if (bIsInteracting)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Already interacting, ignoring input"));
-        return;
-    }
-    SpawnStunFlash();
-    TryStunEnemies();
-    if (InteractSound)
-    {
-        UGameplayStatics::PlaySoundAtLocation(this, InteractSound, GetActorLocation());
-    }
-
-    if (InteractionComponent)
-    {
-        InteractionComponent->PrimaryInteract();
-    }
-
     if (InteractMontage && GetMesh())
     {
-        UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-        if (AnimInstance)
-        {
-            float MontageDuration = AnimInstance->Montage_Play(InteractMontage);
-            if (MontageDuration > 0.f)
-            {
-                bIsInteracting = true;
-                if (APlayerController* PC = Cast<APlayerController>(GetController()))
-                {
-                    PC->DisableInput(PC);
-                    GetCharacterMovement()->StopMovementImmediately();
-                }
-
-                FOnMontageEnded EndDelegate;
-                EndDelegate.BindUObject(this, &ACTGCharacter::OnInteractMontageEnded);
-                AnimInstance->Montage_SetEndDelegate(EndDelegate, InteractMontage);
-            }
-        }
+        PlayAnimMontage(InteractMontage);
     }
 }
 
@@ -356,35 +307,13 @@ void ACTGCharacter::TryStunEnemies()
 {
     if (!bCanStun) return;
 
-
     FRotator NewRotation = CameraComponent->GetComponentRotation();
     NewRotation.Pitch = 0.f;
     NewRotation.Roll = 0.f;
     SetActorRotation(NewRotation);
 
-
-    if (StunMontage || !InteractMontage)
-    {
-        if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
-        {
-            AnimInstance->Montage_Play(StunMontage.Get());
-            if (APlayerController* PC = Cast<APlayerController>(GetController()))
-            {
-                PC->DisableInput(PC);
-                GetCharacterMovement()->StopMovementImmediately();
-            }
-            FAnimMontageInstance* MontageInstance = AnimInstance->GetActiveInstanceForMontage(StunMontage.Get());
-            if (MontageInstance)
-            {
-                MontageInstance->OnMontageEnded.BindUObject(this, &ACTGCharacter::OnStunMontageEnded);
-            }
-            bCanStun = false;
-            GetWorldTimerManager().SetTimer(StunCooldownTimer, this, &ACTGCharacter::ResetStun, StunCooldown, false);
-        }
-    }
-
-    SpawnStunFlash();
-
+    bCanStun = false;
+    GetWorldTimerManager().SetTimer(StunCooldownTimer, this, &ACTGCharacter::ResetStun, StunCooldown, false);
 
     FVector Start = GetActorLocation() + FVector(0, 0, 50.f);
     FVector ForwardVector = GetActorForwardVector();
@@ -461,24 +390,16 @@ void ACTGCharacter::DestroyStunFlash(UPointLightComponent* Flash)
 
 void ACTGCharacter::ResetStun()
 {
+    GetWorldTimerManager().ClearTimer(StunCooldownTimer);
+
     bCanStun = true;
-    UE_LOG(LogTemp, Log, TEXT("Stun cooldown reset"));
 }
 
-void ACTGCharacter::OnInteractMontageEnded(UAnimMontage* Montage, bool bInterrupted)
-{
-    bIsInteracting = false;
-    GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-    if (APlayerController* PC = Cast<APlayerController>(GetController()))
-    {
-        PC->EnableInput(PC);
-        GetCharacterMovement()->StopMovementImmediately();
-    }
-}
 FVector ACTGCharacter::GetPawnViewLocation() const
 {
     return CameraComponent->GetComponentLocation();
 }
+
 void ACTGCharacter::UpdateCompass()
 {
     FVector Direction = BossRoomLocation - GetActorLocation();
@@ -489,12 +410,12 @@ void ACTGCharacter::UpdateCompass()
 
     FRotator TargetRotation = Direction.Rotation();
 
-
     FRotator CurrentRotation = CompassArrow->GetComponentRotation();
     FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, GetWorld()->GetDeltaSeconds(), 5.0f);
 
     CompassArrow->SetWorldRotation(NewRotation);
 }
+
 void ACTGCharacter::SetIsChased(bool bChased)
 {
     if (bIsChased != bChased)
@@ -502,17 +423,15 @@ void ACTGCharacter::SetIsChased(bool bChased)
         bIsChased = bChased;
         UE_LOG(LogTemp, Warning, TEXT("Player chase state changed to: %s"), bIsChased ? TEXT("Chased") : TEXT("Not Chased"));
 
-
         if (bIsChased)
         {
-
         }
         else
         {
-
         }
     }
 }
+
 void ACTGCharacter::PlayFootstep()
 {
     UE_LOG(LogTemp, Warning, TEXT("Player played footstep, crouched: %d, velocity: %f"), bIsCrouched, GetVelocity().Size());
@@ -547,5 +466,41 @@ void ACTGCharacter::PlayFootstep()
         UGameplayStatics::PlaySoundAtLocation(this, SelectedSound, GetActorLocation());
 
         UAISense_Hearing::ReportNoiseEvent(GetWorld(), GetActorLocation(), Loudness, this, MaxRange, FName("Footstep"));
+    }
+}
+
+void ACTGCharacter::FindInteractionNotify()
+{
+    if (!InteractMontage) return;
+
+    const auto NotifyEvents = InteractMontage->Notifies;
+    for (auto NotifyEvent : NotifyEvents)
+    {
+        auto InteractionNotify = Cast<UCTGInteractionAnimNotify>(NotifyEvent.Notify);
+        if (InteractionNotify)
+        {
+            InteractionNotify->OnNotified.AddUObject(this, &ACTGCharacter::OnInteractFinished);
+            break;
+        }
+    }
+}
+
+void ACTGCharacter::OnInteractFinished(USkeletalMeshComponent* MeshComp)
+{
+    if (this->GetMesh() == MeshComp)
+    {
+        SpawnStunFlash();
+
+        TryStunEnemies();
+
+        if (InteractSound)
+        {
+            UGameplayStatics::PlaySoundAtLocation(this, InteractSound, GetActorLocation());
+        }
+
+        if (InteractionComponent)
+        {
+            InteractionComponent->PrimaryInteract();
+        }
     }
 }

@@ -42,8 +42,6 @@ public:
 
     void SpawnStunFlash();
     void ScheduleNextXylanShout();
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animations")
-    UAnimMontage* LoseMontage;
 
     void PerformXylanShout();
     FTimerHandle XylanShoutTimerHandle;
@@ -89,10 +87,6 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stun")
     float StunConeAngle = 45.f;
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animations")
-    TObjectPtr<UAnimMontage> StunMontage;
-    UFUNCTION()
-    void OnStunMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stun")
     float StunCooldown = 3.0f;
@@ -104,10 +98,6 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
     UAnimMontage* InteractMontage;
-
-    bool bIsInteracting = false;
-
-    void OnInteractMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
     USoundBase* InteractSound;
@@ -221,4 +211,7 @@ private:
     void OnStaminaEmpty();
 
     void DestroyStunFlash(UPointLightComponent* Flash);
+
+    void FindInteractionNotify();
+    void OnInteractFinished(USkeletalMeshComponent* MeshComp);
 };

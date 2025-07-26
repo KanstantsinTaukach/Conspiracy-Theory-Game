@@ -489,12 +489,6 @@ void AEnemyCharacter::HandlePlayerCaught()
     if (CTGCharacter)
     {
         CTGCharacter->GetCharacterMovement()->DisableMovement();
-
-        UAnimInstance* AnimInstance = CTGCharacter->GetMesh()->GetAnimInstance();
-        if (AnimInstance && CTGCharacter->LoseMontage)
-        {
-            AnimInstance->Montage_Play(CTGCharacter->LoseMontage);
-        }
     }
 
     AEnemyAIController* AIController = Cast<AEnemyAIController>(GetController());
