@@ -208,8 +208,11 @@ protected:
 
 private:
     FTimerHandle FlashCooldownTimerHandle;
+    FTimerHandle InteractTimerHandle;
+
     bool WantsToSprint = false;
     bool IsMoving = false;
+    bool bIsInteracting = false;
 
     void OnStartSprinting();
     void OnStopSprinting();
@@ -220,4 +223,6 @@ private:
 
     void FindInteractionNotify();
     void OnInteractFinished(USkeletalMeshComponent* MeshComp);
+
+    void ResetInteractFlag();
 };

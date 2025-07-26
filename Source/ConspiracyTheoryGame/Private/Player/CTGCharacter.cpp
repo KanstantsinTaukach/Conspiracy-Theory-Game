@@ -296,9 +296,14 @@ void ACTGCharacter::OnStaminaEmpty()
 
 void ACTGCharacter::PrimaryInteract()
 {
-    if (InteractMontage && GetMesh())
+    if (bIsInteracting || !InteractMontage || !GetMesh()) return;
+
+    float AnimDuration = PlayAnimMontage(InteractMontage);
+    if (AnimDuration > 0.0f)
     {
-        PlayAnimMontage(InteractMontage);
+        bIsInteracting = true;
+
+        GetWorld()->GetTimerManager().SetTimer(InteractTimerHandle, this, &ACTGCharacter::ResetInteractFlag, AnimDuration, false);
     }
 }
 
@@ -502,4 +507,11 @@ void ACTGCharacter::OnInteractFinished(USkeletalMeshComponent* MeshComp)
             InteractionComponent->PrimaryInteract();
         }
     }
+}
+
+void ACTGCharacter::ResetInteractFlag()
+{
+    bIsInteracting = false;
+
+    GetWorld()->GetTimerManager().ClearTimer(InteractTimerHandle);
 }
