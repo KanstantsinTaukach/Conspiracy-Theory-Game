@@ -1,6 +1,5 @@
 // Team Development of a Conspiracy Theory Game for GameBOX.
 
-
 #include "Enemy/EnemyAIController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Enemy/EnemyCharacter.h"
@@ -70,7 +69,6 @@ void AEnemyAIController::Tick(float DeltaTime)
     const FVector MyLocation = GetPawn()->GetActorLocation();
     float DistanceToTarget = FVector::Distance(TargetLocation, MyLocation);
 
-
     EPathFollowingRequestResult::Type Result = MoveToActor(ChaseTarget);
 
     if (Result == EPathFollowingRequestResult::Failed)
@@ -82,10 +80,8 @@ void AEnemyAIController::Tick(float DeltaTime)
     }
     else
     {
-
         GetWorld()->GetTimerManager().ClearTimer(ManualMoveTimerHandle);
     }
-
 
     if (DistanceToTarget < 50.0f)
     {
@@ -95,7 +91,6 @@ void AEnemyAIController::Tick(float DeltaTime)
             EnemyChar->StartAttack();
         }
     }
-
 
     const bool bCanSee = LineOfSightTo(ChaseTarget);
     const bool bCanHear = DistanceToTarget < HearingRadius;
@@ -152,6 +147,8 @@ void AEnemyAIController::StartChasing(APawn* Target)
         }
     }
 
+    OnStartChasing.Broadcast();
+
     GetWorld()->GetTimerManager().ClearTimer(LoseTargetTimerHandle);
     GetWorld()->GetTimerManager().SetTimer(LoseTargetTimerHandle, this, &AEnemyAIController::LoseTarget, TimeToLoseTarget, false);
 }
@@ -169,9 +166,7 @@ void AEnemyAIController::LoseTarget()
         EnemyChar->StopChaseSound();
         EnemyChar->StartPatrolSound();
 
-
         StopMovement();
-
 
         if (EnemyChar->LostTargetMontage)
         {
@@ -183,6 +178,7 @@ void AEnemyAIController::LoseTarget()
         }
     }
 
+    OnLoseTarget.Broadcast();
 
     GetWorld()->GetTimerManager().SetTimer(ReturnToPatrolTimerHandle, this, &AEnemyAIController::ResumePatrol, TimeToResumePatrol, false);
 }
@@ -209,5 +205,3 @@ void AEnemyAIController::ResumePatrol()
 
     MoveToNextPatrolPoint();
 }
-
-

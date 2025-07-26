@@ -16,6 +16,7 @@ class UInputAction;
 class UCTGInteractionComponent;
 class ACTGKsilanCharacter;
 class UCTGStaminaComponent;
+class UPointLightComponent;
 
 UCLASS()
 class CONSPIRACYTHEORYGAME_API ACTGCharacter : public ACharacter
@@ -23,10 +24,18 @@ class CONSPIRACYTHEORYGAME_API ACTGCharacter : public ACharacter
     GENERATED_BODY()
 
 public:
+    ACTGCharacter(const FObjectInitializer& OfjInit);
+
+    virtual void Tick(float DeltaTime) override;
+
+    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
     UPROPERTY()
     UUserWidget* XylanShoutWidgetInstance;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     TSubclassOf<class UUserWidget> XylanShoutWidgetClass;
+
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stun")
     bool bCanStun = true;
 
@@ -36,19 +45,15 @@ public:
     UPROPERTY(BlueprintReadOnly, Category = "Stun")
     float CurrentStunCooldown = 0.0f;
 
-    UFUNCTION(BlueprintImplementableEvent, Category = "Stun")
-    void OnStunCooldownProgress(float Progress);
-
     void SpawnStunFlash();
     void ScheduleNextXylanShout();
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animations")
-    UAnimMontage* LoseMontage;
 
     void PerformXylanShout();
     FTimerHandle XylanShoutTimerHandle;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Compass")
     UStaticMeshComponent* CompassArrowMesh;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Xylan|Shout")
     float MinShoutInterval = 30.f;
 
@@ -67,31 +72,22 @@ public:
     void SetBossRoomLocation(const FVector& Location);
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flash")
-    UNiagaraSystem* FlashEffect;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flash")
     float FlashCooldown = 3.0f;
-    ACTGCharacter(const FObjectInitializer& OfjInit);
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Flash", Transient)
     bool bIsFlashOnCooldown = false;
 
-    virtual void Tick(float DeltaTime) override;
     UFUNCTION(BlueprintCallable, Category = "Chase")
     void SetIsChased(bool bChased);
 
-    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stun")
     float StunDistance = 600.f;
+
     UPROPERTY(BlueprintReadWrite, Category = "Chase")
     bool bIsChased = false;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stun")
     float StunConeAngle = 45.f;
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animations")
-    TObjectPtr<UAnimMontage> StunMontage;
-    UFUNCTION()
-    void OnStunMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stun")
     float StunCooldown = 3.0f;
@@ -104,17 +100,15 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
     UAnimMontage* InteractMontage;
 
-    bool bIsInteracting = false;
-
-    void OnInteractMontageEnded(UAnimMontage* Montage, bool bInterrupted);
-
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
     USoundBase* InteractSound;
 
     UFUNCTION(BlueprintCallable, Category = "Movenent")
     bool IsCharacterRunning() const;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
     TArray<USoundBase*> CrouchFootstepSounds;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Footsteps")
     float CrouchFootstepLoudness = 0.4f;
 
@@ -132,20 +126,26 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Footsteps")
     float RunFootstepRange = 3000.f;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
     TArray<USoundBase*> WalkFootstepSounds;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
     TArray<USoundBase*> RunFootstepSounds;
+
     void PlayFootstep();
 
 protected:
     UPROPERTY()
     class ACTGPlayerState* CachedPlayerState = nullptr;
+
     UFUNCTION()
     void OnPointsChanged(ACTGPlayerState* PS, int32 NewPoints, int32 Delta);
+
     FVector BossRoomLocation = FVector::ZeroVector;
+
     bool bShowCompassArrow = false;
+
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Compass", meta = (AllowPrivateAccess = "true"))
     class UArrowComponent* CompassArrow;
 
@@ -189,9 +189,6 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Input")
     TObjectPtr<UInputAction> InteractAction;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Input")
-    TObjectPtr<UInputAction> StunAction;
-
     UPROPERTY(EditDefaultsOnly, Category = "Spawning")
     TSubclassOf<ACTGKsilanCharacter> KsilanClass;
 
@@ -218,4 +215,9 @@ private:
     void OnStopSprinting();
 
     void OnStaminaEmpty();
+
+    void DestroyStunFlash(UPointLightComponent* Flash);
+
+    void FindInteractionNotify();
+    void OnInteractFinished(USkeletalMeshComponent* MeshComp);
 };

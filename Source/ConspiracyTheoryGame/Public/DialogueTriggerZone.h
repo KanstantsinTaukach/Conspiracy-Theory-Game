@@ -37,6 +37,9 @@ protected:
     UPROPERTY(EditAnywhere, Category = "UI")
     float WidgetDisplayTime = 5.f;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control")
+    int32 ScoreToUnlockDialog;
+
     UUserWidget* ActiveWidget;
 
     FTimerHandle HideWidgetTimerHandle;

@@ -44,19 +44,17 @@ AEnemyCharacter::AEnemyCharacter()
 
     AIPerceptionComp = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerceptionComp"));
 
-
     HearingConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("HearingConfig"));
-    HearingConfig->HearingRange = HearingRadius;  
-     HearingConfig->LoSHearingRange = HearingRadius * 1.2f;
+    HearingConfig->HearingRange = HearingRadius;
+    HearingConfig->LoSHearingRange = HearingRadius * 1.2f;
 
-    HearingConfig->bUseLoSHearing = true;     
+    HearingConfig->bUseLoSHearing = true;
     HearingConfig->DetectionByAffiliation.bDetectEnemies = true;
     HearingConfig->DetectionByAffiliation.bDetectNeutrals = true;
     HearingConfig->DetectionByAffiliation.bDetectFriendlies = true;
 
     AIPerceptionComp->ConfigureSense(*HearingConfig);
     AIPerceptionComp->SetDominantSense(HearingConfig->GetSenseImplementation());
-
 }
 
 void AEnemyCharacter::Tick(float DeltaTime)
@@ -111,7 +109,7 @@ void AEnemyCharacter::UpdateStunCooldown()
     float Progress = FMath::Clamp(CurrentStunCooldown / StunCooldown, 0.0f, 1.0f);
     StunCooldownProgress = Progress;
 
-    OnStunCooldownProgress(Progress); 
+    OnStunCooldownProgress(Progress);
 
     if (CurrentStunCooldown >= StunCooldown)
     {
@@ -172,8 +170,7 @@ void AEnemyCharacter::OnPerceptionUpdated(const TArray<AActor*>& UpdatedActors)
                         FVector SoundLocation = Stimulus.StimulusLocation;
                         float SoundStrength = Stimulus.Strength;
 
-                        UE_LOG(
-                            LogTemp, Warning, TEXT("1"), *SoundLocation.ToString(), SoundStrength);
+                        UE_LOG(LogTemp, Warning, TEXT("1"), *SoundLocation.ToString(), SoundStrength);
 
                         // Проверяем, что это игрок
                         ACTGCharacter* Player = Cast<ACTGCharacter>(Actor);
@@ -229,7 +226,6 @@ void AEnemyCharacter::OnSeePawn(APawn* Pawn)
         GetCharacterMovement()->MaxWalkSpeed = ChaseSpeed;
     }
 
-
     if (CTGCharacter)
     {
         CurrentTargetPlayer = CTGCharacter;
@@ -257,7 +253,7 @@ void AEnemyCharacter::OnSeePawn(APawn* Pawn)
 
 void AEnemyCharacter::StartAttack()
 {
-    if (bIsStunned ) return;
+    if (bIsStunned) return;
 
     UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 
@@ -288,7 +284,7 @@ void AEnemyCharacter::OnHearNoise(APawn* InstigatorPawn, const FVector& Location
     }
 
     CurrentTargetPlayer = CTGCharacter;
-    CTGCharacter->SetIsChased(true);  
+    CTGCharacter->SetIsChased(true);
 
     bIsChasing = true;
     bIsRunning = true;
@@ -342,12 +338,10 @@ void AEnemyCharacter::Stun()
 {
     if (bIsStunned || !bCanStun) return;
 
-
     if (CurrentTargetPlayer)
     {
         CurrentTargetPlayer->SetIsChased(false);
     }
-
 
     bIsStunned = true;
     bCanStun = false;
@@ -360,7 +354,6 @@ void AEnemyCharacter::Stun()
         AIController->ChaseTarget = nullptr;
         AIController->bIsChasing = false;
 
-
         APawn* TargetPawn = Cast<APawn>(AIController->GetFocusActor());
         if (TargetPawn)
         {
@@ -371,7 +364,6 @@ void AEnemyCharacter::Stun()
             }
         }
 
-
         StopChaseSound();
         bIsRunning = false;
         bIsChasing = false;
@@ -379,17 +371,14 @@ void AEnemyCharacter::Stun()
         AIController->StopMovement();
         AIController->ClearFocus(EAIFocusPriority::Gameplay);
 
-
         AIController->GetWorldTimerManager().ClearTimer(AIController->LoseTargetTimerHandle);
         AIController->GetWorldTimerManager().ClearTimer(AIController->ReturnToPatrolTimerHandle);
     }
-
 
     if (LostTargetSound && LostTargetSound->IsValidLowLevel())
     {
         UGameplayStatics::PlaySoundAtLocation(this, LostTargetSound, GetActorLocation());
     }
-
 
     if (GetCharacterMovement())
     {
@@ -405,13 +394,14 @@ void AEnemyCharacter::Stun()
         }
     }
 
-
     if (AIController)
     {
         FTimerDelegate ResumePatrolDelegate;
         ResumePatrolDelegate.BindUFunction(this, FName("ResumeFromStun"));
 
         AIController->GetWorldTimerManager().SetTimer(AIController->ReturnToPatrolTimerHandle, ResumePatrolDelegate, StunDuration, false);
+
+        AIController->OnLoseTarget.Broadcast();
     }
 
     StartStunCooldown();
@@ -499,12 +489,12 @@ void AEnemyCharacter::HandlePlayerCaught()
     if (CTGCharacter)
     {
         CTGCharacter->GetCharacterMovement()->DisableMovement();
+    }
 
-        UAnimInstance* AnimInstance = CTGCharacter->GetMesh()->GetAnimInstance();
-        if (AnimInstance && CTGCharacter->LoseMontage)
-        {
-            AnimInstance->Montage_Play(CTGCharacter->LoseMontage);
-        }
+    AEnemyAIController* AIController = Cast<AEnemyAIController>(GetController());
+    if (AIController)
+    {
+        AIController->OnLoseTarget.Broadcast();
     }
 
     const auto* CTGGameInstance = GetWorld()->GetGameInstance<UCTGGameInstance>();
